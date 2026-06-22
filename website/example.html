@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Examples — Sutra</title>
+<meta name="description" content="End-to-end Python example walking through Sutra's 6 analysis engines.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+<div class="container nav-inner">
+<a href="index.html" class="logo">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+<rect x="2" y="2" width="10" height="10" rx="2" fill="#6366f1"/>
+<rect x="16" y="2" width="10" height="10" rx="2" fill="#818cf8"/>
+<rect x="2" y="16" width="10" height="10" rx="2" fill="#a5b4fc"/>
+<rect x="16" y="16" width="10" height="10" rx="2" fill="#c7d2fe"/>
+</svg>
+<span>Sutra</span>
+</a>
+<div class="nav-links">
+<a href="index.html">Home</a>
+<a href="book.html">Docs</a>
+<a href="example.html" class="active">Examples</a>
+</div>
+</div>
+</nav>
+
+<section class="section">
+<div class="container">
+<h2>End-to-End Failure Prediction Example</h2>
+<p class="section-desc">
+  A comprehensive 1,040-line Python script that simulates a microservice repository on the brink of a
+  production incident and walks through every engine, every formula, and every score computation in
+  the Sutra pipeline.
+</p>
+
+<div class="monet-grid" style="margin-top:32px;">
+<div class="monet-card monet-free">
+<h3>The Synthetic Repo</h3>
+<ul>
+<li>2 functions with cyclomatic complexity &gt; 50 (untestable)</li>
+<li>A circular dependency chain (processor &rarr; utils &rarr; processor)</li>
+<li>A file with 45 revisions, 12 bug fixes, entropy 4.2</li>
+<li>Tight co-change coupling between core modules</li>
+<li>ML model predicts 94% defect probability</li>
+<li>HITL feedback shows mixed precision across engines</li>
+</ul>
+</div>
+
+<div class="monet-card monet-pro">
+<h3>What It Demonstrates</h3>
+<ul>
+<li>Cyclomatic &amp; cognitive complexity (MGTG engine)</li>
+<li>Tarjan SCC cycle detection (Dependency engine)</li>
+<li>Shannon entropy &amp; 14 JIT features (Process engine)</li>
+<li>SGD logistic regression with AUC (ML engine)</li>
+<li>LLM finding validation (LLM engine)</li>
+<li>Feedback-driven auto-adjustment (HITL engine)</li>
+</ul>
+</div>
+</div>
+
+<div class="example-code-wrap" style="margin-top:32px;">
+<div class="example-section-header">
+<h3>How to Run</h3>
+</div>
+<div class="example-explanation">
+<pre style="background:none;padding:0;margin:0;border:none;font-family:var(--font-code);font-size:0.9rem;line-height:1.8;"><code>python3 docs/example.py</code></pre>
+</div>
+</div>
+
+<div style="text-align:center;margin-top:32px;">
+<a href="/docs/example.py" class="btn btn-primary" style="text-decoration:none;display:inline-flex;align-items:center;gap:8px;">
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+Download example.py
+</a>
+</div>
+
+</div>
+</section>
+
+<section class="section section-dark">
+<div class="container">
+<h2>Section Overview</h2>
+<p class="section-desc">The script is organized into 12 sections, each building on the last.</p>
+
+<div class="engine-deep" style="margin-top:24px;">
+<div class="engine-deep-header">
+<div><h3>Section 1 — Foundational Math Utilities</h3></div>
+</div>
+<div class="engine-deep-body">
+<p><code>sigmoid(z)</code>, <code>shannon_entropy()</code>, <code>standard_scale()</code>, <code>weighted_sigmoid_score()</code> — the math primitives shared by all engines.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 2 — Data Structures</h3></div>
+</div>
+<div class="engine-deep-body">
+<p><code>AnalysisResult</code>, <code>EngineFinding</code>, <code>RiskLevel</code>, <code>FeedbackEntry</code> — the types that flow through every engine, mirroring the Rust types in <code>sutra-schema</code>.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 3 — Synthetic Repository Generator</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Builds a 15-file, 100-commit microservice repo with deliberate risk patterns: high-churn files, bug-dense modules, and files modified by many authors.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 4 — MGTG Engine</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Cyclomatic complexity M = E − N + 2P per function. The walker identifies two functions exceeding 50 — well past the industry threshold of 10.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 5 — Dependency Engine</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Tarjan's SCC algorithm detects a circular dependency. Fan-in and fan-out metrics identify the most coupled modules.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 6 — Process Engine</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Shannon entropy per file, 14 JIT features (added_lines, deleted_lines, distinct_authors, bug_fixes, etc.), and co-change matrices that surface hidden coupling.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 7 — ML Engine</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>SGD + L2 regularization to learn optimal risk weights. Computes AUC via trapezoidal ROC, predicts 94% defect probability for the highest-risk file.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 8 — LLM Engine</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Simulates Ollama validation of findings: each finding is sent to an LLM which returns <code>isValid</code>, <code>confidence</code>, and <code>explanation</code>.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 9 — HITL Engine</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Stores feedback, computes per-engine precision, auto-adjusts findings based on majority voting with configurable thresholds.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 10 — Orchestrator</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Runs every engine in sequence, fuses results using max-merge semantics, and prints a unified risk score and all findings.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 11 — Expected Output</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Complete annotated output showing the risk score, all findings grouped by engine, and the 5 key insights Sutra produces about this synthetic repository.</p>
+</div>
+</div>
+
+<div class="engine-deep">
+<div class="engine-deep-header">
+<div><h3>Section 12 — Key Insights</h3></div>
+</div>
+<div class="engine-deep-body">
+<p>Five actionable conclusions Sutra derives from fusing all 6 engine signals — demonstrating how multi-dimensional analysis catches what single-tool approaches miss.</p>
+</div>
+</div>
+
+</div>
+</section>
+
+<footer>
+<div class="container footer-inner">
+<p>Sutra — Because production failures are predictable.</p>
+<p class="footer-meta">Apache 2.0 &middot; Pure Rust &middot; <a href="https://github.com/darshanredkar/sutra">GitHub</a></p>
+</div>
+</footer>
+
+</body>
+</html>

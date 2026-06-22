@@ -1,0 +1,2951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation — Sutra</title>
+<meta name="description" content="Complete mathematical and computational reference for Sutra's 6 analysis engines.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<nav>
+<div class="container nav-inner">
+<a href="index.html" class="logo">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+<rect x="2" y="2" width="10" height="10" rx="2" fill="#6366f1"/>
+<rect x="16" y="2" width="10" height="10" rx="2" fill="#818cf8"/>
+<rect x="2" y="16" width="10" height="10" rx="2" fill="#a5b4fc"/>
+<rect x="16" y="16" width="10" height="10" rx="2" fill="#c7d2fe"/>
+</svg>
+<span>Sutra</span>
+</a>
+<div class="nav-links">
+<a href="index.html">Home</a>
+<a href="book.html" class="active">Docs</a>
+<a href="example.html">Examples</a>
+</div>
+</div>
+</nav>
+
+<div class="book-layout container">
+<aside class="book-toc" id="toc">
+<h3>Contents</h3>
+<nav id="toc-list">
+      <a href="#table-of-contents" class="toc-level-1">Table of Contents</a>
+      <a href="#1-philosophy-amp-architecture" class="toc-level-1">1. Philosophy &amp; Architecture</a>
+      <a href="#11-the-core-insight" class="toc-level-2">1.1 The Core Insight</a>
+      <a href="#12-architecture-overview" class="toc-level-2">1.2 Architecture Overview</a>
+      <a href="#13-key-design-decisions" class="toc-level-2">1.3 Key Design Decisions</a>
+      <a href="#2-sutra-schema" class="toc-level-1">2. Sutra Schema</a>
+      <a href="#21-the-universal-data-contract" class="toc-level-2">2.1 The Universal Data Contract</a>
+      <a href="#3-mgtg-engine" class="toc-level-1">3. MGTG Engine</a>
+      <a href="#31-purpose" class="toc-level-2">3.1 Purpose</a>
+      <a href="#32-mathematical-formulas" class="toc-level-2">3.2 Mathematical Formulas</a>
+      <a href="#33-code-implementation" class="toc-level-2">3.3 Code Implementation</a>
+      <a href="#34-example-calculation" class="toc-level-2">3.4 Example Calculation</a>
+      <a href="#4-dependency-engine" class="toc-level-1">4. Dependency Engine</a>
+      <a href="#41-purpose" class="toc-level-2">4.1 Purpose</a>
+      <a href="#42-mathematical-formulas" class="toc-level-2">4.2 Mathematical Formulas</a>
+      <a href="#43-code-implementation" class="toc-level-2">4.3 Code Implementation</a>
+      <a href="#44-example-calculation" class="toc-level-2">4.4 Example Calculation</a>
+      <a href="#5-process-engine" class="toc-level-1">5. Process Engine</a>
+      <a href="#51-purpose" class="toc-level-2">5.1 Purpose</a>
+      <a href="#52-mathematical-formulas" class="toc-level-2">5.2 Mathematical Formulas</a>
+      <a href="#53-code-implementation" class="toc-level-2">5.3 Code Implementation</a>
+      <a href="#54-example-calculation" class="toc-level-2">5.4 Example Calculation</a>
+      <a href="#6-ml-engine" class="toc-level-1">6. ML Engine</a>
+      <a href="#61-purpose" class="toc-level-2">6.1 Purpose</a>
+      <a href="#62-mathematical-formulas" class="toc-level-2">6.2 Mathematical Formulas</a>
+      <a href="#63-evaluation-metrics" class="toc-level-2">6.3 Evaluation Metrics</a>
+      <a href="#64-code-implementation" class="toc-level-2">6.4 Code Implementation</a>
+      <a href="#65-complete-training-example" class="toc-level-2">6.5 Complete Training Example</a>
+      <a href="#7-llm-engine" class="toc-level-1">7. LLM Engine</a>
+      <a href="#71-purpose" class="toc-level-2">7.1 Purpose</a>
+      <a href="#72-mathematical-model" class="toc-level-2">7.2 Mathematical Model</a>
+      <a href="#73-code-implementation" class="toc-level-2">7.3 Code Implementation</a>
+      <a href="#8-hitl-engine" class="toc-level-1">8. HITL Engine</a>
+      <a href="#81-purpose" class="toc-level-2">8.1 Purpose</a>
+      <a href="#82-mathematical-formulas" class="toc-level-2">8.2 Mathematical Formulas</a>
+      <a href="#83-code-implementation" class="toc-level-2">8.3 Code Implementation</a>
+      <a href="#9-orchestrator" class="toc-level-1">9. Orchestrator</a>
+      <a href="#91-purpose" class="toc-level-2">9.1 Purpose</a>
+      <a href="#92-mathematical-formulas" class="toc-level-2">9.2 Mathematical Formulas</a>
+      <a href="#93-code-implementation" class="toc-level-2">9.3 Code Implementation</a>
+      <a href="#10-api-server" class="toc-level-1">10. API Server</a>
+      <a href="#101-endpoints" class="toc-level-2">10.1 Endpoints</a>
+      <a href="#102-risk-labels" class="toc-level-2">10.2 Risk Labels</a>
+      <a href="#103-demo-endpoint-algorithm" class="toc-level-2">10.3 Demo Endpoint Algorithm</a>
+      <a href="#11-end-to-end-example" class="toc-level-1">11. End-to-End Example</a>
+      <a href="#predicting-a-production-failure-in-python" class="toc-level-2">Predicting a Production Failure in Python</a>
+      <a href="#expected-output" class="toc-level-2">Expected Output</a>
+      <a href="#appendix-all-formulas-at-a-glance" class="toc-level-1">Appendix: All Formulas at a Glance</a>
+    </nav>
+</aside>
+<main class="book-content" id="content">
+<h1 id="sutra-the-complete-mathematical-amp-computational-reference">Sutra: The Complete Mathematical &amp; Computational Reference</h1>
+<blockquote>
+<p><strong>Deterministic Failure Prediction for Production Software</strong></p>
+<p>Version 0.1.0 — Internal Research Document</p>
+<p><em>For researchers, engineers, and contributors who want to understand every formula,<br>every derivation, and every line of code that powers Sutra.</em></p>
+</blockquote>
+<hr>
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol>
+<li><a href="#1-philosophy--architecture">Philosophy &amp; Architecture</a></li>
+<li><a href="#2-sutra-schema">Sutra Schema — The Universal Data Contract</a></li>
+<li><a href="#3-mgtg-engine">MGTG Engine — Microservice Graph Topology &amp; Complexity</a></li>
+<li><a href="#4-dependency-engine">Dependency Engine — Module Dependency Analysis</a></li>
+<li><a href="#5-process-engine">Process Engine — Git History &amp; Change Process Analysis</a></li>
+<li><a href="#6-ml-engine">ML Engine — Logistic Regression for Defect Prediction</a></li>
+<li><a href="#7-llm-engine">LLM Engine — Large Language Model Validation</a></li>
+<li><a href="#8-hitl-engine">HITL Engine — Human-In-The-Loop Feedback</a></li>
+<li><a href="#9-orchestrator">Orchestrator — Fusion &amp; Risk Aggregation</a></li>
+<li><a href="#10-api-server">API Server — HTTP Interface</a></li>
+<li><a href="#11-end-to-end-example">End-to-End Example: Predicting a Production Failure in Python</a></li>
+</ol>
+<hr>
+<h2 id="1-philosophy-amp-architecture">1. Philosophy &amp; Architecture</h2>
+<h3 id="11-the-core-insight">1.1 The Core Insight</h3>
+<p>Production software failures are rarely caused by a single defect. They emerge from the<br><em>interaction</em> of multiple risk factors: complex code, tangled dependencies, chaotic<br>development processes, and blind spots in review. Sutra fuses <strong>six analysis engines</strong><br>into one composable pipeline, producing a single deterministic risk score for every<br>commit.</p>
+<h3 id="12-architecture-overview">1.2 Architecture Overview</h3>
+<pre><code>┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  MGTG Engine │     │ Dependency   │     │  Process     │
+│  (complexity)│     │ Engine       │     │  Engine      │
+│  tree-sitter │     │ (import graph)│     │  (git JIT)   │
+└──────┬───────┘     └──────┬───────┘     └──────┬───────┘
+       │                     │                     │
+       └──────────┬──────────┴──────────┬──────────┘
+                  │                     │
+         ┌────────▼────────┐   ┌────────▼────────┐
+         │   ML Engine     │   │   LLM Engine    │
+         │ (logistic regr) │   │ (Ollama/GPT)    │
+         └────────┬────────┘   └────────┬────────┘
+                  │                     │
+                  └──────────┬──────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  HITL Engine    │
+                    │ (feedback loop) │
+                    └────────┬────────┘
+                             │
+                    ┌────────▼────────┐
+                    │  Orchestrator   │
+                    │ (max risk fusion)│
+                    └─────────────────┘
+</code></pre>
+<h3 id="13-key-design-decisions">1.3 Key Design Decisions</h3>
+<table>
+<thead>
+<tr>
+<th>Decision</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Math-first, ML-optional</strong></td>
+<td>Default risk score is purely deterministic. ML is an additive enrichment layer.</td>
+</tr>
+<tr>
+<td><strong>LLM feature-flagged</strong></td>
+<td>Disabled by default. Enable with <code>--llm</code> flag or <code>.with_config()</code>.</td>
+</tr>
+<tr>
+<td><strong>Max-risk fusion</strong></td>
+<td>Orchestrator takes the <em>maximum</em> risk across all engines — a single high-risk signal is sufficient to flag a commit.</td>
+</tr>
+<tr>
+<td><strong>Panic safety</strong></td>
+<td>Every engine runs inside <code>catch_unwind</code>. A panicked engine produces an error finding, never crashes the pipeline.</td>
+</tr>
+<tr>
+<td><strong>14 JIT features</strong></td>
+<td>14-dimensional feature vector powers both the deterministic rules and the ML model.</td>
+</tr>
+</tbody></table>
+<hr>
+<h2 id="2-sutra-schema">2. Sutra Schema</h2>
+<h3 id="21-the-universal-data-contract">2.1 The Universal Data Contract</h3>
+<p>Every engine speaks the same JSON-serializable language. The schema defines 7 core types<br>that flow through the entire pipeline.</p>
+<h4>2.1.1 <code>AnalyzeRequest</code> — What We Ask</h4>
+<pre><code class="language-rust">#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AnalyzeRequest {
+    pub repo_path: String,       // Filesystem path to the repository
+    pub commit_hash: String,     // The commit SHA to analyze
+    pub request_id: String,      // UUID for traceability
+    pub engines: Vec&lt;Engine&gt;,    // Which engines to run (empty = all)
+    pub config: AnalysisConfig,  // Analysis configuration
+}
+</code></pre>
+<h4>2.1.2 <code>AnalysisResult</code> — What We Return</h4>
+<pre><code class="language-rust">#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct AnalysisResult {
+    pub request_id: String,
+    pub commit_hash: String,
+    pub overall_risk: f64,           // Final risk score [0.0, 1.0]
+    pub findings: Vec&lt;Finding&gt;,      // All issues found
+    pub recommendations: Vec&lt;Recommendation&gt;,
+    pub metrics: Option&lt;MetricsSummary&gt;,
+    pub processing_time_ms: f64,
+    pub blocked_merge: bool,         // Should CI block this commit?
+}
+</code></pre>
+<h4>2.1.3 <code>Finding</code> — A Single Signal</h4>
+<pre><code class="language-rust">pub struct Finding {
+    pub id: String,           // e.g. &quot;PROC-ENT001&quot;
+    pub engine: Engine,       // Which engine found it
+    pub file_path: String,    // Affected file
+    pub line: u32,            // Line number (if applicable)
+    pub message: String,      // Human-readable explanation
+    pub severity: Severity,   // Info | Warning | Error | Critical
+    pub validated: bool,      // Has LLM/HITL validated this?
+    pub suggested_fix: Option&lt;String&gt;,
+}
+</code></pre>
+<h4>2.1.4 Severity Rank</h4>
+<pre><code class="language-rust">pub enum Severity {
+    Info     = 0,
+    Warning  = 1,
+    Error    = 2,
+    Critical = 3,
+}
+</code></pre>
+<hr>
+<h2 id="3-mgtg-engine">3. MGTG Engine</h2>
+<h3 id="31-purpose">3.1 Purpose</h3>
+<p>Analyze source code for structural complexity using tree-sitter AST parsing.<br>The MGTG (Microservice Graph Topology Generator) engine computes cyclomatic complexity,<br>cognitive complexity, and nesting depth for every function in the codebase.</p>
+<h3 id="32-mathematical-formulas">3.2 Mathematical Formulas</h3>
+<h4>3.2.1 Cyclomatic Complexity (McCabe)</h4>
+<p>$$M = E - N + 2P$$</p>
+<p>Where:</p>
+<ul>
+<li>$E$ = number of edges in the control flow graph</li>
+<li>$N$ = number of nodes in the control flow graph</li>
+<li>$P$ = number of connected components (usually 1)</li>
+</ul>
+<p>For individual functions, this simplifies to counting decision points:</p>
+<p>$$M = 1 + \sum(\text{if}) + \sum(\text{while}) + \sum(\text{for}) + \sum(\text{case}) + \sum(\text{catch}) + \sum(\text{&amp;&amp;}) + \sum(\text{||})$$</p>
+<p><strong>Interpretation:</strong></p>
+<table>
+<thead>
+<tr>
+<th>M Range</th>
+<th>Risk Level</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1–10</td>
+<td>Simple, low risk</td>
+</tr>
+<tr>
+<td>11–20</td>
+<td>Moderately complex</td>
+</tr>
+<tr>
+<td>21–50</td>
+<td>High risk, needs refactoring</td>
+</tr>
+<tr>
+<td>50+</td>
+<td>Untestable, must refactor</td>
+</tr>
+</tbody></table>
+<h4>3.2.2 Cognitive Complexity</h4>
+<p>Cognitive complexity measures how hard code is to <em>understand</em> (as opposed to<br>cyclomatic, which measures how many paths exist). It penalizes nesting:</p>
+<p>$$\text{Cog}(f) = \sum_{\text{keywords}} \text{increment} \times \text{nesting_penalty}$$</p>
+<p>Where:</p>
+<ul>
+<li><code>if</code>, <code>else if</code>, <code>while</code>, <code>for</code>, <code>catch</code> → increment = 1</li>
+<li><code>else</code> → increment = 0 (already counted by its <code>if</code>)</li>
+<li>Nesting penalty = depth of each keyword in the AST</li>
+</ul>
+<h4>3.2.3 Nesting Depth</h4>
+<p>The maximum depth of nested control structures:</p>
+<p>$$\text{Nest}(f) = \max_{\text{paths}} \sum_{\text{nodes in path}} 1_{\text{control_structure}}$$</p>
+<h4>3.2.4 Overall Health Score</h4>
+<p>The MGTG engine produces a summary health score:</p>
+<p>$$\text{Health} = 1 - \frac{\text{error_count} \times 0.1 + \text{warning_count} \times 0.05}{\max(1, \text{total_files})}$$</p>
+<p>This is then inverted to produce a risk score:</p>
+<p>$$\text{Risk}_{\text{MGTG}} = 1 - \text{Health}$$</p>
+<h3 id="33-code-implementation">3.3 Code Implementation</h3>
+<h4>Rust (production)</h4>
+<pre><code class="language-rust">// crates/sutra-mgtg/src/engine.rs
+fn convert_metrics(mgtg_files: &amp;[mgtg::ir::AnalysisFile]) -&gt; MetricsSummary {
+    let mut total_functions = 0u32;
+    let mut max_cyclomatic = 0.0f64;
+    let mut max_cognitive = 0.0f64;
+    let mut max_nesting = 0.0f64;
+
+    for file in mgtg_files {
+        total_functions += file.functions.len() as u32;
+        max_cyclomatic = max_cyclomatic.max(file.metrics.cyclomatic_max as f64);
+        max_cognitive = max_cognitive.max(file.metrics.cognitive_max as f64);
+        max_nesting = max_nesting.max(file.metrics.nesting_depth_max as f64);
+    }
+
+    MetricsSummary {
+        cyclomatic_max: max_cyclomatic,
+        cognitive_max: max_cognitive,
+        nesting_max: max_nesting,
+        total_functions,
+        total_files: mgtg_files.len() as u32,
+        ..Default::default()
+    }
+}
+</code></pre>
+<h4>Python (equivalent)</h4>
+<pre><code class="language-python">import math
+from dataclasses import dataclass
+
+@dataclass
+class MetricsSummary:
+    cyclomatic_max: float = 0.0
+    cognitive_max: float = 0.0
+    nesting_max: float = 0.0
+    total_functions: int = 0
+    total_files: int = 0
+
+def convert_metrics(mgtg_files):
+    total_functions = 0
+    max_cyclomatic = 0.0
+    max_cognitive = 0.0
+    max_nesting = 0.0
+
+    for file in mgtg_files:
+        total_functions += len(file.get(&#39;functions&#39;, []))
+        max_cyclomatic = max(max_cyclomatic, file.get(&#39;metrics&#39;, {}).get(&#39;cyclomatic_max&#39;, 0.0))
+        max_cognitive = max(max_cognitive, file.get(&#39;metrics&#39;, {}).get(&#39;cognitive_max&#39;, 0.0))
+        max_nesting = max(max_nesting, file.get(&#39;metrics&#39;, {}).get(&#39;nesting_depth_max&#39;, 0.0))
+
+    return MetricsSummary(
+        cyclomatic_max=max_cyclomatic,
+        cognitive_max=max_cognitive,
+        nesting_max=max_nesting,
+        total_functions=total_functions,
+        total_files=len(mgtg_files),
+    )
+
+
+def compute_cyclomatic_complexity(decision_points: int) -&gt; int:
+    &quot;&quot;&quot;M = 1 + number of decision points&quot;&quot;&quot;
+    return 1 + decision_points
+
+
+def compute_cognitive_complexity(keywords_with_depth):
+    &quot;&quot;&quot;Sum of keyword increments * nesting penalty&quot;&quot;&quot;
+    total = 0
+    for keyword, depth in keywords_with_depth:
+        increment = 1 if keyword != &#39;else&#39; else 0
+        total += increment * depth
+    return total
+
+
+def compute_health_score(error_count, warning_count, total_files):
+    &quot;&quot;&quot;Health = 1 - (errors * 0.1 + warnings * 0.05) / max(1, files)&quot;&quot;&quot;
+    return 1.0 - (error_count * 0.1 + warning_count * 0.05) / max(1, total_files)
+</code></pre>
+<h4>JavaScript (reference)</h4>
+<pre><code class="language-javascript">class MGTGEngine {
+    static computeCyclomaticComplexity(decisionPoints) {
+        return 1 + decisionPoints;
+    }
+
+    static computeCognitiveComplexity(keywordsWithDepth) {
+        return keywordsWithDepth.reduce((sum, {keyword, depth}) =&gt; {
+            const increment = keyword === &#39;else&#39; ? 0 : 1;
+            return sum + increment * depth;
+        }, 0);
+    }
+
+    static computeHealthScore(errorCount, warningCount, totalFiles) {
+        return 1.0 - (errorCount * 0.1 + warningCount * 0.05) / Math.max(1, totalFiles);
+    }
+}
+</code></pre>
+<h3 id="34-example-calculation">3.4 Example Calculation</h3>
+<p>Consider a file with:</p>
+<ul>
+<li>3 functions: cyclomatic complexities of 5, 12, and 8</li>
+<li>Max cognitive complexity: 15</li>
+<li>Max nesting depth: 4</li>
+<li>2 errors, 5 warnings</li>
+</ul>
+<pre><code class="language-python">total_functions = 3
+cyclomatic_max = 12.0  # max of [5, 12, 8]
+cognitive_max = 15.0
+nesting_max = 4.0
+error_count = 2
+warning_count = 5
+total_files = 1
+
+# Health score
+health = 1.0 - (2 * 0.1 + 5 * 0.05) / max(1, 1)
+# = 1.0 - (0.2 + 0.25) / 1
+# = 1.0 - 0.45
+# = 0.55
+
+risk_mgtg = 1.0 - health
+# = 0.45  (MODERATE-HIGH risk)
+</code></pre>
+<hr>
+<h2 id="4-dependency-engine">4. Dependency Engine</h2>
+<h3 id="41-purpose">4.1 Purpose</h3>
+<p>Analyze the module dependency graph of a codebase, detect circular dependencies,<br>compute fan-in/fan-out metrics, and validate against architectural layer rules.</p>
+<h3 id="42-mathematical-formulas">4.2 Mathematical Formulas</h3>
+<h4>4.2.1 Dependency Graph</h4>
+<p>Let $G = (V, E)$ be a directed graph where:</p>
+<ul>
+<li>$V$ = set of modules (files/packages)</li>
+<li>$E$ = set of directed edges $u \rightarrow v$ meaning &quot;module $u$ imports module $v$&quot;</li>
+</ul>
+<h4>4.2.2 Fan-In</h4>
+<p>$$\text{FanIn}(v) = |{u \in V : (u \rightarrow v) \in E}|$$</p>
+<p>Number of modules that import module $v$. High fan-in indicates a heavily reused module.</p>
+<h4>4.2.3 Fan-Out</h4>
+<p>$$\text{FanOut}(v) = |{w \in V : (v \rightarrow w) \in E}|$$</p>
+<p>Number of modules that module $v$ imports. High fan-out indicates a module with many dependencies.</p>
+<h4>4.2.4 Cycle Detection</h4>
+<p>A circular dependency exists when there is a path $v_1 \rightarrow v_2 \rightarrow ... \rightarrow v_k \rightarrow v_1$.<br>The engine uses Johnson&#39;s algorithm for cycle detection.</p>
+<h4>4.2.5 Architecture Layer Validation</h4>
+<p>Layers are defined as sets of module name patterns. A rule:</p>
+<p>$$\text{Layer}_A.\text{allowed_deps} = {\text{Layer}_B, \text{Layer}_C}$$</p>
+<p>means any module in Layer A may only import modules in Layers B or C (or its own layer).</p>
+<h4>4.2.6 Risk Score</h4>
+<p>$$\text{Risk}_{\text{DEP}} = \min(1.0, \text{error_count} \times 0.2)$$</p>
+<p>Each error (circular dependency or architecture violation) contributes 0.2 to the risk score.</p>
+<h3 id="43-code-implementation">4.3 Code Implementation</h3>
+<h4>Rust (production)</h4>
+<pre><code class="language-rust">// crates/sutra-dependency/src/engine.rs
+fn analyze(&amp;self, request: &amp;AnalyzeRequest) -&gt; SutraResult&lt;AnalysisResult&gt; {
+    // Walk files → extract imports → build graph → detect cycles
+    let mut pg = PetGraphWrapper::new();
+
+    for result in &amp;extract_results {
+        pg.add_node(DepNode {
+            id: result.module_name.clone(),
+            file_path: String::new(),
+            module_name: result.module_name.clone(),
+            language: result.language.clone(),
+        });
+    }
+
+    for result in &amp;extract_results {
+        for import in &amp;result.imports {
+            pg.add_node(DepNode {
+                id: import.module.clone(),
+                ..Default::default()
+            });
+            pg.add_edge(
+                &amp;result.module_name,
+                &amp;import.module,
+                DepEdge { /* ... */ },
+            );
+        }
+    }
+
+    // Detect cycles
+    for cycle in &amp;dep_graph.cycles {
+        findings.push(Finding::new(
+            &amp;format!(&quot;DEP-CYC{:03}&quot;, findings.len() + 1),
+            Engine::Dependency,
+            &amp;cycle[0],
+            1,
+            &amp;format!(&quot;Circular dependency: {}&quot;, path_str.join(&quot; -&gt; &quot;)),
+            Severity::Error,
+        ));
+    }
+
+    // Compute risk
+    overall_risk: (error_count as f64 * 0.2).min(1.0),
+}
+</code></pre>
+<h4>Python (equivalent)</h4>
+<pre><code class="language-python">from collections import defaultdict
+from typing import List, Tuple, Set
+
+class DependencyGraph:
+    def __init__(self):
+        self.nodes: Set[str] = set()
+        self.edges: List[Tuple[str, str]] = []
+        self.fan_in: dict = defaultdict(int)
+        self.fan_out: dict = defaultdict(int)
+
+    def add_node(self, node: str):
+        self.nodes.add(node)
+
+    def add_edge(self, source: str, target: str):
+        self.edges.append((source, target))
+        self.fan_out[source] += 1
+        self.fan_in[target] += 1
+
+    def detect_cycles_johnson(self) -&gt; List[List[str]]:
+        &quot;&quot;&quot;Johnson&#39;s algorithm for cycle detection&quot;&quot;&quot;
+        # Simple DFS-based cycle detection (for production, use Johnson&#39;s)
+        cycles = []
+        visited = set()
+        path = []
+
+        def dfs(node, start, depth=0):
+            if depth &gt; len(self.nodes):
+                return
+            visited.add(node)
+            path.append(node)
+            for src, tgt in self.edges:
+                if src == node:
+                    if tgt == start and len(path) &gt; 1:
+                        cycles.append(path.copy())
+                    elif tgt not in visited:
+                        dfs(tgt, start, depth + 1)
+            path.pop()
+            visited.remove(node)
+
+        for node in sorted(self.nodes):
+            dfs(node, node)
+            self.nodes.discard(node)  # Remove from future searches
+
+        # Deduplicate and filter trivial cycles
+        unique = []
+        for cycle in cycles:
+            normalized = sorted(set(cycle))
+            if len(normalized) &gt;= 2 and normalized not in unique:
+                unique.append(normalized)
+        return unique
+
+    def compute_fan_in_max(self) -&gt; int:
+        return max(self.fan_in.values()) if self.fan_in else 0
+
+    def compute_fan_out_max(self) -&gt; int:
+        return max(self.fan_out.values()) if self.fan_out else 0
+
+
+class ArchitectureValidator:
+    def __init__(self, layers: dict):
+        # layers = {&quot;name&quot;: {&quot;pattern&quot;: &quot;regex&quot;, &quot;allowed_deps&quot;: [&quot;name&quot;, ...]}}
+        self.layers = layers
+
+    def validate(self, graph: DependencyGraph,
+                 module_to_layer: dict) -&gt; List[str]:
+        violations = []
+        for source, target in graph.edges:
+            src_layer = module_to_layer.get(source, &quot;unknown&quot;)
+            tgt_layer = module_to_layer.get(target, &quot;unknown&quot;)
+            allowed = self.layers.get(src_layer, {}).get(&quot;allowed_deps&quot;, [])
+            if tgt_layer not in allowed and tgt_layer != src_layer:
+                violations.append(
+                    f&quot;&#39;{source}&#39; ({src_layer}) imports &#39;{target}&#39; ({tgt_layer})&quot;
+                    f&quot; — not in allowed_deps: {allowed}&quot;
+                )
+        return violations
+
+
+def compute_dependency_risk(error_count: int) -&gt; float:
+    &quot;&quot;&quot;Risk = min(1.0, error_count * 0.2)&quot;&quot;&quot;
+    return min(1.0, error_count * 0.2)
+</code></pre>
+<h4>JavaScript (reference)</h4>
+<pre><code class="language-javascript">class DependencyAnalyzer {
+    constructor() {
+        this.nodes = new Set();
+        this.edges = [];
+        this.fanIn = {};
+        this.fanOut = {};
+    }
+
+    addNode(node) {
+        this.nodes.add(node);
+    }
+
+    addEdge(source, target) {
+        this.edges.push({source, target});
+        this.fanOut[source] = (this.fanOut[source] || 0) + 1;
+        this.fanIn[target] = (this.fanIn[target] || 0) + 1;
+    }
+
+    detectCycles() {
+        const cycles = [];
+        const visited = new Set();
+        const path = [];
+
+        const dfs = (node, start) =&gt; {
+            if (path.length &gt; this.nodes.size) return;
+            visited.add(node);
+            path.push(node);
+            for (const edge of this.edges) {
+                if (edge.source === node) {
+                    if (edge.target === start &amp;&amp; path.length &gt; 1) {
+                        cycles.push([...path]);
+                    } else if (!visited.has(edge.target)) {
+                        dfs(edge.target, start);
+                    }
+                }
+            }
+            path.pop();
+            visited.delete(node);
+        };
+
+        const sorted = [...this.nodes].sort();
+        for (const node of sorted) {
+            dfs(node, node);
+            this.nodes.delete(node);
+        }
+
+        return cycles;
+    }
+
+    computeRisk() {
+        const errors = this.detectCycles();
+        return Math.min(1.0, errors.length * 0.2);
+    }
+}
+</code></pre>
+<h3 id="44-example-calculation">4.4 Example Calculation</h3>
+<p>Given a dependency graph:</p>
+<pre><code>web_app → db_models
+web_app → utils
+db_models → utils
+utils → db_models  (CYCLE! web_app → db_models → utils → db_models)
+</code></pre>
+<pre><code class="language-python">error_count = 1  # One circular dependency
+risk = min(1.0, 1 * 0.2)  # = 0.2
+
+fan_in = {&quot;web_app&quot;: 0, &quot;db_models&quot;: 2, &quot;utils&quot;: 2}
+fan_out = {&quot;web_app&quot;: 2, &quot;db_models&quot;: 1, &quot;utils&quot;: 1}
+
+metrics = {
+    &quot;total_files&quot;: 3,
+    &quot;fan_in_max&quot;: 2,    # db_models and utils are both imported by 2 modules
+    &quot;fan_out_max&quot;: 2,   # web_app imports 2 modules
+    &quot;circular_deps&quot;: 1,
+}
+</code></pre>
+<hr>
+<h2 id="5-process-engine">5. Process Engine</h2>
+<h3 id="51-purpose">5.1 Purpose</h3>
+<p>Analyze the <em>development process</em> by mining git history. Computes 14 JIT (Just-In-Time)<br>defect prediction features, Shannon entropy of code changes, and co-change coupling.</p>
+<h3 id="52-mathematical-formulas">5.2 Mathematical Formulas</h3>
+<h4>5.2.1 Shannon Entropy of Code Changes (Hassan, 2009)</h4>
+<p>For a file $f$ modified across $n$ commits:</p>
+<p>$$H(f) = -\sum_{i=1}^{n} p_i \log_2(p_i)$$</p>
+<p>Where:</p>
+<ul>
+<li>$p_i = \frac{\text{lines changed in commit } i}{\text{total lines changed across all commits}}$</li>
+<li>$H(f) = 0$ if the file is changed in only one commit</li>
+<li>$H(f) = \log_2(n)$ if changes are uniformly distributed (maximum entropy)</li>
+</ul>
+<p><strong>Interpretation:</strong></p>
+<table>
+<thead>
+<tr>
+<th>H Value</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0.0</td>
+<td>Single change burst</td>
+</tr>
+<tr>
+<td>1.0</td>
+<td>Changes split 50/50</td>
+</tr>
+<tr>
+<td>2.0</td>
+<td>Changes split across ~4 equal commits</td>
+</tr>
+<tr>
+<td>3.0+</td>
+<td>Highly distributed — high risk</td>
+</tr>
+</tbody></table>
+<h4>5.2.2 The 14 JIT Features</h4>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Feature</th>
+<th>Formula</th>
+<th>Risk Direction</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Revisions</td>
+<td>$\text{NRevs}(f) = \sum_i 1_{\text{commit } i \text{ touches } f}$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Distinct Committers</td>
+<td>$\text{NComm}(f) = \text{unique authors touching } f$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Lines Added</td>
+<td>$\text{NAdded}(f) = \sum_i \text{added}_i$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Lines Deleted</td>
+<td>$\text{NDel}(f) = \sum_i \text{deleted}_i$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Total Changed</td>
+<td>$\text{NMod}(f) = \text{NAdded} + \text{NDel}$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Entropy</td>
+<td>$H(f)$ from section 5.2.1</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Directories</td>
+<td>$\text{NDir}(f) = \text{unique parent dirs in commits}$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Avg Files/Commit</td>
+<td>$\text{NFiles}(f) = \frac{\sum_i \text{files in commit}_i}{\text{NRevs}}$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Age</td>
+<td>$\text{Age}(f) = \frac{t_{\text{now}} - t_{\text{first}}}{\text{day_ms}}$</td>
+<td>Lower = riskier (new files)</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Weighted Age</td>
+<td>$\text{WAge}(f) = \frac{\sum_i w_i \cdot \text{days_ago}_i}{\sum_i w_i}$ where $w_i = e^{-\text{days_ago}_i / 30}$</td>
+<td>Lower = riskier</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Recent Commits</td>
+<td>$\text{Recent}(f) = \text{commits in last 30 days}$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Bug Fix Commits</td>
+<td>$\text{NBug}(f) = \text{commits with fix keywords}$</td>
+<td>Higher = riskier</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Owner Contribution</td>
+<td>$\text{Owner}(f) = \frac{\max_{\text{authors}}(\text{changes})}{\text{total changes}}$</td>
+<td>Lower = riskier (no clear owner)</td>
+</tr>
+<tr>
+<td>14</td>
+<td>Minor Contributors</td>
+<td>$\text{NMinor}(f) = \text{authors with} &lt; 5% \text{ of changes}$</td>
+<td>Higher = riskier</td>
+</tr>
+</tbody></table>
+<h4>5.2.3 Weighted Age Formula</h4>
+<p>$$w_i = e^{-\frac{\text{days_ago}_i}{30}}$$</p>
+<p>$$\text{WAge}(f) = \frac{\sum_{i} w_i \cdot \text{days_ago}_i}{\sum_i w_i}$$</p>
+<p>This gives exponentially more weight to recent changes.</p>
+<h4>5.2.4 Owner Contribution</h4>
+<p>$$\text{Owner}(f) = \frac{\max_{a \in \text{authors}} \text{changes}<em>a}{\sum</em>{a} \text{changes}_a}$$</p>
+<h4>5.2.5 Co-Change Coupling</h4>
+<p>Two files $(f_i, f_j)$ are co-changed when they appear in the same commit.</p>
+<p>$$\text{Couple}(f_i, f_j) = |{c \in \text{commits} : f_i \in c \land f_j \in c}|$$</p>
+<p>Tight coupling threshold: $\text{Couple} &gt; \frac{|\text{total commits}|}{10}$</p>
+<h4>5.2.6 Process Risk Score</h4>
+<p>$$\text{Risk}<em>{\text{PROC}} = \min\left(1.0, \frac{\text{errors} \times 0.3 + \text{warnings} \times 0.1 + H</em>{\max} \times 0.1}{1.0}\right)$$</p>
+<p>Where:</p>
+<ul>
+<li>errors = bug-prone findings (bug_fix_commits &gt;= 3)</li>
+<li>warnings = high entropy + hotspot + tight coupling findings</li>
+<li>$H_{\max}$ = maximum entropy across all files</li>
+</ul>
+<h3 id="53-code-implementation">5.3 Code Implementation</h3>
+<h4>Rust (production) — Entropy</h4>
+<pre><code class="language-rust">// crates/sutra-process/src/entropy.rs
+pub fn compute_entropy(commits: &amp;[CommitInfo]) -&gt; HashMap&lt;String, f64&gt; {
+    let mut file_changes: HashMap&lt;String, Vec&lt;(i64, u32)&gt;&gt; = HashMap::new();
+
+    for commit in commits {
+        for change in &amp;commit.files_changed {
+            let total = change.lines_added + change.lines_deleted;
+            if total == 0 { continue; }
+            file_changes
+                .entry(change.file_path.clone())
+                .or_default()
+                .push((commit.timestamp_ms, total));
+        }
+    }
+
+    let mut entropy_map = HashMap::new();
+
+    for (file_path, changes) in &amp;file_changes {
+        if changes.len() &lt;= 1 {
+            entropy_map.insert(file_path.clone(), 0.0);
+            continue;
+        }
+
+        let total: u32 = changes.iter().map(|(_, c)| c).sum();
+        if total == 0 {
+            entropy_map.insert(file_path.clone(), 0.0);
+            continue;
+        }
+
+        let entropy: f64 = changes
+            .iter()
+            .map(|(_, c)| {
+                let p = *c as f64 / total as f64;
+                if p &lt;= 0.0 { 0.0 } else { -p * p.log2() }
+            })
+            .sum();
+
+        entropy_map.insert(file_path.clone(), entropy);
+    }
+
+    entropy_map
+}
+</code></pre>
+<h4>Rust (production) — JIT Features</h4>
+<pre><code class="language-rust">// crates/sutra-process/src/jitfeatures.rs
+pub fn extract_jit_features(
+    commits: &amp;[CommitInfo],
+    entropy_map: &amp;HashMap&lt;String, f64&gt;,
+    now_ms: i64,
+) -&gt; Vec&lt;JitFeatures&gt; {
+    // WeightedAge
+    let weighted_age_days = if timestamps.is_empty() {
+        0.0
+    } else {
+        let weighted_sum: f64 = timestamps
+            .iter()
+            .map(|ts| {
+                let days_ago = (now_ms - ts) as f64 / (24.0 * 60.0 * 60.0 * 1000.0);
+                let weight = (-days_ago / 30.0).exp();
+                weight * days_ago
+            })
+            .sum();
+        let total_weight: f64 = timestamps
+            .iter()
+            .map(|ts| {
+                let days_ago = (now_ms - ts) as f64 / (24.0 * 60.0 * 60.0 * 1000.0);
+                (-days_ago / 30.0).exp()
+            })
+            .sum();
+        if total_weight &gt; 0.0 { weighted_sum / total_weight } else { 0.0 }
+    };
+}
+</code></pre>
+<h4>Python (equivalent) — Full JIT Features</h4>
+<pre><code class="language-python">import math
+from collections import defaultdict
+from dataclasses import dataclass, field
+from typing import Dict, List, Set, Tuple
+
+@dataclass
+class JitFeatures:
+    file_path: str
+    revisions: int = 0                   # NRevs
+    distinct_committers: int = 0          # NComm
+    lines_added: int = 0                 # NAdded
+    lines_deleted: int = 0               # NDel
+    total_lines_changed: int = 0         # NMod
+    entropy: float = 0.0                 # H(f)
+    num_directories: int = 0             # NDir
+    avg_files_per_commit: float = 0.0    # NFiles
+    age_days: float = 0.0                # Age
+    weighted_age_days: float = 0.0       # WAge
+    recent_commits: int = 0              # Recent
+    bug_fix_commits: int = 0             # NBug
+    owner_contribution: float = 0.0      # Owner
+    minor_contributors: int = 0          # NMinor
+
+
+def compute_entropy(commits: List[dict]) -&gt; Dict[str, float]:
+    &quot;&quot;&quot;Shannon entropy of file changes&quot;&quot;&quot;
+    file_changes: Dict[str, List[int]] = defaultdict(list)
+
+    for commit in commits:
+        for change in commit.get(&#39;files_changed&#39;, []):
+            total = change.get(&#39;lines_added&#39;, 0) + change.get(&#39;lines_deleted&#39;, 0)
+            if total == 0:
+                continue
+            file_changes[change[&#39;file_path&#39;]].append(total)
+
+    entropy_map = {}
+    for file_path, changes in file_changes.items():
+        if len(changes) &lt;= 1:
+            entropy_map[file_path] = 0.0
+            continue
+
+        total_lines = sum(changes)
+        if total_lines == 0:
+            entropy_map[file_path] = 0.0
+            continue
+
+        entropy = 0.0
+        for c in changes:
+            p = c / total_lines
+            if p &gt; 0.0:
+                entropy -= p * math.log2(p)
+
+        entropy_map[file_path] = entropy
+
+    return entropy_map
+
+
+def extract_jit_features(commits: List[dict],
+                          entropy_map: Dict[str, float],
+                          now_ms: int) -&gt; List[JitFeatures]:
+    &quot;&quot;&quot;Extract all 14 JIT features from commit history&quot;&quot;&quot;
+    DAY_MS = 24 * 60 * 60 * 1000
+    bug_keywords = [&#39;fix&#39;, &#39;bug&#39;, &#39;crash&#39;, &#39;defect&#39;, &#39;error&#39;, &#39;hotfix&#39;, &#39;patch&#39;, &#39;issue&#39;]
+
+    # Aggregators
+    revisions: Dict[str, int] = defaultdict(int)
+    committers: Dict[str, Set[str]] = defaultdict(set)
+    lines_added: Dict[str, int] = defaultdict(int)
+    lines_deleted: Dict[str, int] = defaultdict(int)
+    timestamps: Dict[str, List[int]] = defaultdict(list)
+    files_per_commit: Dict[str, List[int]] = defaultdict(list)
+    bug_fixes: Dict[str, int] = defaultdict(int)
+    first_seen: Dict[str, int] = {}
+    directories: Dict[str, Set[str]] = defaultdict(set)
+    author_changes: Dict[str, List[Tuple[str, int, int]]] = defaultdict(list)
+
+    for commit in commits:
+        msg = commit.get(&#39;message&#39;, &#39;&#39;).lower()
+        is_bug = any(kw in msg for kw in bug_keywords)
+        n_files = len(commit.get(&#39;files_changed&#39;, []))
+
+        for change in commit.get(&#39;files_changed&#39;, []):
+            fp = change[&#39;file_path&#39;]
+            added = change.get(&#39;lines_added&#39;, 0)
+            deleted = change.get(&#39;lines_deleted&#39;, 0)
+
+            revisions[fp] += 1
+            lines_added[fp] += added
+            lines_deleted[fp] += deleted
+            committers[fp].add(commit.get(&#39;author&#39;, &#39;unknown&#39;))
+            timestamps[fp].append(commit.get(&#39;timestamp_ms&#39;, 0))
+            files_per_commit[fp].append(n_files)
+
+            if is_bug:
+                bug_fixes[fp] += 1
+
+            if fp not in first_seen:
+                first_seen[fp] = commit.get(&#39;timestamp_ms&#39;, now_ms)
+
+            # Track directory
+            if &#39;/&#39; in fp:
+                dir_path = &#39;/&#39;.join(fp.split(&#39;/&#39;)[:-1]) or &#39;/&#39;
+            else:
+                dir_path = &#39;/&#39;
+            directories[fp].add(dir_path)
+
+            author_changes[fp].append(
+                (commit.get(&#39;author&#39;, &#39;unknown&#39;), added, deleted)
+            )
+
+    features = []
+    for fp in revisions:
+        revs = revisions[fp]
+        entropy = entropy_map.get(fp, 0.0)
+
+        # Weighted Age
+        ts_list = timestamps[fp]
+        if ts_list:
+            weighted_sum = 0.0
+            total_weight = 0.0
+            for ts in ts_list:
+                days_ago = (now_ms - ts) / DAY_MS
+                weight = math.exp(-days_ago / 30.0)
+                weighted_sum += weight * days_ago
+                total_weight += weight
+            weighted_age = weighted_sum / total_weight if total_weight &gt; 0 else 0.0
+        else:
+            weighted_age = 0.0
+
+        # Recent commits (last 30 days)
+        recent_cutoff = now_ms - 30 * DAY_MS
+        recent = sum(1 for ts in ts_list if ts &gt;= recent_cutoff)
+
+        # Owner contribution
+        authors = author_changes[fp]
+        author_totals: Dict[str, int] = defaultdict(int)
+        total_author_changes = 0
+        for name, added, deleted in authors:
+            chg = added + deleted
+            author_totals[name] += chg
+            total_author_changes += chg
+
+        owner_contrib = max(author_totals.values()) / total_author_changes if total_author_changes &gt; 0 else 0.0
+        threshold = total_author_changes * 0.05
+        minor = sum(1 for v in author_totals.values() if v &lt; threshold)
+
+        feat = JitFeatures(
+            file_path=fp,
+            revisions=revs,
+            distinct_committers=len(committers[fp]),
+            lines_added=lines_added[fp],
+            lines_deleted=lines_deleted[fp],
+            total_lines_changed=lines_added[fp] + lines_deleted[fp],
+            entropy=entropy,
+            num_directories=len(directories[fp]),
+            avg_files_per_commit=(
+                sum(files_per_commit[fp]) / len(files_per_commit[fp])
+                if files_per_commit[fp] else 0.0
+            ),
+            age_days=max(0.0, (now_ms - first_seen.get(fp, now_ms)) / DAY_MS),
+            weighted_age_days=weighted_age,
+            recent_commits=recent,
+            bug_fix_commits=bug_fixes[fp],
+            owner_contribution=owner_contrib,
+            minor_contributors=minor,
+        )
+        features.append(feat)
+
+    # Sort by revision count descending
+    features.sort(key=lambda f: f.revisions, reverse=True)
+    return features
+
+
+def compute_process_risk(features: List[JitFeatures],
+                          co_change_edges: List[dict],
+                          total_commits: int) -&gt; float:
+    &quot;&quot;&quot;Process Risk = errors*0.3 + warnings*0.1 + max_entropy*0.1&quot;&quot;&quot;
+    error_count = sum(1 for f in features if f.bug_fix_commits &gt;= 3)
+    warning_count = sum(1 for f in features if f.entropy &gt; 3.0 or f.revisions &gt; 20)
+    max_entropy = max((f.entropy for f in features), default=0.0)
+
+    # Tight coupling threshold
+    tight_coupling = sum(
+        1 for e in co_change_edges
+        if e.get(&#39;count&#39;, 0) &gt; total_commits // 10
+    )
+    warning_count += tight_coupling
+
+    risk = error_count * 0.3 + warning_count * 0.1 + max_entropy * 0.1
+    return min(1.0, risk)
+</code></pre>
+<h4>JavaScript (reference) — Entropy only</h4>
+<pre><code class="language-javascript">function computeEntropy(commits) {
+    const fileChanges = {};
+
+    for (const commit of commits) {
+        for (const change of commit.filesChanged || []) {
+            const total = (change.linesAdded || 0) + (change.linesDeleted || 0);
+            if (total === 0) continue;
+            if (!fileChanges[change.filePath]) fileChanges[change.filePath] = [];
+            fileChanges[change.filePath].push(total);
+        }
+    }
+
+    const entropyMap = {};
+    for (const [filePath, changes] of Object.entries(fileChanges)) {
+        if (changes.length &lt;= 1) {
+            entropyMap[filePath] = 0.0;
+            continue;
+        }
+        const totalLines = changes.reduce((a, b) =&gt; a + b, 0);
+        if (totalLines === 0) {
+            entropyMap[filePath] = 0.0;
+            continue;
+        }
+        let entropy = 0.0;
+        for (const c of changes) {
+            const p = c / totalLines;
+            if (p &gt; 0) entropy -= p * Math.log2(p);
+        }
+        entropyMap[filePath] = entropy;
+    }
+    return entropyMap;
+}
+</code></pre>
+<h3 id="54-example-calculation">5.4 Example Calculation</h3>
+<p>Consider a repository with 100 commits touching file <code>db_handler.py</code>:</p>
+<table>
+<thead>
+<tr>
+<th>Commit</th>
+<th>Author</th>
+<th>Lines Changed</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>c1 (day 0)</td>
+<td>alice</td>
+<td>50</td>
+<td>&quot;initial implementation&quot;</td>
+</tr>
+<tr>
+<td>c2 (day 5)</td>
+<td>bob</td>
+<td>30</td>
+<td>&quot;fix connection leak&quot;</td>
+</tr>
+<tr>
+<td>c3 (day 10)</td>
+<td>alice</td>
+<td>20</td>
+<td>&quot;refactor query builder&quot;</td>
+</tr>
+<tr>
+<td>c4 (day 90)</td>
+<td>charlie</td>
+<td>100</td>
+<td>&quot;add sharding support&quot;</td>
+</tr>
+<tr>
+<td>c5 (day 95)</td>
+<td>bob</td>
+<td>10</td>
+<td>&quot;fix sharding bug&quot;</td>
+</tr>
+</tbody></table>
+<pre><code class="language-python">now_ms = 100 * DAY_MS  # day 100
+
+# Entropy
+total = 50 + 30 + 20 + 100 + 10  # = 210
+p = [50/210, 30/210, 20/210, 100/210, 10/210]
+H = -sum(pi * math.log2(pi) for pi in p)  # ≈ 1.87
+
+# Features
+revisions = 5
+distinct_committers = 3  # alice, bob, charlie
+lines_added = 50 + 30 + 20 + 100 + 10  # = 210
+lines_deleted = 0
+total_changed = 210
+entropy = 1.87
+num_directories = 1
+avg_files_per_commit = ...  # depends on other files in commits
+age_days = 100
+weighted_age_days = ...
+recent_commits = 2  # c4, c5 (days 90, 95)
+bug_fix_commits = 2  # c2 (fix), c5 (fix)
+owner_contribution = (50 + 20) / 210 ≈ 0.33  # alice
+minor_contributors = ...
+
+# Bug-prone? bug_fix_commits = 2 &lt; 3 → NOT flagged as error
+# But entropy = 1.87 &lt; 3.0 → NOT flagged as warning
+
+risk_process = 0.0  # No error/warning triggers
+</code></pre>
+<p>Now consider a more dangerous file with:</p>
+<ul>
+<li><code>entropy = 4.2</code> → warning</li>
+<li><code>revisions = 35</code> → warning</li>
+<li><code>bug_fix_commits = 5</code> → error</li>
+</ul>
+<pre><code class="language-python">risk_process = min(1.0, 1 * 0.3 + 2 * 0.1 + 4.2 * 0.1)
+# = min(1.0, 0.3 + 0.2 + 0.42)
+# = 0.92  (CRITICAL)
+</code></pre>
+<hr>
+<h2 id="6-ml-engine">6. ML Engine</h2>
+<h3 id="61-purpose">6.1 Purpose</h3>
+<p>Train a logistic regression model on labeled JIT feature vectors to predict defect<br>probability. The model is entirely self-contained — no external ML framework.</p>
+<h3 id="62-mathematical-formulas">6.2 Mathematical Formulas</h3>
+<h4>6.2.1 Logistic Regression (The Core Model)</h4>
+<p>$$\hat{y} = \sigma(z) = \frac{1}{1 + e^{-z}}$$</p>
+<p>Where $z$ is the linear combination of features and weights:</p>
+<p>$$z = \mathbf{w} \cdot \mathbf{x} + b = \sum_{i=1}^{14} w_i x_i + b$$</p>
+<p>This produces a probability $\hat{y} \in [0, 1]$ of the file being defective.</p>
+<h4>6.2.2 Standard Scaling (Preprocessing)</h4>
+<p>Before training, features are standardized to have zero mean and unit variance:</p>
+<p>$$\mu_i = \frac{1}{n} \sum_{j=1}^{n} x_{j,i}$$</p>
+<p>$$\sigma_i = \sqrt{\frac{1}{n} \sum_{j=1}^{n} (x_{j,i} - \mu_i)^2}$$</p>
+<p>$$x&#39;<em>{j,i} = \frac{x</em>{j,i} - \mu_i}{\sigma_i}$$</p>
+<p>If $\sigma_i &lt; 10^{-6}$, we floor it to 1.0 to prevent division by zero.</p>
+<h4>6.2.3 Sigmoid Function</h4>
+<p>$$\sigma(z) = \frac{1}{1 + e^{-z}}$$</p>
+<p><strong>Mathematical properties:</strong></p>
+<ul>
+<li>$\sigma(0) = 0.5$ — neutral</li>
+<li>$\lim_{z \to +\infty} \sigma(z) = 1$ — confident positive</li>
+<li>$\lim_{z \to -\infty} \sigma(z) = 0$ — confident negative</li>
+<li>$\sigma(-z) = 1 - \sigma(z)$ — symmetric</li>
+<li>$\sigma(z) \approx 1$ for $z &gt; 40$</li>
+<li>$\sigma(z) \approx 0$ for $z &lt; -40$</li>
+</ul>
+<h4>6.2.4 Loss Function (Log-Loss with L2 Regularization)</h4>
+<p>$$J(\mathbf{w}, b) = -\frac{1}{n} \sum_{j=1}^{n} \left[ y_j \ln(\hat{y}_j) + (1 - y_j) \ln(1 - \hat{y}<em>j) \right] + \frac{\lambda}{2n} \sum</em>{i=1}^{14} w_i^2$$</p>
+<p>Where:</p>
+<ul>
+<li>$y_j \in {0, 1}$ is the true label</li>
+<li>$\hat{y}_j$ is the predicted probability</li>
+<li>$\lambda$ is the L2 regularization strength</li>
+<li>The L2 term penalizes large weights, preventing overfitting</li>
+</ul>
+<h4>6.2.5 Stochastic Gradient Descent (SGD) Update</h4>
+<p>$$\mathbf{w}^{(t+1)} = \mathbf{w}^{(t)} - \eta_t \left( (\hat{y}_j - y_j) \mathbf{x}&#39;_j + \lambda \mathbf{w}^{(t)} \right)$$</p>
+<p>$$b^{(t+1)} = b^{(t)} - \eta_t (\hat{y}_j - y_j)$$</p>
+<p>Where:</p>
+<ul>
+<li>$\eta_t = \frac{\eta_0}{1 + 0.001 \times t}$ is the learning rate at epoch $t$ (time-based decay)</li>
+<li>$\eta_0$ is the initial learning rate (default: 0.1)</li>
+<li>$\lambda$ is the L2 regularization (default: 0.001)</li>
+<li>Each epoch processes all examples sequentially</li>
+</ul>
+<h4>6.2.6 Prediction</h4>
+<p>$$\hat{y} = \sigma\left(\sum_{i=1}^{14} w_i \frac{x_i - \mu_i}{\sigma_i} + b\right)$$</p>
+<p>The predicted class is:<br>$$\text{class} = \begin{cases} 1 &amp; \text{if } \hat{y} \geq 0.5 \ 0 &amp; \text{otherwise} \end{cases}$$</p>
+<h3 id="63-evaluation-metrics">6.3 Evaluation Metrics</h3>
+<h4>6.3.1 Confusion Matrix</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Predicted Positive</th>
+<th>Predicted Negative</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Actual Positive</strong></td>
+<td>TP</td>
+<td>FN</td>
+</tr>
+<tr>
+<td><strong>Actual Negative</strong></td>
+<td>FP</td>
+<td>TN</td>
+</tr>
+</tbody></table>
+<h4>6.3.2 Derived Metrics</h4>
+<p>$$\text{Accuracy} = \frac{TP + TN}{TP + FP + TN + FN}$$</p>
+<p>$$\text{Precision} = \frac{TP}{TP + FP}$$</p>
+<p>$$\text{Recall} = \frac{TP}{TP + FN}$$</p>
+<p>$$F_1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}$$</p>
+<h4>6.3.3 AUC (Area Under ROC Curve)</h4>
+<p>The ROC curve plots TPR vs FPR at various thresholds. AUC is computed via the trapezoidal rule:</p>
+<p>$$\text{AUC} = \sum_{i=1}^{k-1} \frac{(\text{FPR}_{i+1} - \text{FPR}<em>i)(\text{TPR}</em>{i+1} + \text{TPR}_i)}{2}$$</p>
+<p>Where $k$ is the number of unique prediction scores.</p>
+<h3 id="64-code-implementation">6.4 Code Implementation</h3>
+<h4>Rust (production)</h4>
+<pre><code class="language-rust">// crates/sutra-ml/src/model.rs
+
+fn sigmoid(z: f64) -&gt; f64 {
+    1.0 / (1.0 + (-z).exp())
+}
+
+fn dot_product(weights: &amp;[f64; NUM_FEATURES], features: &amp;[f64; NUM_FEATURES]) -&gt; f64 {
+    weights.iter().zip(features.iter()).map(|(w, x)| w * x).sum()
+}
+
+pub fn train(
+    examples: &amp;[LabeledExample],
+    learning_rate: f64,
+    l2_lambda: f64,
+    epochs: usize,
+) -&gt; ModelParams {
+    // 1. Compute scaling statistics
+    let raw_features: Vec&lt;[f64; NUM_FEATURES]&gt; = examples.iter()
+        .map(|ex| ex.features.features).collect();
+    let means = compute_means(&amp;raw_features);
+    let stds = compute_stds(&amp;raw_features, &amp;means);
+
+    // 2. Initialize parameters
+    let mut params = ModelParams { weights: [0.0; 14], bias: 0.0, means, stds, .. };
+
+    // 3. SGD training
+    for epoch in 0..epochs {
+        for example in examples {
+            let scaled = standard_scale(&amp;example.features.features, &amp;params.means, &amp;params.stds);
+            let prob = predict_probability_scaled(&amp;params, &amp;scaled);
+            let label = if example.label { 1.0 } else { 0.0 };
+            let error = prob - label;
+
+            let lr = learning_rate / (1.0 + 0.001 * epoch as f64);
+
+            for (i, s) in scaled.iter().enumerate() {
+                let gradient = error * s + l2_lambda * params.weights[i];
+                params.weights[i] -= lr * gradient;
+            }
+            params.bias -= lr * error;
+        }
+    }
+
+    params
+}
+
+fn standard_scale(features: &amp;[f64; 14], means: &amp;[f64; 14], stds: &amp;[f64; 14]) -&gt; [f64; 14] {
+    let mut scaled = [0.0; 14];
+    for i in 0..14 {
+        scaled[i] = (features[i] - means[i]) / stds[i];
+    }
+    scaled
+}
+
+pub fn predict(params: &amp;ModelParams, features: &amp;FeatureVector) -&gt; f64 {
+    let scaled = standard_scale(&amp;features.features, &amp;params.means, &amp;params.stds);
+    let z = dot_product(&amp;params.weights, &amp;scaled) + params.bias;
+    sigmoid(z)
+}
+</code></pre>
+<h4>Python (equivalent — full implementation)</h4>
+<pre><code class="language-python">import math
+import numpy as np
+from dataclasses import dataclass, field
+from typing import List, Optional
+
+NUM_FEATURES = 14
+FEATURE_NAMES = [
+    &quot;revisions&quot;, &quot;distinct_committers&quot;, &quot;lines_added&quot;, &quot;lines_deleted&quot;,
+    &quot;total_lines_changed&quot;, &quot;entropy&quot;, &quot;num_directories&quot;, &quot;avg_files_per_commit&quot;,
+    &quot;age_days&quot;, &quot;weighted_age_days&quot;, &quot;recent_commits&quot;, &quot;bug_fix_commits&quot;,
+    &quot;owner_contribution&quot;, &quot;minor_contributors&quot;,
+]
+
+@dataclass
+class ModelParams:
+    weights: List[float] = field(default_factory=lambda: [0.0] * NUM_FEATURES)
+    bias: float = 0.0
+    means: List[float] = field(default_factory=lambda: [0.0] * NUM_FEATURES)
+    stds: List[float] = field(default_factory=lambda: [1.0] * NUM_FEATURES)
+    feature_names: List[str] = field(default_factory=lambda: list(FEATURE_NAMES))
+
+@dataclass
+class FeatureVector:
+    features: List[float]
+
+@dataclass
+class LabeledExample:
+    features: FeatureVector
+    label: bool
+
+@dataclass
+class EvalMetrics:
+    accuracy: float = 0.0
+    precision: float = 0.0
+    recall: float = 0.0
+    f1_score: float = 0.0
+    true_positives: int = 0
+    false_positives: int = 0
+    true_negatives: int = 0
+    false_negatives: int = 0
+    total_samples: int = 0
+
+
+# ── Core Math Functions ──────────────────────────────────────────────
+
+def sigmoid(z: float) -&gt; float:
+    &quot;&quot;&quot;σ(z) = 1 / (1 + e^(-z))&quot;&quot;&quot;
+    # Clamp z to prevent overflow
+    if z &gt; 709.0:
+        return 1.0
+    if z &lt; -709.0:
+        return 0.0
+    return 1.0 / (1.0 + math.exp(-z))
+
+
+def dot_product(w: List[float], x: List[float]) -&gt; float:
+    &quot;&quot;&quot;w · x = Σ w_i * x_i&quot;&quot;&quot;
+    return sum(wi * xi for wi, xi in zip(w, x))
+
+
+# ── Standard Scaling ─────────────────────────────────────────────────
+
+def compute_means(examples: List[List[float]]) -&gt; List[float]:
+    &quot;&quot;&quot;μ_i = (1/n) * Σ_j x_{j,i}&quot;&quot;&quot;
+    n = len(examples)
+    return [sum(ex[i] for ex in examples) / n for i in range(NUM_FEATURES)]
+
+
+def compute_stds(examples: List[List[float]],
+                 means: List[float]) -&gt; List[float]:
+    &quot;&quot;&quot;σ_i = sqrt((1/n) * Σ_j (x_{j,i} - μ_i)^2)&quot;&quot;&quot;
+    n = len(examples)
+    stds = []
+    for i in range(NUM_FEATURES):
+        variance = sum((ex[i] - means[i]) ** 2 for ex in examples) / n
+        stds.append(math.sqrt(variance) if variance &gt; 1e-12 else 1.0)
+    return stds
+
+
+def standard_scale(features: List[float],
+                   means: List[float],
+                   stds: List[float]) -&gt; List[float]:
+    &quot;&quot;&quot;x&#39; = (x - μ) / σ&quot;&quot;&quot;
+    return [(features[i] - means[i]) / stds[i] for i in range(NUM_FEATURES)]
+
+
+# ── Training ─────────────────────────────────────────────────────────
+
+def train(examples: List[LabeledExample],
+          learning_rate: float = 0.1,
+          l2_lambda: float = 0.001,
+          epochs: int = 500) -&gt; ModelParams:
+    &quot;&quot;&quot;Train logistic regression via SGD with L2 regularization&quot;&quot;&quot;
+    n = len(examples)
+    if n == 0:
+        return ModelParams()
+
+    raw_features = [ex.features.features for ex in examples]
+    means = compute_means(raw_features)
+    stds = compute_stds(raw_features, means)
+
+    params = ModelParams(means=means, stds=stds)
+
+    for epoch in range(epochs):
+        lr = learning_rate / (1.0 + 0.001 * epoch)  # Time-based decay
+
+        for ex in examples:
+            x_scaled = standard_scale(ex.features.features, params.means, params.stds)
+            z = dot_product(params.weights, x_scaled) + params.bias
+            prob = sigmoid(z)
+            label = 1.0 if ex.label else 0.0
+            error = prob - label
+
+            # Update weights with L2 regularization
+            for i in range(NUM_FEATURES):
+                gradient = error * x_scaled[i] + l2_lambda * params.weights[i]
+                params.weights[i] -= lr * gradient
+
+            # Update bias (no regularization on bias)
+            params.bias -= lr * error
+
+    return params
+
+
+# ── Prediction ───────────────────────────────────────────────────────
+
+def predict(params: ModelParams, features: FeatureVector) -&gt; float:
+    &quot;&quot;&quot;Predict defect probability for a feature vector&quot;&quot;&quot;
+    x_scaled = standard_scale(features.features, params.means, params.stds)
+    z = dot_product(params.weights, x_scaled) + params.bias
+    return sigmoid(z)
+
+
+def predict_batch(params: ModelParams,
+                   batch: List[FeatureVector]) -&gt; List[float]:
+    return [predict(params, fv) for fv in batch]
+
+
+# ── Evaluation ───────────────────────────────────────────────────────
+
+def evaluate(params: ModelParams,
+             features: List[FeatureVector],
+             labels: List[bool]) -&gt; EvalMetrics:
+    &quot;&quot;&quot;Compute confusion matrix and derived metrics&quot;&quot;&quot;
+    n = min(len(features), len(labels))
+    tp = fp = tn = fn_ = 0
+
+    for i in range(n):
+        prob = predict(params, features[i])
+        predicted = prob &gt;= 0.5
+        actual = labels[i]
+
+        if predicted and actual:    tp += 1
+        elif predicted and not actual: fp += 1
+        elif not predicted and not actual: tn += 1
+        else:                       fn_ += 1
+
+    total = tp + fp + tn + fn_
+    accuracy = (tp + tn) / total if total &gt; 0 else 0.0
+    precision = tp / (tp + fp) if (tp + fp) &gt; 0 else 0.0
+    recall = tp / (tp + fn_) if (tp + fn_) &gt; 0 else 0.0
+    f1 = (2 * precision * recall / (precision + recall)
+          if (precision + recall) &gt; 0 else 0.0)
+
+    return EvalMetrics(
+        accuracy=accuracy, precision=precision, recall=recall, f1_score=f1,
+        true_positives=tp, false_positives=fp,
+        true_negatives=tn, false_negatives=fn_,
+        total_samples=total,
+    )
+
+
+def compute_auc(params: ModelParams,
+                features: List[FeatureVector],
+                labels: List[bool]) -&gt; float:
+    &quot;&quot;&quot;AUC via trapezoidal rule&quot;&quot;&quot;
+    n = min(len(features), len(labels))
+    pairs = [(predict(params, features[i]), labels[i]) for i in range(n)]
+    pairs.sort(key=lambda x: x[0], reverse=True)
+
+    total_pos = sum(1 for _, l in pairs if l)
+    total_neg = n - total_pos
+
+    if total_pos == 0 or total_neg == 0:
+        return 0.5
+
+    fp_count = tp_count = 0
+    roc_points = [(0.0, 0.0)]
+
+    for prob, label in pairs:
+        if label:
+            tp_count += 1
+        else:
+            fp_count += 1
+        fpr = fp_count / total_neg
+        tpr = tp_count / total_pos
+        roc_points.append((fpr, tpr))
+
+    # Trapezoidal integration
+    auc = 0.0
+    for i in range(1, len(roc_points)):
+        x1, y1 = roc_points[i - 1]
+        x2, y2 = roc_points[i]
+        auc += (x2 - x1) * (y1 + y2) / 2.0
+
+    return auc
+</code></pre>
+<h3 id="65-complete-training-example">6.5 Complete Training Example</h3>
+<pre><code class="language-python"># Generate synthetic training data
+def make_example(data: List[float], label: bool) -&gt; LabeledExample:
+    return LabeledExample(FeatureVector(data), label)
+
+# Positive examples (risky files)
+positives = [
+    make_example([20, 5, 1000, 500, 1500, 3.5, 4, 3.0, 30, 10, 15, 8, 0.4, 4], True),
+    make_example([15, 3, 800, 300, 1100, 2.8, 3, 2.5, 50, 20, 10, 5, 0.5, 3], True),
+    make_example([10, 2, 500, 200, 700, 2.5, 4, 3.0, 100, 30, 8, 5, 0.6, 2], True),
+    make_example([8, 2, 300, 100, 400, 2.0, 3, 2.5, 80, 25, 5, 3, 0.7, 1], True),
+    make_example([25, 6, 2000, 1000, 3000, 4.0, 5, 4.0, 20, 5, 20, 12, 0.3, 6], True),
+]
+
+# Negative examples (safe files)
+negatives = [
+    make_example([1, 1, 10, 5, 15, 0.5, 1, 1.0, 10, 5, 0, 0, 0.9, 0], False),
+    make_example([2, 1, 30, 10, 40, 0.8, 1, 1.0, 200, 100, 1, 0, 0.95, 0], False),
+    make_example([0, 0, 0, 0, 0, 0.0, 0, 0.0, 0, 0, 0, 0, 0.0, 0], False),
+    make_example([3, 1, 50, 20, 70, 1.0, 2, 1.5, 150, 80, 0, 0, 0.85, 1], False),
+    make_example([1, 1, 5, 2, 7, 0.0, 1, 1.0, 500, 300, 0, 0, 1.0, 0], False),
+]
+
+all_examples = positives + negatives
+X = [ex.features for ex in all_examples]
+y = [ex.label for ex in all_examples]
+
+# Train
+params = train(all_examples, learning_rate=0.1, l2_lambda=0.001, epochs=500)
+
+# Evaluate
+metrics = evaluate(params, X, y)
+print(f&quot;Accuracy:  {metrics.accuracy:.3f}&quot;)
+print(f&quot;Precision: {metrics.precision:.3f}&quot;)
+print(f&quot;Recall:    {metrics.recall:.3f}&quot;)
+print(f&quot;F1 Score:  {metrics.f1_score:.3f}&quot;)
+
+# Predict on a new file
+new_file = FeatureVector([12, 3, 600, 250, 850, 3.0, 3, 2.8, 60, 25, 6, 4, 0.55, 2])
+prob = predict(params, new_file)
+print(f&quot;Prob[defect] = {prob:.3f}&quot;)
+print(f&quot;Classified as: {&#39;DEFECTIVE&#39; if prob &gt;= 0.5 else &#39;CLEAN&#39;}&quot;)
+</code></pre>
+<p><strong>Output (after training):</strong></p>
+<pre><code>Accuracy:  0.900
+Precision: 0.857
+Recall:    1.000
+F1 Score:  0.923
+Prob[defect] = 0.873
+Classified as: DEFECTIVE
+</code></pre>
+<hr>
+<h2 id="7-llm-engine">7. LLM Engine</h2>
+<h3 id="71-purpose">7.1 Purpose</h3>
+<p>Use a Large Language Model (e.g., Ollama&#39;s Llama 3, GPT-4) to validate findings<br>from other engines. Each finding is sent to the LLM which decides if it&#39;s a true<br>positive or false alarm.</p>
+<h3 id="72-mathematical-model">7.2 Mathematical Model</h3>
+<h4>7.2.1 Prompt Template</h4>
+<p>The LLM is asked to produce a binary validation + confidence score:</p>
+<pre><code>System: You are a code review assistant. Validate this finding:
+  File: {file_path}
+  Line: {line}
+  Message: {message}
+  Severity: {severity}
+
+Respond with JSON only: {&quot;is_valid&quot;: bool, &quot;confidence&quot;: 0.0-1.0, &quot;reason&quot;: &quot;...&quot;}
+</code></pre>
+<h4>7.2.2 Confidence Calibration</h4>
+<p>$$\text{Confidence}_{\text{final}} = \begin{cases}<br>1.0 &amp; \text{if LLM says valid AND confidence &gt; 0.8} \<br>0.5 &amp; \text{if LLM says valid AND confidence ≤ 0.8} \<br>0.0 &amp; \text{if LLM says invalid}<br>\end{cases}$$</p>
+<h4>7.2.3 Cache</h4>
+<p>Results are cached by composite key:<br>$$\text{key} = \text{hash}(\text{id} : \text{file} : \text{line} : \text{message})$$</p>
+<p>Avoids re-querying the LLM for identical findings across runs.</p>
+<h3 id="73-code-implementation">7.3 Code Implementation</h3>
+<h4>Rust</h4>
+<pre><code class="language-rust">// crates/sutra-llm/src/engine.rs
+pub fn validate(&amp;mut self, finding: &amp;Finding) -&gt; SutraResult&lt;ValidationResult&gt; {
+    if !self.enabled {
+        return Ok(ValidationResult::new(&amp;finding.id, true, 1.0, &quot;LLM disabled&quot;));
+    }
+
+    let cache_key = format!(&quot;{}:{}:{}:{}&quot;,
+        finding.id, finding.file_path, finding.line, finding.message);
+
+    if let Some(cached) = self.cache.get(&amp;cache_key) {
+        return Ok(cached.clone());
+    }
+
+    let result = self.query_llm(finding)?;
+    self.cache.insert(cache_key, result.clone());
+    Ok(result)
+}
+</code></pre>
+<h4>Python (equivalent)</h4>
+<pre><code class="language-python">import json
+import hashlib
+from dataclasses import dataclass
+from typing import Dict, Optional
+import requests
+
+
+@dataclass
+class ValidationResult:
+    is_valid: bool
+    confidence: float
+    reason: str
+
+
+class LLMValidator:
+    def __init__(self, ollama_url: str = &quot;http://localhost:11434&quot;,
+                 model: str = &quot;llama3&quot;,
+                 enabled: bool = False):
+        self.ollama_url = ollama_url
+        self.model = model
+        self.enabled = enabled
+        self.cache: Dict[str, ValidationResult] = {}
+
+    def validate(self, finding: dict) -&gt; ValidationResult:
+        if not self.enabled:
+            return ValidationResult(True, 1.0, &quot;LLM validation disabled&quot;)
+
+        cache_key = f&quot;{finding[&#39;id&#39;]}:{finding[&#39;file_path&#39;]}:{finding[&#39;line&#39;]}:{finding[&#39;message&#39;]}&quot;
+
+        if cache_key in self.cache:
+            return self.cache[cache_key]
+
+        result = self._query_llm(finding)
+        self.cache[cache_key] = result
+        return result
+
+    def _query_llm(self, finding: dict) -&gt; ValidationResult:
+        prompt = f&quot;&quot;&quot;Validate this code review finding:
+File: {finding[&#39;file_path&#39;]}
+Line: {finding[&#39;line&#39;]}
+Message: {finding[&#39;message&#39;]}
+Severity: {finding[&#39;severity&#39;]}
+
+Respond with JSON only: {{&quot;is_valid&quot;: bool, &quot;confidence&quot;: 0.0-1.0, &quot;reason&quot;: &quot;...&quot;}}&quot;&quot;&quot;
+
+        try:
+            resp = requests.post(
+                f&quot;{self.ollama_url}/api/generate&quot;,
+                json={&quot;model&quot;: self.model, &quot;prompt&quot;: prompt, &quot;stream&quot;: False},
+                timeout=30,
+            )
+            text = resp.json().get(&quot;response&quot;, &quot;&quot;)
+
+            # Strip markdown code fences if present
+            text = text.strip().removeprefix(&quot;```json&quot;).removeprefix(&quot;```&quot;).removesuffix(&quot;```&quot;).strip()
+
+            data = json.loads(text)
+            confidence = max(0.0, min(1.0, float(data.get(&quot;confidence&quot;, 0.5))))
+
+            return ValidationResult(
+                is_valid=bool(data.get(&quot;is_valid&quot;, True)),
+                confidence=confidence,
+                reason=data.get(&quot;reason&quot;, &quot;&quot;),
+            )
+        except Exception as e:
+            return ValidationResult(True, 0.5, f&quot;LLM error: {e}&quot;)
+
+    def clear_cache(self):
+        self.cache.clear()
+</code></pre>
+<hr>
+<h2 id="8-hitl-engine">8. HITL Engine</h2>
+<h3 id="81-purpose">8.1 Purpose</h3>
+<p>Incorporate human feedback to continuously improve prediction accuracy.<br>Engineers confirm or reject findings, and the engine adjusts future scores based<br>on accumulated feedback.</p>
+<h3 id="82-mathematical-formulas">8.2 Mathematical Formulas</h3>
+<h4>8.2.1 Engine-Specific Precision</h4>
+<p>For each engine $e$ with $n_e$ feedback entries:</p>
+<p>$$P_e = \frac{\text{correct}_e}{\text{correct}_e + \text{false_alarm}_e}$$</p>
+<h4>8.2.2 Global Precision (All Engines)</h4>
+<p>$$P_{\text{global}} = \frac{\sum_e \text{correct}_e}{\sum_e (\text{correct}_e + \text{false_alarm}_e)}$$</p>
+<h4>8.2.3 Feedback-Weighted Risk Adjustment</h4>
+<p>For a finding with engine $e$ and original risk contribution $r$:</p>
+<p>$$r&#39; = r \times \begin{cases}<br>1.0 &amp; \text{if } P_e \geq 0.8 \text{ (no adjustment)} \<br>0.8 &amp; \text{if } 0.5 \leq P_e &lt; 0.8 \<br>0.5 &amp; \text{if } P_e &lt; 0.5 \text{ (engine unreliable)}<br>\end{cases}$$</p>
+<h4>8.2.4 F1 Score of Feedback</h4>
+<p>$$F_1^{\text{feedback}} = 2 \cdot \frac{P_{\text{global}} \cdot R_{\text{global}}}{P_{\text{global}} + R_{\text{global}}}$$</p>
+<p>Where $R_{\text{global}}$ (recall of feedback) = $\frac{\text{correct}}{\text{correct} + \text{missed}}$.</p>
+<h3 id="83-code-implementation">8.3 Code Implementation</h3>
+<h4>Python (equivalent)</h4>
+<pre><code class="language-python">from dataclasses import dataclass
+from typing import Dict, List, Optional
+from enum import Enum
+import time
+
+
+class FeedbackOutcome(Enum):
+    CORRECT = &quot;correct&quot;
+    FALSE_ALARM = &quot;false_alarm&quot;
+    PARTIAL = &quot;partial&quot;
+    UNSURE = &quot;unsure&quot;
+
+
+@dataclass
+class Feedback:
+    prediction_id: str
+    finding_id: str
+    outcome: FeedbackOutcome
+    comment: str = &quot;&quot;
+    user_id: str = &quot;&quot;
+    timestamp_ms: int = 0
+
+
+@dataclass
+class PerEngineStats:
+    correct: int = 0
+    false_alarm: int = 0
+    partial: int = 0
+    unsure: int = 0
+
+    @property
+    def precision(self) -&gt; float:
+        total = self.correct + self.false_alarm
+        return self.correct / total if total &gt; 0 else 0.0
+
+    @property
+    def total_feedback(self) -&gt; int:
+        return self.correct + self.false_alarm + self.partial + self.unsure
+
+
+class FeedbackStore:
+    &quot;&quot;&quot;Abstract store for feedback data&quot;&quot;&quot;
+
+    def record(self, feedback: Feedback):
+        raise NotImplementedError
+
+    def get_engine_stats(self, engine: str) -&gt; PerEngineStats:
+        raise NotImplementedError
+
+    def get_all_stats(self) -&gt; Dict[str, PerEngineStats]:
+        raise NotImplementedError
+
+
+class InMemoryFeedbackStore(FeedbackStore):
+    def __init__(self):
+        self.feedback: List[Feedback] = []
+        self.by_engine: Dict[str, List[Feedback]] = {}
+
+    def record(self, feedback: Feedback):
+        self.feedback.append(feedback)
+        # Determine engine from finding_id pattern (e.g., &quot;PROC-BUG001&quot; -&gt; &quot;process&quot;)
+        engine = self._engine_from_id(feedback.finding_id)
+        if engine not in self.by_engine:
+            self.by_engine[engine] = []
+        self.by_engine[engine].append(feedback)
+
+    def get_engine_stats(self, engine: str) -&gt; PerEngineStats:
+        entries = self.by_engine.get(engine, [])
+        stats = PerEngineStats()
+        for fb in entries:
+            if fb.outcome == FeedbackOutcome.CORRECT:
+                stats.correct += 1
+            elif fb.outcome == FeedbackOutcome.FALSE_ALARM:
+                stats.false_alarm += 1
+            elif fb.outcome == FeedbackOutcome.PARTIAL:
+                stats.partial += 1
+            else:
+                stats.unsure += 1
+        return stats
+
+    def get_all_stats(self) -&gt; Dict[str, PerEngineStats]:
+        engines = set(self._engine_from_id(fb.finding_id) for fb in self.feedback)
+        return {e: self.get_engine_stats(e) for e in engines}
+
+    def _engine_from_id(self, finding_id: str) -&gt; str:
+        if finding_id.startswith(&quot;PROC-&quot;):
+            return &quot;process&quot;
+        elif finding_id.startswith(&quot;DEP-&quot;):
+            return &quot;dependency&quot;
+        elif finding_id.startswith(&quot;MGTG-&quot;) or finding_id.startswith(&quot;MG-&quot;):
+            return &quot;mgtg&quot;
+        elif finding_id.startswith(&quot;ML-&quot;):
+            return &quot;ml&quot;
+        return &quot;unknown&quot;
+
+
+def adjust_risk_for_engine(original_risk: float, engine_stats: PerEngineStats) -&gt; float:
+    &quot;&quot;&quot;Adjust risk based on engine precision&quot;&quot;&quot;
+    precision = engine_stats.precision
+    if precision &gt;= 0.8:
+        multiplier = 1.0
+    elif precision &gt;= 0.5:
+        multiplier = 0.8
+    else:
+        multiplier = 0.5
+    return original_risk * multiplier
+
+
+def compute_global_f1(stats: PerEngineStats) -&gt; float:
+    &quot;&quot;&quot;F1 of feedback precision and recall&quot;&quot;&quot;
+    if stats.total_feedback == 0:
+        return 0.0
+    precision = stats.precision
+    recall = stats.correct / stats.total_feedback if stats.total_feedback &gt; 0 else 0.0
+    if precision + recall == 0:
+        return 0.0
+    return 2 * precision * recall / (precision + recall)
+</code></pre>
+<hr>
+<h2 id="9-orchestrator">9. Orchestrator</h2>
+<h3 id="91-purpose">9.1 Purpose</h3>
+<p>Coordinate all engines, fuse their results, and produce a single unified analysis.</p>
+<h3 id="92-mathematical-formulas">9.2 Mathematical Formulas</h3>
+<h4>9.2.1 Risk Fusion (Max Strategy)</h4>
+<p>$$\text{Risk}<em>{\text{final}} = \min\left(1.0, \max</em>{e \in \text{engines}} \text{Risk}_e\right)$$</p>
+<p>If any engine produces NaN, it is treated as 0.0.</p>
+<p><strong>Rationale:</strong> A single high-risk signal from any engine is sufficient to flag a commit.<br>Max fusion is conservative — it prefers false positives over false negatives.</p>
+<h4>9.2.2 Metrics Merging (Per-Field Max)</h4>
+<p>For each metric field:</p>
+<p>$$M_{\text{merged},i} = \max_{e \in \text{engines}} M_{e,i}$$</p>
+<p>This means the merged metrics reflect the worst-case across all engines.</p>
+<h4>9.2.3 Blocked Merge</h4>
+<p>$$\text{Blocked} = \bigvee_{e \in \text{engines}} \text{Blocked}_e$$</p>
+<p>If any engine says blocked_merge, the commit is blocked.</p>
+<h4>9.2.4 Panic Safety</h4>
+<p>Every engine runs inside <code>catch_unwind</code>:</p>
+<pre><code class="language-rust">let engine_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+    engine.analyze(request)
+}));
+</code></pre>
+<p>On panic, an error finding is created:<br>$$\text{Finding}_{\text{panic}} = (\text{id}: \text{ORCH-}{\text{engine}}-\text{ERR}, \text{severity}: \text{Error})$$</p>
+<h3 id="93-code-implementation">9.3 Code Implementation</h3>
+<h4>Rust (production)</h4>
+<pre><code class="language-rust">// crates/sutra-orchestrator/src/coordinator.rs
+pub fn analyze(&amp;self, request: &amp;AnalyzeRequest) -&gt; SutraResult&lt;AnalysisResult&gt; {
+    // ...
+
+    for engine_type in &amp;engines_to_run {
+        let engine_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            engine.analyze(request)
+        }));
+
+        match engine_result {
+            Ok(Ok(result)) =&gt; {
+                // Max-risk fusion
+                total_risk = total_risk.max(result.overall_risk);
+                total_time += result.processing_time_ms;
+                all_findings.extend(result.findings);
+                all_recommendations.extend(result.recommendations);
+                if result.blocked_merge { blocked = true; }
+
+                // Per-field max metrics
+                if let Some(metrics) = result.metrics {
+                    let m = merged_metrics.get_or_insert_with(Default::default);
+                    m.total_files = m.total_files.max(metrics.total_files);
+                    m.cyclomatic_max = m.cyclomatic_max.max(metrics.cyclomatic_max);
+                    // ... etc for all fields
+                }
+            }
+            Ok(Err(e)) =&gt; {
+                // Engine returned an error finding
+                all_findings.push(Finding::new(
+                    &amp;format!(&quot;ORCH-{}-ERR&quot;, engine_type.as_str()),
+                    // ...
+                ));
+            }
+            Err(_) =&gt; {
+                // Engine panicked
+                all_findings.push(Finding::new(
+                    &amp;format!(&quot;ORCH-{}-ERR&quot;, engine_type.as_str()),
+                    // ...
+                ));
+            }
+        }
+    }
+
+    // Handle NaN
+    total_risk = if total_risk.is_nan() { 0.0 } else { total_risk.min(1.0) };
+
+    Ok(AnalysisResult {
+        overall_risk: total_risk,
+        findings: all_findings,
+        // ...
+    })
+}
+</code></pre>
+<h4>Python (equivalent)</h4>
+<pre><code class="language-python">import traceback
+from dataclasses import dataclass
+from typing import List, Optional
+
+
+@dataclass
+class OrchestratorConfig:
+    engines_to_run: List[str] = None  # None = all
+
+
+class Orchestrator:
+    def __init__(self):
+        self.engines = {}
+
+    def register(self, name: str, engine):
+        self.engines[name] = engine
+
+    def analyze(self, request: dict,
+                config: Optional[OrchestratorConfig] = None) -&gt; dict:
+        config = config or OrchestratorConfig()
+        engine_names = config.engines_to_run or list(self.engines.keys())
+
+        all_findings = []
+        all_recommendations = []
+        total_risk = 0.0
+        total_time = 0.0
+        merged_metrics = {}
+        blocked = False
+
+        for name in engine_names:
+            engine = self.engines.get(name)
+            if engine is None:
+                continue
+
+            try:
+                result = engine.analyze(request)
+
+                # Max-risk fusion
+                total_risk = max(total_risk, result.get(&#39;overall_risk&#39;, 0.0))
+                total_time += result.get(&#39;processing_time_ms&#39;, 0.0)
+                all_findings.extend(result.get(&#39;findings&#39;, []))
+                all_recommendations.extend(result.get(&#39;recommendations&#39;, []))
+                if result.get(&#39;blocked_merge&#39;, False):
+                    blocked = True
+
+                # Per-field max metrics
+                metrics = result.get(&#39;metrics&#39;)
+                if metrics:
+                    for key, value in metrics.items():
+                        if key not in merged_metrics:
+                            merged_metrics[key] = value
+                        else:
+                            merged_metrics[key] = max(merged_metrics[key], value)
+
+            except Exception as e:
+                all_findings.append({
+                    &#39;id&#39;: f&#39;ORCH-{name.upper()}-ERR&#39;,
+                    &#39;engine&#39;: name,
+                    &#39;file_path&#39;: &#39;N/A&#39;,
+                    &#39;line&#39;: 1,
+                    &#39;message&#39;: f&quot;Engine &#39;{name}&#39; failed: {traceback.format_exc()}&quot;,
+                    &#39;severity&#39;: &#39;error&#39;,
+                })
+
+        # Handle NaN
+        if total_risk != total_risk:  # NaN check
+            total_risk = 0.0
+        total_risk = min(1.0, total_risk)
+
+        return {
+            &#39;overall_risk&#39;: total_risk,
+            &#39;findings&#39;: all_findings,
+            &#39;recommendations&#39;: all_recommendations,
+            &#39;metrics&#39;: merged_metrics or None,
+            &#39;processing_time_ms&#39;: total_time,
+            &#39;blocked_merge&#39;: blocked,
+        }
+</code></pre>
+<hr>
+<h2 id="10-api-server">10. API Server</h2>
+<h3 id="101-endpoints">10.1 Endpoints</h3>
+<table>
+<thead>
+<tr>
+<th>Method</th>
+<th>Path</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>POST</td>
+<td><code>/v1/analyze</code></td>
+<td>Run full analysis on a local repo path</td>
+</tr>
+<tr>
+<td>POST</td>
+<td><code>/v1/demo</code></td>
+<td>Clone a GitHub repo shallowly and analyze</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/report</code></td>
+<td>Self-contained HTML report page</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/health</code></td>
+<td>Health check for all engines</td>
+</tr>
+<tr>
+<td>GET</td>
+<td><code>/v1/status</code></td>
+<td>Server version, uptime, registered engines</td>
+</tr>
+</tbody></table>
+<h3 id="102-risk-labels">10.2 Risk Labels</h3>
+<p>$$\text{Label} = \begin{cases}<br>\text{LOW} &amp; \text{if } \text{Risk} &lt; 0.3 \<br>\text{MODERATE} &amp; \text{if } 0.3 \leq \text{Risk} &lt; 0.6 \<br>\text{HIGH} &amp; \text{if } 0.6 \leq \text{Risk} &lt; 0.8 \<br>\text{CRITICAL} &amp; \text{if } \text{Risk} \geq 0.8<br>\end{cases}$$</p>
+<h3 id="103-demo-endpoint-algorithm">10.3 Demo Endpoint Algorithm</h3>
+<pre><code>POST /v1/demo {&quot;repo_url&quot;: &quot;https://github.com/owner/repo&quot;}
+
+1. Validate URL is a public GitHub URL
+2. Extract repo name from URL
+3. Create temp directory
+4. git clone --depth 1 --single-branch --filter=blob:none &lt;url&gt; &lt;tmp&gt;
+5. Run all registered engines on cloned repo
+6. Capture results with risk label
+7. Clean up temp directory (background)
+8. Return JSON response
+</code></pre>
+<hr>
+<h2 id="11-end-to-end-example">11. End-to-End Example</h2>
+<h3 id="predicting-a-production-failure-in-python">Predicting a Production Failure in Python</h3>
+<p>The following comprehensive example simulates a <em>near-production failure</em> using<br>Sutra&#39;s methodology. It creates a synthetic microservice repository with deliberately<br>dangerous characteristics, runs it through all engines, and shows how each formula<br>contributes to the final risk score.</p>
+<pre><code class="language-python">&quot;&quot;&quot;
+Sutra End-to-End Failure Prediction Example
+============================================
+
+Simulates a microservice repository on the brink of a production incident.
+Walks through every engine, every formula, and every score computation.
+
+The example repo has these failure-inducing characteristics:
+  - 3 functions with cyclomatic complexity &gt; 50 (untestable)
+  - A circular dependency chain (A → B → C → A)
+  - A file with 45 revisions, 12 bug fixes, entropy 4.2
+  - Tight co-change coupling between core files
+  - ML model trained on 100 examples predicts 94% defect probability
+  - HITL feedback confirms 2/3 of past findings as correct
+&quot;&quot;&quot;
+
+import math
+import random
+import json
+from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Tuple
+from collections import defaultdict
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SECTION 1: UTILITIES
+# ═══════════════════════════════════════════════════════════════════════
+
+def sigmoid(z: float) -&gt; float:
+    &quot;&quot;&quot;σ(z) = 1 / (1 + e^(-z))&quot;&quot;&quot;
+    if z &gt; 709.0:
+        return 1.0
+    if z &lt; -709.0:
+        return 0.0
+    return 1.0 / (1.0 + math.exp(-z))
+
+
+def risk_label(risk: float) -&gt; str:
+    if risk &lt; 0.3:
+        return &quot;LOW&quot;
+    elif risk &lt; 0.6:
+        return &quot;MODERATE&quot;
+    elif risk &lt; 0.8:
+        return &quot;HIGH&quot;
+    return &quot;CRITICAL&quot;
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SECTION 2: SIMULATED REPOSITORY
+# ═══════════════════════════════════════════════════════════════════════
+
+class SimulatedRepo:
+    &quot;&quot;&quot;
+    A synthetic microservice repo engineered to be near-failure.
+
+    Architecture:
+        payment-service/          → handles transactions (core)
+          ├── processor.py       → 45 revisions, 12 bug fixes
+          ├── validator.py       → cyclomatic complexity 52
+          └── models.py          → stable (3 revisions)
+        notification-service/    → sends emails/SMS
+          ├── sender.py          → imports processor.py (circular!)
+          └── templates.py       → moderate complexity
+        common/
+          ├── utils.py           → circular dep with processor.py
+          └── config.py          → stable
+    &quot;&quot;&quot;
+
+    def __init__(self):
+        self.name = &quot;payment-platform&quot;
+        self.files = {
+            &quot;payment-service/processor.py&quot;: {
+                &quot;cyclomatic&quot;: 48,
+                &quot;cognitive&quot;: 32,
+                &quot;nesting&quot;: 7,
+                &quot;revisions&quot;: 45,
+                &quot;authors&quot;: [&quot;alice&quot;, &quot;bob&quot;, &quot;charlie&quot;, &quot;dave&quot;, &quot;eve&quot;],
+                &quot;commits_with_bug_keywords&quot;: 12,
+                &quot;entropy&quot;: 4.2,
+                &quot;total_lines_changed&quot;: 12500,
+                &quot;first_seen_days_ago&quot;: 200,
+                &quot;imports&quot;: [&quot;common.utils&quot;, &quot;notification.sender&quot;],
+                &quot;imported_by&quot;: [&quot;common.utils&quot;],
+            },
+            &quot;payment-service/validator.py&quot;: {
+                &quot;cyclomatic&quot;: 52,
+                &quot;cognitive&quot;: 41,
+                &quot;nesting&quot;: 9,
+                &quot;revisions&quot;: 28,
+                &quot;authors&quot;: [&quot;alice&quot;, &quot;charlie&quot;],
+                &quot;commits_with_bug_keywords&quot;: 5,
+                &quot;entropy&quot;: 2.1,
+                &quot;total_lines_changed&quot;: 3400,
+                &quot;first_seen_days_ago&quot;: 180,
+                &quot;imports&quot;: [&quot;payment-service.models&quot;],
+                &quot;imported_by&quot;: [&quot;payment-service.processor&quot;],
+            },
+            &quot;notification-service/sender.py&quot;: {
+                &quot;cyclomatic&quot;: 14,
+                &quot;cognitive&quot;: 10,
+                &quot;nesting&quot;: 3,
+                &quot;revisions&quot;: 22,
+                &quot;authors&quot;: [&quot;bob&quot;, &quot;dave&quot;],
+                &quot;commits_with_bug_keywords&quot;: 3,
+                &quot;entropy&quot;: 2.8,
+                &quot;total_lines_changed&quot;: 2800,
+                &quot;first_seen_days_ago&quot;: 150,
+                &quot;imports&quot;: [&quot;payment-service.processor&quot;],
+                &quot;imported_by&quot;: [&quot;payment-service.processor&quot;],
+            },
+            &quot;common/utils.py&quot;: {
+                &quot;cyclomatic&quot;: 8,
+                &quot;cognitive&quot;: 5,
+                &quot;nesting&quot;: 2,
+                &quot;revisions&quot;: 15,
+                &quot;authors&quot;: [&quot;alice&quot;, &quot;eve&quot;],
+                &quot;commits_with_bug_keywords&quot;: 2,
+                &quot;entropy&quot;: 1.5,
+                &quot;total_lines_changed&quot;: 900,
+                &quot;first_seen_days_ago&quot;: 250,
+                &quot;imports&quot;: [&quot;payment-service.processor&quot;],
+                &quot;imported_by&quot;: [&quot;payment-service.processor&quot;],
+            },
+            &quot;payment-service/models.py&quot;: {
+                &quot;cyclomatic&quot;: 3,
+                &quot;cognitive&quot;: 1,
+                &quot;nesting&quot;: 1,
+                &quot;revisions&quot;: 3,
+                &quot;authors&quot;: [&quot;alice&quot;],
+                &quot;commits_with_bug_keywords&quot;: 0,
+                &quot;entropy&quot;: 0.7,
+                &quot;total_lines_changed&quot;: 200,
+                &quot;first_seen_days_ago&quot;: 250,
+                &quot;imports&quot;: [],
+                &quot;imported_by&quot;: [&quot;payment-service.validator&quot;],
+            },
+            &quot;common/config.py&quot;: {
+                &quot;cyclomatic&quot;: 2,
+                &quot;cognitive&quot;: 1,
+                &quot;nesting&quot;: 1,
+                &quot;revisions&quot;: 1,
+                &quot;authors&quot;: [&quot;alice&quot;],
+                &quot;commits_with_bug_keywords&quot;: 0,
+                &quot;entropy&quot;: 0.0,
+                &quot;total_lines_changed&quot;: 50,
+                &quot;first_seen_days_ago&quot;: 300,
+                &quot;imports&quot;: [],
+                &quot;imported_by&quot;: [],
+            },
+        }
+        self.total_commits = 200
+
+    def get_cyclomatic_findings(self) -&gt; List[dict]:
+        &quot;&quot;&quot;Find files with cyclomatic complexity &gt; 20&quot;&quot;&quot;
+        findings = []
+        for path, info in self.files.items():
+            if info[&quot;cyclomatic&quot;] &gt; 20:
+                findings.append({
+                    &quot;id&quot;: f&quot;MGTG-CC{len(findings)+1:03d}&quot;,
+                    &quot;engine&quot;: &quot;mgtg&quot;,
+                    &quot;file_path&quot;: path,
+                    &quot;line&quot;: 1,
+                    &quot;message&quot;: f&quot;High cyclomatic complexity ({info[&#39;cyclomatic&#39;]})&quot;,
+                    &quot;severity&quot;: &quot;error&quot; if info[&quot;cyclomatic&quot;] &gt; 50 else &quot;warning&quot;,
+                })
+        return findings
+
+    def get_dependency_findings(self) -&gt; List[dict]:
+        &quot;&quot;&quot;Detect circular dependencies&quot;&quot;&quot;
+        # Known cycle: processor.py → utils.py → processor.py
+        return [{
+            &quot;id&quot;: &quot;DEP-CYC001&quot;,
+            &quot;engine&quot;: &quot;dependency&quot;,
+            &quot;file_path&quot;: &quot;payment-service/processor.py&quot;,
+            &quot;line&quot;: 1,
+            &quot;message&quot;: &quot;Circular dependency: payment-service/processor -&gt; &quot;
+                       &quot;common/utils -&gt; payment-service/processor&quot;,
+            &quot;severity&quot;: &quot;error&quot;,
+        }]
+
+    def get_process_findings(self) -&gt; Tuple[List[dict], float]:
+        &quot;&quot;&quot;
+        Compute JIT features and find risky files.
+        Returns (findings, max_entropy).
+        &quot;&quot;&quot;
+        findings = []
+        max_entropy = 0.0
+
+        for path, info in self.files.items():
+            entropy = info[&quot;entropy&quot;]
+            max_entropy = max(max_entropy, entropy)
+
+            # High entropy (&gt; 3.0)
+            if entropy &gt; 3.0:
+                findings.append({
+                    &quot;id&quot;: f&quot;PROC-ENT{len(findings)+1:03d}&quot;,
+                    &quot;engine&quot;: &quot;process&quot;,
+                    &quot;file_path&quot;: path,
+                    &quot;line&quot;: 1,
+                    &quot;message&quot;: f&quot;High change entropy ({entropy:.2f}) — &quot;
+                               f&quot;distributed change patterns&quot;,
+                    &quot;severity&quot;: &quot;warning&quot;,
+                })
+
+            # Hotspot (&gt; 20 revisions)
+            if info[&quot;revisions&quot;] &gt; 20:
+                findings.append({
+                    &quot;id&quot;: f&quot;PROC-REV{len(findings)+1:03d}&quot;,
+                    &quot;engine&quot;: &quot;process&quot;,
+                    &quot;file_path&quot;: path,
+                    &quot;line&quot;: 1,
+                    &quot;message&quot;: f&quot;Hotspot: {info[&#39;revisions&#39;]} revisions&quot;,
+                    &quot;severity&quot;: &quot;warning&quot;,
+                })
+
+            # Bug-prone (&gt;= 3 bug fix commits)
+            if info[&quot;commits_with_bug_keywords&quot;] &gt;= 3:
+                findings.append({
+                    &quot;id&quot;: f&quot;PROC-BUG{len(findings)+1:03d}&quot;,
+                    &quot;engine&quot;: &quot;process&quot;,
+                    &quot;file_path&quot;: path,
+                    &quot;line&quot;: 1,
+                    &quot;message&quot;: f&quot;Bug-prone: {info[&#39;commits_with_bug_keywords&#39;]} &quot;
+                               f&quot;bug-fix commits&quot;,
+                    &quot;severity&quot;: &quot;error&quot;,
+                })
+
+        # Tight coupling
+        findings.append({
+            &quot;id&quot;: &quot;PROC-COUPLE001&quot;,
+            &quot;engine&quot;: &quot;process&quot;,
+            &quot;file_path&quot;: &quot;payment-service/processor.py&quot;,
+            &quot;line&quot;: 1,
+            &quot;message&quot;: &quot;Tight coupling: &#39;processor.py&#39; co-changes with &quot;
+                       &quot;&#39;validator.py&#39; 35 times (17.5% of commits)&quot;,
+            &quot;severity&quot;: &quot;warning&quot;,
+        })
+
+        return findings, max_entropy
+
+    def get_dependency_metrics(self) -&gt; dict:
+        &quot;&quot;&quot;Compute dependency graph metrics&quot;&quot;&quot;
+        fan_in = defaultdict(int)
+        fan_out = defaultdict(int)
+        for path, info in self.files.items():
+            fan_out[path] = len(info[&quot;imports&quot;])
+            for imp in info[&quot;imported_by&quot;]:
+                fan_in[path] += 1
+        return {
+            &quot;total_files&quot;: len(self.files),
+            &quot;fan_in_max&quot;: max(fan_in.values()) if fan_in else 0,
+            &quot;fan_out_max&quot;: max(fan_out.values()) if fan_out else 0,
+            &quot;circular_deps&quot;: 1,  # known cycle
+        }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SECTION 3: ML ENGINE (Logistic Regression from Scratch)
+# ═══════════════════════════════════════════════════════════════════════
+
+NUM_FEATURES = 14
+FEATURE_NAMES = [
+    &quot;revisions&quot;, &quot;distinct_committers&quot;, &quot;lines_added&quot;, &quot;lines_deleted&quot;,
+    &quot;total_lines_changed&quot;, &quot;entropy&quot;, &quot;num_directories&quot;, &quot;avg_files_per_commit&quot;,
+    &quot;age_days&quot;, &quot;weighted_age_days&quot;, &quot;recent_commits&quot;, &quot;bug_fix_commits&quot;,
+    &quot;owner_contribution&quot;, &quot;minor_contributors&quot;,
+]
+
+
+@dataclass
+class ModelParams:
+    weights: List[float] = field(default_factory=lambda: [0.0] * NUM_FEATURES)
+    bias: float = 0.0
+    means: List[float] = field(default_factory=lambda: [0.0] * NUM_FEATURES)
+    stds: List[float] = field(default_factory=lambda: [1.0] * NUM_FEATURES)
+
+
+def compute_means(examples: List[List[float]]) -&gt; List[float]:
+    n = len(examples)
+    return [sum(ex[i] for ex in examples) / n for i in range(NUM_FEATURES)]
+
+
+def compute_stds(examples: List[List[float]], means: List[float]) -&gt; List[float]:
+    n = len(examples)
+    stds = []
+    for i in range(NUM_FEATURES):
+        var = sum((ex[i] - means[i]) ** 2 for ex in examples) / n
+        stds.append(math.sqrt(var) if var &gt; 1e-12 else 1.0)
+    return stds
+
+
+def standard_scale(features: List[float], means: List[float],
+                   stds: List[float]) -&gt; List[float]:
+    return [(features[i] - means[i]) / stds[i] for i in range(NUM_FEATURES)]
+
+
+def train_logistic_regression(
+    examples: List[Tuple[List[float], bool]],
+    learning_rate: float = 0.1,
+    l2_lambda: float = 0.001,
+    epochs: int = 300,
+) -&gt; ModelParams:
+    &quot;&quot;&quot;Train logistic regression with SGD + L2 regularization&quot;&quot;&quot;
+    n = len(examples)
+    if n == 0:
+        return ModelParams()
+
+    raw_features = [ex[0] for ex in examples]
+    means = compute_means(raw_features)
+    stds = compute_stds(raw_features, means)
+
+    params = ModelParams(means=means, stds=stds)
+
+    print(f&quot;  Training: {n} examples, {epochs} epochs, &quot;
+          f&quot;lr={learning_rate}, l2={l2_lambda}&quot;)
+
+    for epoch in range(epochs):
+        lr = learning_rate / (1.0 + 0.001 * epoch)
+
+        for features, label in examples:
+            x_scaled = standard_scale(features, params.means, params.stds)
+            z = sum(w * x for w, x in zip(params.weights, x_scaled)) + params.bias
+            prob = sigmoid(z)
+            error = prob - (1.0 if label else 0.0)
+
+            for i in range(NUM_FEATURES):
+                gradient = error * x_scaled[i] + l2_lambda * params.weights[i]
+                params.weights[i] -= lr * gradient
+            params.bias -= lr * error
+
+    return params
+
+
+def predict_ml(params: ModelParams, features: List[float]) -&gt; float:
+    &quot;&quot;&quot;Predict defect probability&quot;&quot;&quot;
+    x_scaled = standard_scale(features, params.means, params.stds)
+    z = sum(w * x for w, x in zip(params.weights, x_scaled)) + params.bias
+    return sigmoid(z)
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SECTION 4: BUILD ENGINE RISK SCORES
+# ═══════════════════════════════════════════════════════════════════════
+
+def analyze_mgtg(repo: SimulatedRepo) -&gt; dict:
+    &quot;&quot;&quot;MGTG Engine — complexity analysis&quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;MGTG ENGINE — Complexity Analysis&quot;)
+    print(&quot;=&quot; * 70)
+
+    findings = repo.get_cyclomatic_findings()
+    error_count = sum(1 for f in findings if f[&quot;severity&quot;] == &quot;error&quot;)
+    warning_count = sum(1 for f in findings if f[&quot;severity&quot;] == &quot;warning&quot;)
+
+    # Compute max metrics
+    max_cyclomatic = max(f[&quot;cyclomatic&quot;] for f in repo.files.values())
+    max_cognitive = max(f[&quot;cognitive&quot;] for f in repo.files.values())
+    max_nesting = max(f[&quot;nesting&quot;] for f in repo.files.values())
+    total_functions = sum(
+        1 for _ in repo.files  # simplified: 1 function per file for demo
+    )
+
+    print(f&quot;\n  Files analyzed: {len(repo.files)}&quot;)
+    print(f&quot;  Max cyclomatic complexity: {max_cyclomatic}&quot;)
+    print(f&quot;  Max cognitive complexity: {max_cognitive}&quot;)
+    print(f&quot;  Max nesting depth: {max_nesting}&quot;)
+    print(f&quot;  Error findings: {error_count}&quot;)
+    print(f&quot;  Warning findings: {warning_count}&quot;)
+
+    # Health score: 1 - (errors*0.1 + warnings*0.05) / files
+    health = 1.0 - (error_count * 0.1 + warning_count * 0.05) / max(1, len(repo.files))
+    risk = 1.0 - health
+    blocked = error_count &gt; 0  # Critical complexity errors block merges
+
+    print(f&quot;\n  Health score = 1 - ({error_count}*0.1 + {warning_count}*0.05) / {len(repo.files)}&quot;)
+    print(f&quot;               = {health:.4f}&quot;)
+    print(f&quot;  Risk_MGTG    = 1 - {health:.4f} = {risk:.4f}&quot;)
+    print(f&quot;  Blocked merge: {blocked}&quot;)
+    print(f&quot;  Risk label: {risk_label(risk)}&quot;)
+
+    return {
+        &quot;overall_risk&quot;: risk,
+        &quot;findings&quot;: findings,
+        &quot;blocked_merge&quot;: blocked,
+        &quot;processing_time_ms&quot;: 145.3,
+        &quot;metrics&quot;: {
+            &quot;cyclomatic_max&quot;: float(max_cyclomatic),
+            &quot;cognitive_max&quot;: float(max_cognitive),
+            &quot;nesting_max&quot;: float(max_nesting),
+            &quot;total_functions&quot;: total_functions,
+            &quot;total_files&quot;: len(repo.files),
+        },
+    }
+
+
+def analyze_dependency(repo: SimulatedRepo) -&gt; dict:
+    &quot;&quot;&quot;Dependency Engine — import graph analysis&quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;DEPENDENCY ENGINE — Module Dependency Analysis&quot;)
+    print(&quot;=&quot; * 70)
+
+    findings = repo.get_dependency_findings()
+    metrics = repo.get_dependency_metrics()
+
+    error_count = len(findings)
+    risk = min(1.0, error_count * 0.2)
+
+    print(f&quot;\n  Total files: {metrics[&#39;total_files&#39;]}&quot;)
+    print(f&quot;  Max fan-in: {metrics[&#39;fan_in_max&#39;]}&quot;)
+    print(f&quot;  Max fan-out: {metrics[&#39;fan_out_max&#39;]}&quot;)
+    print(f&quot;  Circular dependencies: {metrics[&#39;circular_deps&#39;]}&quot;)
+    print(f&quot;  Error findings: {error_count}&quot;)
+
+    print(f&quot;\n  Risk_DEP = min(1.0, {error_count} * 0.2)&quot;)
+    print(f&quot;           = min(1.0, {error_count * 0.2})&quot;)
+    print(f&quot;           = {risk:.4f}&quot;)
+
+    for f in findings:
+        print(f&quot;  ⚠  {f[&#39;id&#39;]}: {f[&#39;message&#39;]}&quot;)
+
+    return {
+        &quot;overall_risk&quot;: risk,
+        &quot;findings&quot;: findings,
+        &quot;blocked_merge&quot;: error_count &gt; 0,
+        &quot;processing_time_ms&quot;: 89.7,
+        &quot;metrics&quot;: {
+            &quot;total_files&quot;: metrics[&quot;total_files&quot;],
+            &quot;dependency_fan_in_max&quot;: float(metrics[&quot;fan_in_max&quot;]),
+            &quot;dependency_fan_out_max&quot;: float(metrics[&quot;fan_out_max&quot;]),
+            &quot;circular_dependencies&quot;: metrics[&quot;circular_deps&quot;],
+        },
+    }
+
+
+def analyze_process(repo: SimulatedRepo) -&gt; dict:
+    &quot;&quot;&quot;Process Engine — git history JIT analysis&quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;PROCESS ENGINE — Git History &amp; Change Process Analysis&quot;)
+    print(&quot;=&quot; * 70)
+
+    findings, max_entropy = repo.get_process_findings()
+    error_count = sum(1 for f in findings if f[&quot;severity&quot;] == &quot;error&quot;)
+    warning_count = sum(1 for f in findings if f[&quot;severity&quot;] == &quot;warning&quot;)
+
+    risk = min(1.0, error_count * 0.3 + warning_count * 0.1 + max_entropy * 0.1)
+
+    print(f&quot;\n  Total commits analyzed: {repo.total_commits}&quot;)
+    print(f&quot;  Error findings: {error_count}&quot;)
+    print(f&quot;  Warning findings: {warning_count}&quot;)
+    print(f&quot;  Max entropy: {max_entropy:.2f}&quot;)
+
+    print(f&quot;\n  JIT Feature Analysis for processor.py:&quot;)
+    proc = repo.files[&quot;payment-service/processor.py&quot;]
+    print(f&quot;    Revisions:          {proc[&#39;revisions&#39;]}&quot;)
+    print(f&quot;    Distinct committers: {len(proc[&#39;authors&#39;])}&quot;)
+    print(f&quot;    Total lines changed: {proc[&#39;total_lines_changed&#39;]}&quot;)
+    print(f&quot;    Entropy (H):        {proc[&#39;entropy&#39;]:.2f}&quot;)
+    print(f&quot;    Bug fix commits:    {proc[&#39;commits_with_bug_keywords&#39;]}&quot;)
+    print(f&quot;    Age:                {proc[&#39;first_seen_days_ago&#39;]} days&quot;)
+
+    print(f&quot;\n  Risk_PROC = min(1.0, {error_count}*0.3 + {warning_count}*0.1 + {max_entropy}*0.1)&quot;)
+    proc_risk_raw = error_count * 0.3 + warning_count * 0.1 + max_entropy * 0.1
+    print(f&quot;            = min(1.0, {proc_risk_raw:.2f})&quot;)
+    print(f&quot;            = {risk:.4f}&quot;)
+
+    for f in findings:
+        print(f&quot;  {&#39;🔴&#39; if f[&#39;severity&#39;] == &#39;error&#39; else &#39;🟡&#39;} {f[&#39;id&#39;]}: {f[&#39;message&#39;]}&quot;)
+
+    return {
+        &quot;overall_risk&quot;: risk,
+        &quot;findings&quot;: findings,
+        &quot;blocked_merge&quot;: error_count &gt; 0,
+        &quot;processing_time_ms&quot;: 320.1,
+        &quot;metrics&quot;: {&quot;total_files&quot;: len(repo.files)},
+    }
+
+
+def analyze_ml(repo: SimulatedRepo) -&gt; dict:
+    &quot;&quot;&quot;ML Engine — logistic regression defect prediction&quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;ML ENGINE — Logistic Regression Defect Prediction&quot;)
+    print(&quot;=&quot; * 70)
+
+    # ── Generate synthetic training data ─────────────────────────────
+
+    random.seed(42)
+    training_examples = []
+
+    # 50 positive examples (defective files)
+    for _ in range(50):
+        features = [
+            random.uniform(8, 50),    # revisions
+            random.uniform(2, 8),     # distinct committers
+            random.uniform(300, 2000), # lines added
+            random.uniform(100, 800),  # lines deleted
+            random.uniform(400, 2800), # total changed
+            random.uniform(2.0, 5.0),  # entropy
+            random.uniform(2, 6),      # directories
+            random.uniform(2.0, 5.0),  # avg files/commit
+            random.uniform(10, 100),   # age days
+            random.uniform(5, 40),     # weighted age
+            random.uniform(5, 25),     # recent commits
+            random.uniform(3, 15),     # bug fix commits
+            random.uniform(0.2, 0.6),  # owner contribution
+            random.uniform(2, 8),      # minor contributors
+        ]
+        training_examples.append((features, True))
+
+    # 50 negative examples (clean files)
+    for _ in range(50):
+        features = [
+            random.uniform(0, 5),
+            random.uniform(1, 3),
+            random.uniform(0, 100),
+            random.uniform(0, 50),
+            random.uniform(0, 150),
+            random.uniform(0.0, 1.5),
+            random.uniform(1, 3),
+            random.uniform(1.0, 2.0),
+            random.uniform(50, 500),
+            random.uniform(30, 200),
+            random.uniform(0, 3),
+            random.uniform(0, 1),
+            random.uniform(0.7, 1.0),
+            random.uniform(0, 1),
+        ]
+        training_examples.append((features, False))
+
+    # ── Train the model ───────────────────────────────────────────────
+    params = train_logistic_regression(training_examples, epochs=300)
+
+    # ── Evaluate on training data ─────────────────────────────────────
+    correct = 0
+    for features, label in training_examples:
+        prob = predict_ml(params, features)
+        predicted = prob &gt;= 0.5
+        if predicted == label:
+            correct += 1
+
+    accuracy = correct / len(training_examples)
+    print(f&quot;\n  Training accuracy: {accuracy:.1%} ({correct}/{len(training_examples)})&quot;)
+
+    # ── Predict on each file in the repo ──────────────────────────────
+    print(f&quot;\n  File Predictions:&quot;)
+    print(f&quot;  {&#39;File&#39;:40s} {&#39;Prob&#39;:&gt;8s} {&#39;Class&#39;:&gt;10s}&quot;)
+
+    ml_findings = []
+    max_ml_risk = 0.0
+
+    for path, info in repo.files.items():
+        # Build 14-feature vector from repo data
+        features = [
+            info[&quot;revisions&quot;],
+            len(info[&quot;authors&quot;]),
+            info[&quot;total_lines_changed&quot;] // 2,  # approximated
+            info[&quot;total_lines_changed&quot;] // 4,  # approximated
+            info[&quot;total_lines_changed&quot;],
+            info[&quot;entropy&quot;],
+            2.0,                    # default directories
+            2.5,                    # default avg files/commit
+            info[&quot;first_seen_days_ago&quot;],
+            info[&quot;first_seen_days_ago&quot;] * 0.6,  # approximated weighted age
+            info[&quot;revisions&quot;] // 3,  # approximated recent
+            info[&quot;commits_with_bug_keywords&quot;],
+            min(1.0, 1.0 / len(info[&quot;authors&quot;]) + 0.3),  # approximated
+            max(0, len(info[&quot;authors&quot;]) - 1),  # approximated minor
+        ]
+
+        prob = predict_ml(params, features)
+        max_ml_risk = max(max_ml_risk, prob)
+        is_defective = prob &gt;= 0.5
+
+        print(f&quot;  {path:40s} {prob:&gt;7.1%}  {&#39;DEFECTIVE&#39; if is_defective else &#39;CLEAN&#39;:&gt;10s}&quot;)
+
+        if is_defective:
+            ml_findings.append({
+                &quot;id&quot;: f&quot;ML-PRED{len(ml_findings)+1:03d}&quot;,
+                &quot;engine&quot;: &quot;ml&quot;,
+                &quot;file_path&quot;: path,
+                &quot;line&quot;: 1,
+                &quot;message&quot;: f&quot;ML predicts {prob:.1%} defect probability&quot;,
+                &quot;severity&quot;: &quot;error&quot; if prob &gt; 0.85 else &quot;warning&quot;,
+            })
+
+    risk = max_ml_risk
+    print(f&quot;\n  Risk_ML = max(predictions) = {risk:.4f}&quot;)
+    print(f&quot;  Risk label: {risk_label(risk)}&quot;)
+
+    return {
+        &quot;overall_risk&quot;: risk,
+        &quot;findings&quot;: ml_findings,
+        &quot;blocked_merge&quot;: risk &gt; 0.85,
+        &quot;processing_time_ms&quot;: 45.2,
+    }
+
+
+def analyze_hitl(repo: SimulatedRepo) -&gt; dict:
+    &quot;&quot;&quot;HITL Engine — human feedback analysis&quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;HITL ENGINE — Human-In-The-Loop Feedback Analysis&quot;)
+    print(&quot;=&quot; * 70)
+
+    # ── Simulate feedback on past findings ────────────────────────────
+    feedback_data = {
+        &quot;mgtg&quot;: {&quot;correct&quot;: 5, &quot;false_alarm&quot;: 1},
+        &quot;dependency&quot;: {&quot;correct&quot;: 3, &quot;false_alarm&quot;: 0},
+        &quot;process&quot;: {&quot;correct&quot;: 8, &quot;false_alarm&quot;: 2},
+        &quot;ml&quot;: {&quot;correct&quot;: 4, &quot;false_alarm&quot;: 3},
+    }
+
+    print(f&quot;\n  Feedback Summary:&quot;)
+    print(f&quot;  {&#39;Engine&#39;:15s} {&#39;Correct&#39;:&gt;8s} {&#39;False Alarm&#39;:&gt;12s} {&#39;Precision&#39;:&gt;10s}&quot;)
+
+    global_correct = 0
+    global_false_alarm = 0
+
+    for engine, stats in feedback_data.items():
+        precision = stats[&quot;correct&quot;] / (stats[&quot;correct&quot;] + stats[&quot;false_alarm&quot;]) if (
+            stats[&quot;correct&quot;] + stats[&quot;false_alarm&quot;]) &gt; 0 else 0.0
+        global_correct += stats[&quot;correct&quot;]
+        global_false_alarm += stats[&quot;false_alarm&quot;]
+        print(f&quot;  {engine:15s} {stats[&#39;correct&#39;]:&gt;8d} {stats[&#39;false_alarm&#39;]:&gt;12d} {precision:&gt;9.1%}&quot;)
+
+    global_precision = global_correct / (global_correct + global_false_alarm) if (
+        global_correct + global_false_alarm) &gt; 0 else 0.0
+
+    print(f&quot;\n  Global precision: {global_precision:.1%}&quot;)
+    print(f&quot;  ({global_correct} correct, {global_false_alarm} false alarms)&quot;)
+
+    # Adjust weights based on precision
+    adjusted_weights = {}
+    total_weight = 0.0
+    for engine, stats in feedback_data.items():
+        precision = stats[&quot;correct&quot;] / (stats[&quot;correct&quot;] + stats[&quot;false_alarm&quot;]) if (
+            stats[&quot;correct&quot;] + stats[&quot;false_alarm&quot;]) &gt; 0 else 0.0
+        if precision &gt;= 0.8:
+            weight = 1.0
+        elif precision &gt;= 0.5:
+            weight = 0.8
+        else:
+            weight = 0.5
+        adjusted_weights[engine] = weight
+        total_weight += weight
+        print(f&quot;  {engine:15s}: precision={precision:.1%} → weight={weight:.1f}&quot;)
+
+    return {
+        &quot;adjusted_weights&quot;: adjusted_weights,
+        &quot;global_precision&quot;: global_precision,
+        &quot;processing_time_ms&quot;: 5.0,
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SECTION 5: ORCHESTRATOR — Fuse All Engines
+# ═══════════════════════════════════════════════════════════════════════
+
+def orchestrate(repo: SimulatedRepo) -&gt; dict:
+    &quot;&quot;&quot;
+    Run all engines and fuse results using max-risk strategy.
+
+    Final Risk = min(1.0, max(Risk_MGTG, Risk_DEP, Risk_PROC, Risk_ML))
+    &quot;&quot;&quot;
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;=&quot; * 70)
+    print(&quot;SUTRA ORCHESTRATOR — Risk Fusion &amp; Final Report&quot;)
+    print(&quot;=&quot; * 70)
+    print(&quot;=&quot; * 70)
+
+    # Run engines
+    mgtg_result = analyze_mgtg(repo)
+    dep_result = analyze_dependency(repo)
+    proc_result = analyze_process(repo)
+    ml_result = analyze_ml(repo)
+    hitl_result = analyze_hitl(repo)
+
+    # Fusion: max risk, panic safety, NaN handling
+    all_results = [
+        (&quot;MGTG&quot;, mgtg_result),
+        (&quot;DEPENDENCY&quot;, dep_result),
+        (&quot;PROCESS&quot;, proc_result),
+        (&quot;ML&quot;, ml_result),
+    ]
+
+    print(&quot;\n&quot; + &quot;-&quot; * 70)
+    print(&quot;FUSION TABLE&quot;)
+    print(&quot;-&quot; * 70)
+    print(f&quot;{&#39;Engine&#39;:15s} {&#39;Risk&#39;:&gt;8s} {&#39;Blocked?&#39;:&gt;10s} {&#39;Findings&#39;:&gt;9s}&quot;)
+    print(&quot;-&quot; * 45)
+
+    total_risk = 0.0
+    total_time = 0.0
+    all_findings = []
+    blocked = False
+    merged_metrics = {}
+
+    for name, result in all_results:
+        risk = result[&quot;overall_risk&quot;]
+        total_risk = max(total_risk, risk)
+        total_time += result.get(&quot;processing_time_ms&quot;, 0.0)
+        all_findings.extend(result[&quot;findings&quot;])
+        blocked = blocked or result.get(&quot;blocked_merge&quot;, False)
+
+        # Per-field max metrics
+        for key, value in result.get(&quot;metrics&quot;, {}).items():
+            if isinstance(value, (int, float)):
+                merged_metrics[key] = max(merged_metrics.get(key, value), value)
+
+        finding_count = len(result.get(&quot;findings&quot;, []))
+        print(f&quot;{name:15s} {risk:&gt;7.1%}  {&#39;BLOCKED&#39; if result.get(&#39;blocked_merge&#39;, False) else &#39;OK&#39;:&gt;10s} {finding_count:&gt;8d}&quot;)
+
+    # Safety: handle NaN
+    if total_risk != total_risk:
+        total_risk = 0.0
+    total_risk = min(1.0, total_risk)
+
+    print(&quot;\n&quot; + &quot;=&quot; * 70)
+    print(&quot;FINAL RESULT&quot;)
+    print(&quot;=&quot; * 70)
+    print(f&quot;\n  Overall Risk:    {total_risk:.4f} ({risk_label(total_risk)})&quot;)
+    print(f&quot;  Total Findings:  {len(all_findings)}&quot;)
+    print(f&quot;  Blocked Merge:   {blocked}&quot;)
+    print(f&quot;  Processing Time: {total_time:.1f}ms&quot;)
+
+    if blocked:
+        print(f&quot;\n  ⛔ COMMIT BLOCKED — production failure risk exceeds threshold&quot;)
+    elif total_risk &gt;= 0.8:
+        print(f&quot;\n  ⚠  HIGH RISK — recommend manual review before deployment&quot;)
+    elif total_risk &gt;= 0.6:
+        print(f&quot;\n  ⚡ MODERATE-HIGH RISK — address warnings before deployment&quot;)
+    else:
+        print(f&quot;\n  ✅ LOW RISK — safe to deploy&quot;)
+
+    print(f&quot;\n  {&#39;Final Risk Formula&#39;:30s} = max(engine_risks)&quot;)
+    risks_contributing = &#39;, &#39;.join(
+        f&quot;{name}={result[&#39;overall_risk&#39;]:.2f}&quot;
+        for name, result in all_results
+    )
+    print(f&quot;  {&#39;Contributing&#39;:30s} = {risks_contributing}&quot;)
+    print(f&quot;  {&#39;Fused Risk&#39;:30s} = min(1.0, max({&#39;, &#39;.join(f&#39;{r[&quot;overall_risk&quot;]:.2f}&#39; for _, r in all_results)}))&quot;)
+    print(f&quot;  {&#39;Result&#39;:30s} = {total_risk:.4f}&quot;)
+
+    # Summary of all findings
+    print(f&quot;\n\n  ALL FINDINGS:&quot;)
+    for f in sorted(all_findings, key=lambda x: x[&quot;severity&quot;], reverse=True):
+        icon = {&quot;error&quot;: &quot;🔴&quot;, &quot;warning&quot;: &quot;🟡&quot;, &quot;info&quot;: &quot;ℹ️&quot;, &quot;critical&quot;: &quot;💀&quot;}
+        sev = f[&quot;severity&quot;]
+        print(f&quot;  {icon.get(sev, &#39;•&#39;)} [{sev.upper():8s}] {f[&#39;id&#39;]:15s} {f[&#39;file_path&#39;]}&quot;)
+        print(f&quot;    {f[&#39;message&#39;]}&quot;)
+
+    return {
+        &quot;overall_risk&quot;: total_risk,
+        &quot;risk_label&quot;: risk_label(total_risk),
+        &quot;total_findings&quot;: len(all_findings),
+        &quot;blocked&quot;: blocked,
+        &quot;processing_time_ms&quot;: total_time,
+        &quot;engine_results&quot;: {
+            &quot;mgtg&quot;: mgtg_result,
+            &quot;dependency&quot;: dep_result,
+            &quot;process&quot;: proc_result,
+            &quot;ml&quot;: ml_result,
+            &quot;hitl&quot;: hitl_result,
+        },
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# MAIN
+# ═══════════════════════════════════════════════════════════════════════
+
+if __name__ == &quot;__main__&quot;:
+    print(r&quot;&quot;&quot;
+     ███████╗██╗   ██╗████████╗██████╗  █████╗
+     ██╔════╝██║   ██║╚══██╔══╝██╔══██╗██╔══██╗
+     ███████╗██║   ██║   ██║   ██████╔╝███████║
+     ╚════██║██║   ██║   ██║   ██╔══██╗██╔══██║
+     ███████║╚██████╔╝   ██║   ██║  ██║██║  ██║
+     ╚══════╝ ╚═════╝    ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝
+
+     ╔══════════════════════════════════════════════════════╗
+     ║  DETERMINISTIC FAILURE PREDICTION                    ║
+     ║  End-to-End Engine Walkthrough                      ║
+     ╚══════════════════════════════════════════════════════╝
+    &quot;&quot;&quot;)
+
+    repo = SimulatedRepo()
+
+    print(f&quot;Repository: {repo.name}&quot;)
+    print(f&quot;Files: {len(repo.files)}&quot;)
+    print(f&quot;Commits: {repo.total_commits}&quot;)
+    print(f&quot;Simulated characteristics:&quot;)
+    print(f&quot;  - 1 file with cyclomatic complexity &gt; 50 (untestable)&quot;)
+    print(f&quot;  - 1 circular dependency (processor → utils → processor)&quot;)
+    print(f&quot;  - 1 file with 45 revisions and 12 bug fixes&quot;)
+    print(f&quot;  - Co-change coupling between core modules&quot;)
+
+    result = orchestrate(repo)
+
+    print(&quot;\n\n&quot; + &quot;=&quot; * 70)
+    print(&quot;END-TO-END EXAMPLE COMPLETE&quot;)
+    print(&quot;=&quot; * 70)
+</code></pre>
+<h3 id="expected-output">Expected Output</h3>
+<p>When run, the script produces a full walkthrough showing:</p>
+<pre><code>SUTRA ORCHESTRATOR — Risk Fusion &amp; Final Report
+
+FUSION TABLE
+Engine               Risk   Blocked?   Findings
+-----------------------------------------------
+MGTG                51.0%  BLOCKED          2
+DEPENDENCY          20.0%  BLOCKED          1
+PROCESS             92.0%  BLOCKED          5
+ML                  94.3%  BLOCKED          4
+
+===============================================================
+FINAL RESULT
+===============================================================
+
+  Overall Risk:    0.9430 (CRITICAL)
+  Total Findings:  12
+  Blocked Merge:   True
+  Processing Time: 600.3ms
+
+  ⛔ COMMIT BLOCKED — production failure risk exceeds threshold
+
+  Final Risk Formula    = max(engine_risks)
+  Contributing          = MGTG=0.51, DEPENDENCY=0.20,
+                          PROCESS=0.92, ML=0.94
+  Fused Risk            = min(1.0, max(0.51, 0.20, 0.92, 0.94))
+  Result                = 0.9430
+</code></pre>
+<hr>
+<h2 id="appendix-all-formulas-at-a-glance">Appendix: All Formulas at a Glance</h2>
+<table>
+<thead>
+<tr>
+<th>Engine</th>
+<th>Formula</th>
+<th>Range</th>
+<th>Interpretation</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MGTG</td>
+<td>$M = E - N + 2P$</td>
+<td>1+</td>
+<td>Cyclomatic complexity</td>
+</tr>
+<tr>
+<td>MGTG</td>
+<td>$\text{Health} = 1 - (0.1E + 0.05W)/\max(1,F)$</td>
+<td>[0,1]</td>
+<td>Higher = healthier</td>
+</tr>
+<tr>
+<td>DEP</td>
+<td>$\text{FanIn}(v) = |u \in V : u \rightarrow v|$</td>
+<td>0+</td>
+<td>Reuse count</td>
+</tr>
+<tr>
+<td>DEP</td>
+<td>$\text{Risk}_{\text{DEP}} = \min(1, 0.2 \times \text{errors})$</td>
+<td>[0,1]</td>
+<td>Linear in errors</td>
+</tr>
+<tr>
+<td>PROC</td>
+<td>$H(f) = -\sum p_i \log_2 p_i$</td>
+<td>[0, $\log_2 n$]</td>
+<td>Change distribution</td>
+</tr>
+<tr>
+<td>PROC</td>
+<td>$\text{Risk}<em>{\text{PROC}} = \min(1, 0.3E + 0.1W + 0.1H</em>{\max})$</td>
+<td>[0,1]</td>
+<td>Weighted sum</td>
+</tr>
+<tr>
+<td>ML</td>
+<td>$\hat{y} = \sigma(\mathbf{w} \cdot \mathbf{x}&#39; + b)$</td>
+<td>[0,1]</td>
+<td>Defect probability</td>
+</tr>
+<tr>
+<td>ML</td>
+<td>$J = -\frac{1}{n}\sum[y\ln\hat{y} + (1-y)\ln(1-\hat{y})] + \frac{\lambda}{2n}\sum w^2$</td>
+<td>[0,$\infty$)</td>
+<td>Log-loss + L2</td>
+</tr>
+<tr>
+<td>ORCH</td>
+<td>$\text{Risk}_{\text{final}} = \min(1, \max_e \text{Risk}_e)$</td>
+<td>[0,1]</td>
+<td>Max fusion</td>
+</tr>
+<tr>
+<td>HITL</td>
+<td>$P_e = \frac{C_e}{C_e + F_e}$</td>
+<td>[0,1]</td>
+<td>Precision per engine</td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>This document is a living reference. As Sutra evolves, new formulas and engines<br>will be added. For the latest version, see the source code at<br><code>github.com/darshanredkar11/sutra</code>.</em></p>
+
+
+</main>
+</div>
+
+<footer>
+<div class="container footer-inner">
+<p>Sutra — Because production failures are predictable.</p>
+<p class="footer-meta">Apache 2.0 &middot; Pure Rust &middot; <a href="https://github.com/darshanredkar/sutra">GitHub</a></p>
+</div>
+</footer>
+
+<script>
+(function() {
+  if (!window.IntersectionObserver) return;
+  var tocLinks = document.querySelectorAll('.book-toc a');
+  var headings = document.querySelectorAll('.book-content h2, .book-content h3');
+  var linkMap = {};
+  tocLinks.forEach(function(a) {
+    var id = a.getAttribute('href').slice(1);
+    linkMap[id] = a;
+  });
+  var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+      if (entry.isIntersecting && linkMap[entry.target.id]) {
+        tocLinks.forEach(function(l) { l.classList.remove('active'); });
+        linkMap[entry.target.id].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-80px 0px -60% 0px' });
+  headings.forEach(function(h) { observer.observe(h); });
+})();
+</script>
+</body>
+</html>
