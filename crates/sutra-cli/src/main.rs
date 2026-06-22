@@ -52,9 +52,9 @@ enum Commands {
     },
     /// Start the HTTP API server
     Server {
-        /// Port to listen on
-        #[arg(short, long, default_value = "8080")]
-        port: u16,
+        /// Port to listen on (default: $PORT env var or 8080)
+        #[arg(short, long)]
+        port: Option<u16>,
     },
 }
 
@@ -222,6 +222,9 @@ async fn main() -> SutraResult<()> {
             println!("  Status: OK");
         }
         Commands::Server { port } => {
+            let port = port
+                .or_else(|| std::env::var("PORT").ok().and_then(|p| p.parse().ok()))
+                .unwrap_or(8080);
             let orchestrator = build_orchestrator(None);
             sutra_orchestrator::server::start_server(orchestrator, port).await?;
         }
