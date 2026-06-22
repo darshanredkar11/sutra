@@ -10,6 +10,7 @@
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="style.css">
 <script defer src="demo.js"></script>
+<script defer src="live-demo.js"></script>
 </head>
 <body>
 
@@ -28,6 +29,7 @@
 <a href="#market">Market</a>
 <a href="#engines">Engines</a>
 <a href="#demo">Demo</a>
+<a href="#live-demo">Live</a>
 <a href="#roadmap">Roadmap</a>
 <a href="#monetization">Plans</a>
 </div>
@@ -410,6 +412,34 @@ The model uses <strong>standard scaling + sigmoid</strong> — the same math run
 </div>
 </div>
 </div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ LIVE DEMO -->
+
+<section id="live-demo" class="section">
+<div class="container">
+<h2>Analyze Any Public GitHub Repo</h2>
+<p class="section-desc">
+Paste a GitHub URL and Sutra will clone it (<strong>shallow, 1 branch, blobless</strong>),
+run all 5 engines, and return the risk analysis. Takes ~30&ndash;60s depending on repo size.
+</p>
+
+<div class="live-form-wrap">
+<form id="live-demo-form" class="live-form">
+<input type="url" id="live-demo-url"
+  placeholder="https://github.com/owner/repo"
+  value="https://github.com/darshanredkar11/sutra"
+  required
+  class="live-input">
+<button type="submit" class="btn btn-primary">Analyze</button>
+</form>
+<p class="live-form-hint">Public repos only. Set <code>window.SUTRA_API_URL</code> to change the API endpoint.</p>
+</div>
+
+<div id="live-demo-status" class="live-hidden live-status"></div>
+<div id="live-demo-results" class="live-hidden"></div>
+
 </div>
 </section>
 

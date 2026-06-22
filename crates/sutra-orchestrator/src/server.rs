@@ -7,8 +7,9 @@ use axum::{
     routing::get,
     Json, Router,
 };
+use serde::{Deserialize, Serialize};
 use sutra_common::error::SutraResult;
-use sutra_schema::v1::{AnalyzeRequest, ComponentHealth, HealthStatus};
+use sutra_schema::v1::{AnalyzeRequest, ComponentHealth, Engine, HealthStatus, Severity};
 use tokio::sync::RwLock;
 use tracing::info;
 
@@ -21,15 +22,203 @@ pub struct AppState {
 
 pub type SharedState = Arc<RwLock<AppState>>;
 
+#[derive(Debug, Deserialize)]
+pub struct DemoRequest {
+    pub repo_url: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct DemoResponse {
+    pub repo_url: String,
+    pub repo_name: String,
+    pub overall_risk: f64,
+    pub risk_label: String,
+    pub findings_count: usize,
+    pub errors: usize,
+    pub warnings: usize,
+    pub info_count: usize,
+    pub processing_time_ms: f64,
+    pub findings: Vec<serde_json::Value>,
+    pub error: Option<String>,
+}
+
+fn risk_label(risk: f64) -> &'static str {
+    if risk < 0.3 { "LOW" } else if risk < 0.6 { "MODERATE" } else if risk < 0.8 { "HIGH" } else { "CRITICAL" }
+}
+
+fn extract_repo_name(url: &str) -> String {
+    url.trim_start_matches("https://github.com/")
+        .trim_start_matches("http://github.com/")
+        .trim_start_matches("github.com/")
+        .trim_end_matches(".git")
+        .trim_end_matches('/')
+        .to_string()
+}
+
+fn is_github_url(url: &str) -> bool {
+    url.starts_with("https://github.com/") || url.starts_with("http://github.com/") || url.starts_with("github.com/")
+}
+
 pub fn build_router(state: SharedState) -> Router {
     Router::new()
         .route("/v1/analyze", axum::routing::post(handle_analyze))
+        .route("/v1/demo", axum::routing::post(handle_demo))
         .route("/v1/health", get(handle_health))
         .route("/v1/status", get(handle_status))
         .layer(
             tower_http::cors::CorsLayer::permissive(),
         )
         .with_state(state)
+}
+
+async fn handle_demo(
+    State(state): State<SharedState>,
+    Json(request): Json<DemoRequest>,
+) -> impl IntoResponse {
+    if !is_github_url(&request.repo_url) {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({
+                "error": "Only public GitHub URLs are supported (https://github.com/owner/repo)"
+            })),
+        ).into_response();
+    }
+
+    let repo_name = extract_repo_name(&request.repo_url);
+    let tmp_id = uuid::Uuid::new_v4().to_string();
+    let tmp_dir = std::env::temp_dir().join(format!("sutra-demo-{}", tmp_id));
+
+    // Shallow clone with blobless filter for speed
+    let clone_result = tokio::process::Command::new("git")
+        .arg("clone")
+        .arg("--depth")
+        .arg("1")
+        .arg("--single-branch")
+        .arg("--filter=blob:none")
+        .arg(&request.repo_url)
+        .arg(&tmp_dir)
+        .output()
+        .await;
+
+    let _output = match clone_result {
+        Ok(output) if output.status.success() => output,
+        Ok(output) => {
+            let stderr = String::from_utf8_lossy(&output.stderr).to_string();
+            return (
+                StatusCode::BAD_REQUEST,
+                Json(serde_json::json!(DemoResponse {
+                    repo_url: request.repo_url,
+                    repo_name,
+                    overall_risk: 0.0,
+                    risk_label: "ERROR".into(),
+                    findings_count: 0,
+                    errors: 0,
+                    warnings: 0,
+                    info_count: 0,
+                    processing_time_ms: 0.0,
+                    findings: vec![],
+                    error: Some(format!("Clone failed: {}", stderr)),
+                })),
+            ).into_response();
+        }
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!(DemoResponse {
+                    repo_url: request.repo_url,
+                    repo_name,
+                    overall_risk: 0.0,
+                    risk_label: "ERROR".into(),
+                    findings_count: 0,
+                    errors: 0,
+                    warnings: 0,
+                    info_count: 0,
+                    processing_time_ms: 0.0,
+                    findings: vec![],
+                    error: Some(format!("Clone error: {}", e)),
+                })),
+            ).into_response();
+        }
+    };
+
+    let path_str = tmp_dir.to_str().unwrap_or("").to_string();
+    let mut analysis_request = AnalyzeRequest::new(&path_str, "HEAD");
+    analysis_request.request_id = format!("demo-{}", tmp_id);
+    analysis_request.engines = vec![
+        Engine::Mgtg, Engine::Dependency, Engine::Process,
+        Engine::Ml, Engine::Hitl,
+    ];
+
+    let state = state.read().await;
+    let start = std::time::Instant::now();
+    let analysis = state.orchestrator.analyze(&analysis_request);
+    let elapsed = start.elapsed().as_secs_f64() * 1000.0;
+    drop(state);
+
+    // Cleanup temp dir in background
+    let cleanup_dir = tmp_dir.clone();
+    tokio::spawn(async move {
+        tokio::process::Command::new("rm")
+            .arg("-rf")
+            .arg(&cleanup_dir)
+            .output()
+            .await
+            .ok();
+    });
+
+    match analysis {
+        Ok(result) => {
+            let errors = result.findings.iter().filter(|f| matches!(f.severity, Severity::Error | Severity::Critical)).count();
+            let warnings = result.findings.iter().filter(|f| f.severity == Severity::Warning).count();
+            let info_count = result.findings.iter().filter(|f| f.severity == Severity::Info).count();
+
+            let findings: Vec<serde_json::Value> = result.findings.iter().map(|f| {
+                serde_json::json!({
+                    "id": f.id,
+                    "engine": f.engine.as_str(),
+                    "file": f.file_path,
+                    "line": f.line,
+                    "message": f.message,
+                    "severity": format!("{:?}", f.severity),
+                })
+            }).collect();
+
+            (
+                StatusCode::OK,
+                Json(serde_json::json!(DemoResponse {
+                    repo_url: request.repo_url,
+                    repo_name,
+                    overall_risk: result.overall_risk,
+                    risk_label: risk_label(result.overall_risk).into(),
+                    findings_count: result.findings.len(),
+                    errors,
+                    warnings,
+                    info_count,
+                    processing_time_ms: elapsed,
+                    findings,
+                    error: None,
+                })),
+            ).into_response()
+        }
+        Err(e) => {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!(DemoResponse {
+                    repo_url: request.repo_url,
+                    repo_name,
+                    overall_risk: 0.0,
+                    risk_label: "ERROR".into(),
+                    findings_count: 0,
+                    errors: 0,
+                    warnings: 0,
+                    info_count: 0,
+                    processing_time_ms: elapsed,
+                    findings: vec![],
+                    error: Some(format!("Analysis failed: {}", e)),
+                })),
+            ).into_response()
+        }
+    }
 }
 
 pub fn create_shared_state(orchestrator: Orchestrator) -> SharedState {
