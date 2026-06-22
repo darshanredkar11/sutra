@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sutra Report</title>
+<style>
+:root {
+  --bg: #0f0f1a; --bg-card: #1a1a2e; --fg: #e2e8f0;
+  --fg-muted: #94a3b8; --fg-dim: #64748b;
+  --accent: #6366f1; --accent-light: #818cf8;
+  --border: #2d2d4a; --radius: 8px;
+  --font-code: 'SF Mono','Fira Code','JetBrains Mono',monospace;
+  --font-ui: -apple-system,'Segoe UI',system-ui,sans-serif;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: var(--font-ui); background: var(--bg); color: var(--fg); line-height: 1.6;
+}
+.container { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+
+header {
+  border-bottom: 1px solid var(--border);
+  padding: 20px 0;
+  background: rgba(15,15,26,0.85);
+  backdrop-filter: blur(8px);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  display: flex; align-items: center; justify-content: space-between;
+  max-width: 860px; margin: 0 auto; padding: 0 20px;
+}
+.logo {
+  display: flex; align-items: center; gap: 8px;
+  text-decoration: none; color: var(--fg);
+  font-weight: 700; font-size: 1.1rem;
+}
+.logo svg { width: 24px; height: 24px; }
+.header-tag {
+  font-size: 0.72rem; color: var(--fg-dim);
+  font-family: var(--font-code);
+}
+
+.hero {
+  text-align: center; padding: 48px 0 32px;
+}
+.hero h1 {
+  font-size: 1.8rem; font-weight: 800; letter-spacing: -0.02em;
+}
+.hero .accent {
+  background: linear-gradient(135deg,var(--accent),var(--accent-light));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.hero p { color: var(--fg-muted); margin-top: 8px; font-size: 0.9rem; }
+
+.form-wrap { max-width: 600px; margin: 24px auto; }
+.form-row { display: flex; gap: 8px; }
+.form-input {
+  flex: 1; padding: 12px 16px; border-radius: var(--radius);
+  border: 1px solid var(--border); background: var(--bg-card);
+  color: var(--fg); font-family: var(--font-code); font-size: 0.9rem;
+  outline: none; transition: border-color 0.2s;
+}
+.form-input:focus { border-color: var(--accent); }
+.form-input::placeholder { color: var(--fg-dim); }
+.form-hint { text-align: center; font-size: 0.72rem; color: var(--fg-dim); margin-top: 6px; }
+
+.btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 12px 24px; border-radius: var(--radius); border: none;
+  font-weight: 600; font-size: 0.9rem; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: #4f46e5; transform: translateY(-1px); }
+.btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.status { display: none; text-align: center; padding: 40px 20px; }
+.status.visible { display: block; }
+.spinner {
+  width: 28px; height: 28px; border: 3px solid var(--border);
+  border-top-color: var(--accent); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.status-text { color: var(--fg-muted); font-size: 0.85rem; }
+
+.error { display: none; }
+.error.visible { display: block; }
+.error-box {
+  background: rgba(239,68,68,0.08);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: var(--radius); padding: 20px 24px; margin-top: 24px;
+}
+.error-box h3 { color: #ef4444; font-size: 0.9rem; margin-bottom: 6px; }
+.error-box p { color: var(--fg-muted); font-size: 0.85rem; }
+.error-box code { font-family: var(--font-code); font-size: 0.8rem; background: rgba(0,0,0,0.2); padding: 1px 5px; border-radius: 3px; }
+
+.results { display: none; }
+.results.visible { display: block; }
+
+.repo-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
+}
+.repo-name {
+  font-family: var(--font-code); font-size: 0.85rem;
+  background: var(--bg-card); padding: 4px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+}
+.repo-time {
+  font-size: 0.75rem; color: var(--fg-dim);
+  margin-left: auto;
+}
+
+.summary-grid {
+  display: grid; grid-template-columns: 160px 1fr 100px;
+  gap: 16px; margin-bottom: 24px;
+}
+@media (max-width: 600px) { .summary-grid { grid-template-columns: 1fr; } }
+
+.risk-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 24px; text-align: center;
+}
+.risk-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--fg-dim); margin-bottom: 6px; }
+.risk-value { font-family: var(--font-code); font-size: 2rem; font-weight: 700; }
+.risk-badge {
+  display: inline-block; font-size: 0.72rem; font-weight: 600;
+  padding: 3px 12px; border-radius: 9999px; margin-top: 6px;
+}
+.badge-low { color: #22c55e; }
+.badge-moderate { color: #eab308; }
+.badge-high { color: #f97316; }
+.badge-critical { color: #ef4444; }
+
+.meta-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.meta-row {
+  display: flex; justify-content: space-between; padding: 4px 0;
+  border-bottom: 1px solid var(--border); font-size: 0.82rem;
+}
+.meta-row:last-child { border-bottom: none; }
+.meta-k { color: var(--fg-dim); }
+.meta-v { color: var(--fg); font-family: var(--font-code); font-size: 0.8rem; }
+
+.engine-tag {
+  display: inline-block; font-family: var(--font-code); font-size: 0.7rem;
+  padding: 1px 7px; border-radius: 4px;
+  background: rgba(99,102,241,0.15); color: var(--accent-light); margin: 1px;
+}
+
+.breakdown-col {
+  display: flex; flex-direction: column; gap: 6px;
+}
+.bd-item {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 16px;
+  text-align: center; flex: 1;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.bd-count { font-family: var(--font-code); font-size: 1.2rem; font-weight: 700; }
+.bd-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fg-dim); margin-top: 2px; }
+.bd-error { color: #ef4444; }
+.bd-warn { color: #eab308; }
+.bd-info { color: var(--fg-muted); }
+
+.findings-card {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px; margin-bottom: 20px;
+}
+.findings-card h3 {
+  font-size: 0.85rem; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.f-count {
+  font-family: var(--font-code); font-size: 0.7rem;
+  padding: 1px 7px; border-radius: 9999px;
+  background: rgba(99,102,241,0.15); color: var(--accent-light);
+}
+
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+th {
+  text-align: left; padding: 8px 10px;
+  border-bottom: 2px solid var(--border);
+  color: var(--fg-dim); font-size: 0.7rem;
+  text-transform: uppercase; letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+td {
+  padding: 6px 10px; border-bottom: 1px solid var(--border);
+  color: var(--fg-muted); white-space: nowrap;
+}
+tr:hover td { background: rgba(99,102,241,0.04); }
+.fid { font-family: var(--font-code); color: var(--accent-light); font-size: 0.72rem; }
+.feng { font-family: var(--font-code); font-size: 0.72rem; color: var(--fg); }
+.ffile { font-family: var(--font-code); font-size: 0.72rem; max-width: 160px; overflow: hidden; text-overflow: ellipsis; }
+.fmsg { max-width: 200px; overflow: hidden; text-overflow: ellipsis; color: var(--fg); font-size: 0.75rem; }
+.sinfo { color: var(--fg-dim); }
+.swarning { color: #eab308; }
+.serror { color: #ef4444; }
+.scritical { color: #ef4444; font-weight: 700; }
+.empty-row td { text-align: center; padding: 20px; color: var(--fg-dim); font-style: italic; }
+.truncated-note { text-align: center; font-size: 0.72rem; color: var(--fg-dim); margin-top: 8px; }
+
+footer {
+  text-align: center; padding: 32px 0;
+  border-top: 1px solid var(--border); margin-top: 40px;
+}
+footer p { color: var(--fg-dim); font-size: 0.8rem; }
+footer a { color: var(--accent-light); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+<div class="header-inner">
+<a href="/v1/report" class="logo">
+<svg viewBox="0 0 28 28" fill="none">
+<rect x="2" y="2" width="10" height="10" rx="2" fill="#6366f1"/>
+<rect x="16" y="2" width="10" height="10" rx="2" fill="#818cf8"/>
+<rect x="2" y="16" width="10" height="10" rx="2" fill="#a5b4fc"/>
+<rect x="16" y="16" width="10" height="10" rx="2" fill="#c7d2fe"/>
+</svg>
+<span>Sutra</span>
+</a>
+<span class="header-tag">Analysis Report</span>
+</div>
+</header>
+
+<main class="container">
+
+<div class="hero">
+<h1>Production <span class="accent">Risk Report</span></h1>
+<p>Enter a public GitHub repository URL to run Sutra's 5-engine analysis pipeline.</p>
+</div>
+
+<div class="form-wrap">
+<div class="form-row">
+<input type="url" id="repo-url" class="form-input"
+  placeholder="https://github.com/owner/repo"
+  value="https://github.com/darshanredkar11/sutra">
+<button id="analyze-btn" class="btn btn-primary" onclick="runAnalysis()">Analyze</button>
+</div>
+<div class="form-hint">Public repos only. Analysis takes ~30&ndash;60s.</div>
+</div>
+
+<div id="status" class="status">
+<div class="spinner"></div>
+<div class="status-text">Cloning repository and running all 5 engines...</div>
+</div>
+
+<div id="error" class="error">
+<div class="error-box" id="error-box"></div>
+</div>
+
+<div id="results" class="results">
+
+<div class="repo-header">
+<span class="repo-name" id="repo-name"></span>
+<span class="repo-time" id="repo-time"></span>
+</div>
+
+<div class="summary-grid">
+<div class="risk-card">
+<div class="risk-label">Risk Score</div>
+<div class="risk-value" id="risk-value">0%</div>
+<div class="risk-badge" id="risk-badge">LOW</div>
+</div>
+
+<div class="meta-card">
+<div class="meta-row"><span class="meta-k">Repository</span><span class="meta-v" id="meta-repo">—</span></div>
+<div class="meta-row"><span class="meta-k">Processing Time</span><span class="meta-v" id="meta-time">—</span></div>
+<div class="meta-row"><span class="meta-k">Total Findings</span><span class="meta-v" id="meta-findings">—</span></div>
+<div class="meta-row"><span class="meta-k">Engines Triggered</span><span class="meta-v" id="meta-engines">—</span></div>
+</div>
+
+<div class="breakdown-col">
+<div class="bd-item"><span class="bd-count bd-error" id="bd-errors">0</span><span class="bd-label">Errors</span></div>
+<div class="bd-item"><span class="bd-count bd-warn" id="bd-warnings">0</span><span class="bd-label">Warnings</span></div>
+<div class="bd-item"><span class="bd-count bd-info" id="bd-info">0</span><span class="bd-label">Info</span></div>
+</div>
+</div>
+
+<div class="findings-card">
+<h3>Findings <span class="f-count" id="findings-count">0</span></h3>
+<div class="table-wrap">
+<table>
+<thead><tr><th>ID</th><th>Engine</th><th>Location</th><th>Message</th><th>Severity</th></tr></thead>
+<tbody id="findings-body"></tbody>
+</table>
+</div>
+<div id="truncated-note" class="truncated-note" style="display:none"></div>
+</div>
+
+</div>
+
+</main>
+
+<footer>
+<p>Sutra &mdash; <a href="https://github.com/darshanredkar11/sutra">github.com/darshanredkar11/sutra</a></p>
+</footer>
+
+<script>
+const API = "";
+
+async function runAnalysis() {
+  const url = document.getElementById("repo-url").value.trim();
+  if (!url) return;
+
+  const btn = document.getElementById("analyze-btn");
+  const status = document.getElementById("status");
+  const error = document.getElementById("error");
+  const results = document.getElementById("results");
+
+  btn.disabled = true;
+  error.classList.remove("visible");
+  results.classList.remove("visible");
+  status.classList.add("visible");
+
+  try {
+    const res = await fetch(API + "/v1/demo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ repo_url: url }),
+      signal: AbortSignal.timeout(120000),
+    });
+
+    const data = await res.json();
+
+    if (data.error) {
+      showError(data.error);
+      return;
+    }
+
+    renderReport(data);
+  } catch (err) {
+    showError(err.message);
+  } finally {
+    btn.disabled = false;
+    status.classList.remove("visible");
+  }
+}
+
+function showError(msg) {
+  const error = document.getElementById("error");
+  const box = document.getElementById("error-box");
+  error.classList.add("visible");
+  box.innerHTML = `<h3>Analysis Failed</h3><p>${esc(msg)}</p>`;
+}
+
+function renderReport(data) {
+  document.getElementById("results").classList.add("visible");
+  document.getElementById("repo-name").textContent = data.repo_name;
+  document.getElementById("repo-time").textContent = "Took " + data.processing_time_ms.toFixed(0) + "ms";
+
+  document.getElementById("risk-value").textContent = (data.overall_risk * 100).toFixed(1) + "%";
+  const badge = document.getElementById("risk-badge");
+  badge.textContent = data.risk_label;
+  badge.className = "risk-badge badge-" + data.risk_label.toLowerCase();
+
+  document.getElementById("meta-repo").textContent = data.repo_name;
+  document.getElementById("meta-time").textContent = data.processing_time_ms.toFixed(0) + "ms";
+  document.getElementById("meta-findings").textContent = data.findings_count;
+
+  if (data.engines_triggered && data.engines_triggered.length > 0) {
+    document.getElementById("meta-engines").innerHTML = data.engines_triggered.map(e =>
+      '<span class="engine-tag">' + e + "</span>"
+    ).join("");
+  } else {
+    document.getElementById("meta-engines").textContent = "none";
+  }
+
+  document.getElementById("bd-errors").textContent = data.errors;
+  document.getElementById("bd-warnings").textContent = data.warnings;
+  document.getElementById("bd-info").textContent = data.info_count;
+
+  document.getElementById("findings-count").textContent = data.findings_count;
+
+  const tbody = document.getElementById("findings-body");
+  if (data.findings && data.findings.length > 0) {
+    const maxShow = 50;
+    const rows = data.findings.slice(0, maxShow).map(f =>
+      `<tr>
+        <td class="fid">${esc(f.id)}</td>
+        <td class="feng">${esc(f.engine)}</td>
+        <td class="ffile">${esc(trunc(f.file, 40))}:${f.line}</td>
+        <td class="fmsg">${esc(trunc(f.message, 60))}</td>
+        <td class="s${f.severity.toLowerCase()}">${f.severity}</td>
+      </tr>`
+    ).join("");
+    tbody.innerHTML = rows;
+
+    if (data.findings.length > maxShow) {
+      const note = document.getElementById("truncated-note");
+      note.style.display = "block";
+      note.textContent = "Showing top " + maxShow + " of " + data.findings.length + " findings";
+    }
+  } else {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="5">No findings — clean bill of health</td></tr>';
+  }
+}
+
+function esc(s) {
+  if (typeof s !== "string") return String(s);
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
+function trunc(s, n) {
+  if (typeof s !== "string") return String(s);
+  return s.length > n ? s.slice(0, n) + "\u2026" : s;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const repo = params.get("repo");
+  if (repo) {
+    document.getElementById("repo-url").value = repo;
+    runAnalysis();
+  }
+});
+</script>
+</body>
+</html>

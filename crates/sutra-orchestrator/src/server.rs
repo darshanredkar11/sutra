@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
 use axum::{
-    extract::State,
+    extract::{Query, State},
     http::StatusCode,
-    response::IntoResponse,
+    response::{Html, IntoResponse},
     routing::get,
     Json, Router,
 };
@@ -63,12 +63,37 @@ pub fn build_router(state: SharedState) -> Router {
     Router::new()
         .route("/v1/analyze", axum::routing::post(handle_analyze))
         .route("/v1/demo", axum::routing::post(handle_demo))
+        .route("/v1/report", get(handle_report))
         .route("/v1/health", get(handle_health))
         .route("/v1/status", get(handle_status))
         .layer(
             tower_http::cors::CorsLayer::permissive(),
         )
         .with_state(state)
+}
+
+#[derive(Deserialize)]
+pub struct ReportQuery {
+    pub repo: Option<String>,
+}
+
+pub async fn handle_report(
+    Query(query): Query<ReportQuery>,
+) -> impl IntoResponse {
+    let html = include_str!("report.html");
+    let html = if let Some(repo) = &query.repo {
+        if is_github_url(repo) {
+            html.replace(
+                r#"value="https://github.com/darshanredkar11/sutra""#,
+                &format!("value=\"{}\"", repo),
+            )
+        } else {
+            html.to_string()
+        }
+    } else {
+        html.to_string()
+    };
+    Html(html)
 }
 
 async fn handle_demo(
