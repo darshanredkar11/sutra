@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sutra — Predict Production Software Failures</title>
+<meta name="description" content="Sutra is a deterministic, open-source framework that predicts production software failures by fusing 6 analysis engines into a single composable pipeline. 13K+ lines of Rust, 550+ tests, zero external runtime deps.">
+<meta property="og:title" content="Sutra — Predict Production Failures Before They Happen">
+<meta property="og:description" content="Deterministic failure prediction for production software. Open-core, 6 engines, 550+ tests, pure Rust.">
+<meta property="og:type" content="website">
+<link rel="stylesheet" href="style.css">
+<script defer src="demo.js"></script>
+</head>
+<body>
+
+<nav>
+<div class="container nav-inner">
+<a href="#" class="logo">
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+<rect x="2" y="2" width="10" height="10" rx="2" fill="#6366f1"/>
+<rect x="16" y="2" width="10" height="10" rx="2" fill="#818cf8"/>
+<rect x="2" y="16" width="10" height="10" rx="2" fill="#a5b4fc"/>
+<rect x="16" y="16" width="10" height="10" rx="2" fill="#c7d2fe"/>
+</svg>
+<span>Sutra</span>
+</a>
+<div class="nav-links">
+<a href="#market">Market</a>
+<a href="#engines">Engines</a>
+<a href="#demo">Demo</a>
+<a href="#roadmap">Roadmap</a>
+<a href="#monetization">Plans</a>
+</div>
+</div>
+</nav>
+
+<header>
+<div class="container header-inner">
+<div class="header-badge">Open Core &middot; Apache 2.0 &middot; Pure Rust</div>
+<h1>Predict production software failures<br><span class="accent">before they happen.</span></h1>
+<p class="subtitle">
+Every year, software failures cost enterprises <strong>$2T+</strong> in downtime, incident response, and lost revenue.
+Sutra is a deterministic, open-source framework that analyzes source code across <strong>6 dimensions</strong>
+— complexity, dependency, change history, ML regression, LLM validation, and human feedback —
+and produces a single, actionable <strong>risk score</strong> before you deploy.
+</p>
+<div class="header-actions">
+<a href="#demo" class="btn btn-primary">Try the Risk Calculator</a>
+<a href="#market" class="btn btn-secondary">Why Sutra &darr;</a>
+</div>
+<div class="header-metrics">
+<div class="hm-item"><span class="hm-num">13K+</span><span class="hm-label">Lines of Rust</span></div>
+<div class="hm-item"><span class="hm-num">552</span><span class="hm-label">Tests</span></div>
+<div class="hm-item"><span class="hm-num">11</span><span class="hm-label">Crates</span></div>
+<div class="hm-item"><span class="hm-num">6</span><span class="hm-label">Fused Engines</span></div>
+<div class="hm-item"><span class="hm-num">0</span><span class="hm-label">External Runtime Deps</span></div>
+</div>
+</div>
+</header>
+
+<!-- ═══════════════════════════════════════════════════════ MARKET -->
+
+<section id="market" class="section">
+<div class="container">
+<h2>The $2T Problem Sutra Solves</h2>
+<p class="section-desc">
+Software failure is the largest operational risk most companies don't measure.
+Existing tools catch syntax and style — they don't predict <em>production</em> risk.
+Sutra bridges the gap between static analysis and production reliability.
+</p>
+
+<div class="market-grid">
+<div class="market-card market-problem">
+<h3>The Problem</h3>
+<ul>
+<li><strong>Linters</strong> check style, not risk. They catch formatting but can't predict runtime failures.</li>
+<li><strong>Code quality platforms</strong> compute scores that don't correlate with incident frequency.</li>
+<li><strong>APM tools</strong> (DataDog, Sentry) detect failures after they reach production — too late.</li>
+<li><strong>ML models</strong> require labeled defect data that most teams don't have.</li>
+<li><strong>Security scanners</strong> (CodeQL, Semgrep) find vulnerabilities but miss architectural and process risk.</li>
+</ul>
+</div>
+
+<div class="market-card market-solution">
+<h3>Why Sutra</h3>
+<ul>
+<li><strong>6 engines, one pipeline</strong> — complexity + dependency + process + ML + LLM + HITL, fused into a single risk score</li>
+<li><strong>Zero external deps</strong> — runs on any system with Rust and a filesystem. No databases, no queues, no SaaS needed</li>
+<li><strong>Deterministic by default</strong> — same repo + commit = identical results. ML and LLM are optional enrichment</li>
+<li><strong>Open core</strong> — all engines are Apache 2.0. Enterprise features (SSO, audit, hosted) are additive</li>
+<li><strong>CI-native</strong> — SARIF 2.1.0 output integrates with GitHub Advanced Security, GitLab, and any CI pipeline</li>
+</ul>
+</div>
+</div>
+
+<h3 style="margin-top:48px;text-align:center;">Competitive Landscape</h3>
+<div class="comp-table-wrap">
+<table class="comp-table">
+<thead>
+<tr><th>Capability</th><th>Sutra</th><th>SonarQube</th><th>CodeClimate</th><th>Semgrep</th><th>DataDog CI</th></tr>
+</thead>
+<tbody>
+<tr><td>Cyclomatic complexity</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Dependency cycle detection</td><td class="yes">Yes</td><td class="partial">Limited</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Git change entropy</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>14 JIT risk features</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td></tr>
+<tr><td>Logistic regression</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td></tr>
+<tr><td>LLM validation</td><td class="yes">Yes*</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td><td class="no">No</td></tr>
+<tr><td>HITL feedback loop</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Single risk score</td><td class="yes">Yes</td><td class="partial">Partial</td><td class="partial">Partial</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>SARIF output</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
+<tr><td>Zero external deps</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="partial">Python</td><td class="no">No</td></tr>
+<tr><td>Open core</td><td class="yes">Yes</td><td class="partial">Community</td><td class="no">No</td><td class="partial">Rules limited</td><td class="no">No</td></tr>
+</tbody>
+</table>
+</div>
+<p class="table-footnote">* LLM engine is optional (disabled by default, enabled via <code>--llm</code> flag). Only Sutra fuses all 6 signals into one composable pipeline.</p>
+
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ OVERVIEW -->
+
+<section id="overview" class="section section-dark">
+<div class="container">
+<h2>Architecture</h2>
+<p class="section-desc">
+Six engines, each with a specific purpose, fused by a deterministic orchestrator into a single unified risk model.
+Every engine implements the <code>AnalysisEngine</code> trait — add or remove engines without changing the pipeline.
+</p>
+
+<div class="pipeline">
+<div class="pipeline-step">
+<div class="step-number">1</div>
+<h3>mgtg</h3>
+<p>Complexity metrics<br><span class="step-detail">McCabe &middot; Cognitive</span></p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step">
+<div class="step-number">2</div>
+<h3>dependency</h3>
+<p>Graph analysis<br><span class="step-detail">Tarjan SCC &middot; Fan in/out</span></p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step">
+<div class="step-number">3</div>
+<h3>process</h3>
+<p>Change mining<br><span class="step-detail">Hassan entropy &middot; 14 JIT</span></p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step">
+<div class="step-number">4</div>
+<h3>ml</h3>
+<p>Risk regression<br><span class="step-detail">SGD+L2 &middot; AUC</span></p>
+</div>
+<div class="pipeline-arrow optional">&rarr;</div>
+<div class="pipeline-step optional">
+<div class="step-number">5</div>
+<h3>llm</h3>
+<p>Finding validation<br><span class="step-detail">Ollama &middot; opt-in</span></p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step">
+<div class="step-number">6</div>
+<h3>hitl</h3>
+<p>Feedback loop<br><span class="step-detail">Auto-adjust &middot; learn</span></p>
+</div>
+</div>
+
+<div class="arch-highlight">
+<div class="arch-highlight-item">
+<span class="ah-num">O(V+E)</span>
+<span class="ah-label">Tarjan SCC</span>
+</div>
+<div class="arch-highlight-item">
+<span class="ah-num">σ(w·x + b)</span>
+<span class="ah-label">Logistic Regression</span>
+</div>
+<div class="arch-highlight-item">
+<span class="ah-num">−Σ p·log₂(p)</span>
+<span class="ah-label">Hassan Entropy</span>
+</div>
+<div class="arch-highlight-item">
+<span class="ah-num">max ∪</span>
+<span class="ah-label">Merge Semantics</span>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ ENGINES DEEP DIVE -->
+
+<section id="engines" class="section">
+<div class="container">
+<h2>How Each Engine Works</h2>
+<p class="section-desc">
+Every engine exists to answer a specific question about production risk. Together they form a
+holistic picture no single tool can provide.
+</p>
+
+<div class="engine-deep" id="engine-mgtg">
+<div class="engine-deep-header">
+<div class="engine-deep-icon mgtg"></div>
+<div>
+<h3>mgtg — Complexity Engine <span class="crate-badge">sutra-mgtg</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Code complexity is the oldest and most validated predictor of defects. McCabe's 1976 study established that functions with cyclomatic complexity &gt; 10 are statistically more likely to contain faults. Cognitive complexity extends this by weighting nesting depth — an <code>if</code> inside a <code>for</code> inside a <code>while</code> costs more than three sequential <code>if</code>s.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>M = E − N + 2P — cyclomatic number counts linearly independent paths through the CFG. Cognitive complexity adds weighted penalties for nesting depth and logical operators.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p>Per-file metrics: <code>cyclomatic_max</code>, <code>cognitive_max</code>, <code>nesting_max</code>, <code>total_functions</code>. Findings for functions exceeding thresholds.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-dependency">
+<div class="engine-deep-header">
+<div class="engine-deep-icon dep"></div>
+<div>
+<h3>dependency — Graph Analysis Engine <span class="crate-badge">sutra-dependency</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Circular dependencies couple modules that should be independent. High fan-in modules are fragile foundations; high fan-out modules are brittle hubs. Architecture layers enforce explicit dependency direction (presentation → application → domain).</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>Builds directed graph G = (V, E). Tarjan's SCC (O(V+E)) partitions nodes into strongly connected components. SCCs with &gt;1 node = circular dependencies. Fan-in = indegree, fan-out = outdegree.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>DependencyGraph</code> with nodes, edges, cycles, fan-in/out maps, architecture violations. Findings for each cycle and layer violation.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-process">
+<div class="engine-deep-header">
+<div class="engine-deep-icon proc"></div>
+<div>
+<h3>process — Change Mining Engine <span class="crate-badge">sutra-process</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> The best predictor of future failure is past change patterns. Files with frequent edits, many authors, or evenly distributed change (high entropy) are statistically riskier. This is the foundation of JIT defect prediction [Kamei et al., 2013].</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>Hassan entropy H(f) = −Σ pᵢ · log₂(pᵢ). 14 JIT features per file from git history. Co-change matrix surface hidden coupling between files in different packages.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p>Per-file <code>FeatureMap</code> (HashMap&lt;String, f64&gt;) with all 14 JIT features persisted to SQLite. Findings for high entropy, churn, and coupling.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-ml">
+<div class="engine-deep-header">
+<div class="engine-deep-icon ml"></div>
+<div>
+<h3>ml — Logistic Regression Engine <span class="crate-badge">sutra-ml</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Deterministic thresholds on individual features are brittle. Logistic regression learns the optimal weighted combination of all 14 signals. Pure Rust — no external ML framework required.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>P(risky) = σ(wᵀ · x_scaled + b). Features z-score standardized. SGD + L2 regularization + learning rate decay. AUC via trapezoidal ROC.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p>Risk probability per file, AUC score, confusion matrix. Serialized model (JSON weights, bias, means, stds).</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-llm">
+<div class="engine-deep-header">
+<div class="engine-deep-icon llm"></div>
+<div>
+<h3>llm — Validation Engine <span class="crate-badge">sutra-llm</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Static analysis produces false positives. An LLM provides contextual judgment — it evaluates whether a finding is a genuine production hazard. Disabled by default; opt-in enrichment layer.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>Each finding sent to Ollama /api/generate. Prompt requests structured JSON: isValid, confidence, explanation. Response parser strips code fences and falls back to defaults.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>ValidationResult</code> per finding. <code>analyze_with_llm()</code> runs deterministic engines first, then validates combined findings.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-hitl">
+<div class="engine-deep-header">
+<div class="engine-deep-icon hitl"></div>
+<div>
+<h3>hitl — Human-in-the-Loop Engine <span class="crate-badge">sutra-hitl</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> No automated analysis is perfect. The HITL engine closes the feedback loop — recording developer judgments and auto-adjusting future results. Over time, Sutra learns which engines produce reliable findings.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>Feedback stored via <code>FeedbackStore</code> trait. For findings with ≥3 entries: confirm_ratio ≥ 0.8 auto-validates; reject_ratio ≥ 0.6 downgrades severity. Per-engine precision tracked.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p>HITL-001 (precision), HITL-002 (coverage), HITL-003 (low precision) findings. Adjusted findings from <code>adjust_findings()</code>.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-orchestrator">
+<div class="engine-deep-header">
+<div class="engine-deep-icon orch"></div>
+<div>
+<h3>orchestrator — Integration Layer <span class="crate-badge">sutra-orchestrator</span> <span class="crate-badge">sutra-ci</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Individual engines produce fragmented signals. The orchestrator combines them into one answer: "Should I merge this PR?" SARIF and markdown output make it CI-native.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Merge Semantics</h4>
+<ul>
+<li><strong>Risk</strong>: <code>total_risk = max(engine.risk)</code></li>
+<li><strong>Findings</strong>: union across engines, deduped by ID</li>
+<li><strong>Metrics</strong>: per-field <code>max()</code></li>
+<li><strong>Failures</strong>: engine errors produce <code>ORCH-{ENGINE}-ERR</code> findings</li>
+</ul>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p>Unified <code>AnalysisResult</code>, SARIF 2.1.0 JSON, markdown PR comments with emoji severity badges.</p>
+</div>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ DEMO -->
+
+<section id="demo" class="section section-dark">
+<div class="container">
+<h2>Try It Yourself</h2>
+<p class="section-desc">
+Adjust the 14 JIT features below and see Sutra's logistic regression compute the risk score in real time.
+The model uses <strong>standard scaling + sigmoid</strong> — the same math running in <code>sutra-ml</code>.
+</p>
+
+<div class="demo-layout">
+<div class="demo-controls">
+<div class="demo-presets">
+<strong>Presets:</strong>
+<button onclick="applyPreset('stable')" class="demo-btn demo-btn-green">Stable</button>
+<button onclick="applyPreset('risky')" class="demo-btn demo-btn-orange">Risky</button>
+<button onclick="applyPreset('churn')" class="demo-btn demo-btn-red">Churn</button>
+<button onclick="applyPreset('new')" class="demo-btn demo-btn-blue">New</button>
+</div>
+<div id="demo-sliders"></div>
+</div>
+<div class="demo-results">
+<div class="demo-gauge-wrap">
+<div class="demo-gauge-label">Risk Score</div>
+<div class="demo-gauge-track">
+<div class="demo-gauge-fill" id="demo-risk-gauge"></div>
+</div>
+<div class="demo-gauge-value" id="demo-risk-value">0.0%</div>
+<div class="demo-gauge-risk" id="demo-risk-label">LOW RISK</div>
+</div>
+
+<div class="demo-computation">
+<h4>Computation</h4>
+<table class="demo-table">
+<tbody id="demo-breakdown">
+<tr><td>z = w·x + b</td><td>—</td></tr>
+<tr><td>σ(z)</td><td>—</td></tr>
+<tr><td>Engines triggered</td><td>—</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="demo-pipeline-container">
+<h4>Pipeline</h4>
+<div class="pipeline demo-pipeline" id="demo-pipeline-flow">
+<div class="pipeline-step demo-step" data-engine="mgtg">
+<div class="step-number">1</div><h3>mgtg</h3><p>complexity</p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step demo-step" data-engine="process">
+<div class="step-number">3</div><h3>process</h3><p>change</p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step demo-step" data-engine="ml">
+<div class="step-number">4</div><h3>ml</h3><p>regression</p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step demo-step" data-engine="hitl">
+<div class="step-number">6</div><h3>hitl</h3><p>feedback</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ ROADMAP -->
+
+<section id="roadmap" class="section">
+<div class="container">
+<h2>Roadmap</h2>
+<p class="section-desc">
+Sutra is actively developed. Here is the planned trajectory from open-source framework to enterprise platform.
+</p>
+
+<div class="roadmap-grid">
+<div class="roadmap-card roadmap-now">
+<div class="roadmap-phase">Now</div>
+<h3>Core Framework</h3>
+<ul>
+<li>6 engines fused into single pipeline</li>
+<li>CLI with JSON, SARIF, pretty output</li>
+<li>HTTP API (axum)</li>
+<li>552 tests across 11 crates</li>
+<li>Open core under Apache 2.0</li>
+</ul>
+</div>
+
+<div class="roadmap-card roadmap-next">
+<div class="roadmap-phase">Next &mdash; Q3 2026</div>
+<h3>CI/CD Integration</h3>
+<ul>
+<li>GitHub Action with PR comments</li>
+<li>GitLab CI template</li>
+<li>Pre-commit hook</li>
+<li>Baseline tracking (risk over time)</li>
+<li>Release to crates.io</li>
+</ul>
+</div>
+
+<div class="roadmap-card roadmap-future">
+<div class="roadmap-phase">Q4 2026 &mdash; Q1 2027</div>
+<h3>Enterprise Platform</h3>
+<ul>
+<li>Hosted dashboard with team workspaces</li>
+<li>Historical trend analysis &amp; charts</li>
+<li>Custom engine plugins (WASM)</li>
+<li>Role-based access control</li>
+<li>SAML/SSO authentication</li>
+</ul>
+</div>
+
+<div class="roadmap-card roadmap-distant">
+<div class="roadmap-phase">H2 2027</div>
+<h3>AI-Native Platform</h3>
+<ul>
+<li>Auto-remediation PR generation</li>
+<li>Trained foundation model for risk</li>
+<li>Multi-repo portfolio risk view</li>
+<li>Kubernetes operator for deploy gating</li>
+<li>SOC 2 &amp; enterprise compliance</li>
+</ul>
+</div>
+</div>
+
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ MONETIZATION -->
+
+<section id="monetization" class="section section-dark">
+<div class="container">
+<h2>Open-Core Model</h2>
+<p class="section-desc">
+The core analysis engine is and will remain Apache 2.0. Enterprise features are additive — built on top of the open-source foundation. No bait-and-switch.
+</p>
+
+<div class="monet-grid">
+<div class="monet-card monet-free">
+<h3>Open Source</h3>
+<div class="monet-price">Free</div>
+<ul>
+<li>All 6 analysis engines</li>
+<li>CLI and HTTP API</li>
+<li>SARIF, JSON, pretty output</li>
+<li>Community support (GitHub Issues)</li>
+<li>Self-hosted</li>
+<li>Apache 2.0 license</li>
+</ul>
+</div>
+
+<div class="monet-card monet-pro">
+<h3>Professional</h3>
+<div class="monet-price">Per-seat</div>
+<ul>
+<li>Hosted dashboard &amp; historical trends</li>
+<li>Team workspaces</li>
+<li>Custom architecture rules</li>
+<li>Priority GitHub support</li>
+<li>Slack/email integrations</li>
+<li>Usage analytics</li>
+</ul>
+</div>
+
+<div class="monet-card monet-enterprise">
+<h3>Enterprise</h3>
+<div class="monet-price">Custom</div>
+<ul>
+<li>All Professional features</li>
+<li>SAML/SSO</li>
+<li>RBAC &amp; audit logs</li>
+<li>On-premise deployment</li>
+<li>Dedicated SLAs</li>
+<li>SOC 2 compliance</li>
+<li>Custom engine plugins (WASM)</li>
+<li>Auto-remediation PR generation</li>
+</ul>
+</div>
+</div>
+
+<p class="section-desc" style="margin-top:32px;">
+<strong>Enterprise-ready now?</strong> Not yet. We are building the core open-source framework first,
+with enterprise features coming in 2027. Early adopters get grandfathered pricing.
+</p>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ TEAM -->
+
+<section id="team" class="section">
+<div class="container">
+<h2>Built by</h2>
+<p class="section-desc">
+Sutra was founded by a software engineer who experienced production failures firsthand — and built the tool they wished existed.
+</p>
+
+<div class="team-grid">
+<div class="team-card">
+<div class="team-avatar">DR</div>
+<h3>Darshan Redkar</h3>
+<span class="team-role">Founder &amp; Lead Developer</span>
+<p>Software engineer with deep experience in production systems, distributed systems, and developer tooling. Built Sutra from first principles — 6 engines, 11 crates, 13K+ lines of Rust — to solve the problem of unpredictable production failures.</p>
+<div class="team-links">
+<a href="https://github.com/darshanredkar">GitHub</a>
+</div>
+</div>
+</div>
+
+<div class="team-note">
+<p><strong>We are hiring.</strong> If you're interested in developer tools, static analysis, or Rust — <a href="https://github.com/darshanredkar/sutra/issues">reach out</a>.</p>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ TEST COVERAGE -->
+
+<section id="tests" class="section section-dark">
+<div class="container">
+<h2>Engineering Rigor</h2>
+<p class="section-desc"><strong>552 test functions</strong> across 42 test files. Property-based fuzzing (proptest), stress tests (10K entries), edge case coverage (NaN, Infinity, empty, unicode, u32::MAX). Every engine isolated via traits.</p>
+
+<div class="test-grid">
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-dependency</span><span class="test-count">121</span></div><div class="test-bar"><div class="test-fill" style="width:100%"></div></div><p>Import extraction, Tarjan SCC correctness, architecture rules, fan-in/out, 100-node graph stress, serde, fixture isolation</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-ml</span><span class="test-count">70</span></div><div class="test-bar"><div class="test-fill" style="width:58%"></div></div><p>Sigmoid proptest (symmetry, bounds), zero-std guard, SGD convergence with extreme labels, AUC trapezoidal, model JSON persistence</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-schema</span><span class="test-count">68</span></div><div class="test-bar"><div class="test-fill" style="width:56%"></div></div><p>Serde JSON/YAML/TOML roundtrips, proptest fuzzing, severity rank ordering, NaN/Infinity bounds, unicode, Engine serde</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-common</span><span class="test-count">66</span></div><div class="test-bar"><div class="test-fill" style="width:55%"></div></div><p>Error type construction, config parsing, health status, metrics aggregation, tracing setup, edge case errors</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-process</span><span class="test-count">66</span></div><div class="test-bar"><div class="test-fill" style="width:55%"></div></div><p>Entropy uniform/empty/window, co-change matrix, JIT features (100 authors, bug keywords), SQLite roundtrip, unicode paths, engine integration</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-hitl</span><span class="test-count">62</span></div><div class="test-bar"><div class="test-fill" style="width:51%"></div></div><p>10K entry stress test, feedback thresholds, auto-confirm/reject precision, unicode/emoji, u32::MAX line, batch consistency, engine lifecycle</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-llm</span><span class="test-count">45</span></div><div class="test-bar"><div class="test-fill" style="width:37%"></div></div><p>Config serde, prompt building, response parser with code fence stripping, confidence clamping, 1K cache stress test, connection error handling</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-ci</span><span class="test-count">32</span></div><div class="test-bar"><div class="test-fill" style="width:26%"></div></div><p>SARIF 2.1.0 schema, 1K findings stress, NaN/Infinity safety, u32::MAX line, PR comment formatting with unicode/emoji/100 findings</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-orchestrator</span><span class="test-count">22</span></div><div class="test-bar"><div class="test-fill" style="width:18%"></div></div><p>Engine registration, merge logic, panic recovery via catch_unwind, NaN risk clamping, HTTP API with empty/malformed/missing body</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-mgtg</span><span class="test-count">7</span></div><div class="test-bar"><div class="test-fill" style="width:6%"></div></div><p>MgtgEngine AnalysisEngine impl, name/analyze dispatch, request passthrough</p></div>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ DESIGN PRINCIPLES -->
+
+<section id="principles" class="section">
+<div class="container">
+<h2>Design Principles</h2>
+<p class="section-desc">The architectural decisions that shape Sutra's development.</p>
+<div class="principles-grid">
+<div class="principle">
+<h3>Math-first, ML-optional</h3>
+<p>Core risk score is deterministic. ML and LLM enrich, never replace foundational analysis. ML engine is self-contained with zero external framework dependencies.</p>
+</div>
+<div class="principle">
+<h3>Composable via traits</h3>
+<p>Each engine implements <code>AnalysisEngine</code>. Run independently, in batches, or in CI/CD. New engines implement exactly one trait with one function.</p>
+</div>
+<div class="principle">
+<h3>Deterministic by default</h3>
+<p>Same repo + commit = identical results (ML/LLM excluded). No hidden state, no non-determinism in the core pipeline.</p>
+</div>
+<div class="principle">
+<h3>Zero external runtime deps</h3>
+<p>Core stack requires only Rust, git, and a filesystem. No databases, queues, or containers required.</p>
+</div>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ QUICK START -->
+
+<section id="quickstart" class="section section-dark">
+<div class="container">
+<h2>Quick Start</h2>
+<div class="code-block">
+<pre><code><span class="cmt"># Clone and build</span>
+git clone https://github.com/darshanredkar/sutra
+cd sutra
+cargo build --release
+
+<span class="cmt"># Analyze with all engines</span>
+cargo run -- analyze /path/to/repo
+
+<span class="cmt"># Single engine</span>
+cargo run -- analyze /path/to/repo --engine mgtg
+
+<span class="cmt"># HTTP API server</span>
+cargo run -- server --port 8080
+
+<span class="cmt"># Analyze via API</span>
+curl -X POST http://localhost:8080/v1/analyze \
+  -H 'Content-Type: application/json' \
+  -d '{"repo_path":"/path/to/repo","commit_hash":"HEAD"}'
+
+<span class="cmt"># LLM validation (requires Ollama)</span>
+cargo run -- analyze /path/to/repo --llm
+
+<span class="cmt"># SARIF for CI</span>
+cargo run -- analyze /path/to/repo --format sarif --output results.sarif</code></pre>
+</div>
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ CLI -->
+
+<section id="cli" class="section">
+<div class="container">
+<h2>CLI Reference</h2>
+<div class="engine-table-wrap">
+<table class="engine-table">
+<thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>--engine</code></td><td><code>all</code></td><td>Engine(s): mgtg, dependency, process, ml, hitl, all</td></tr>
+<tr><td><code>--format</code></td><td><code>pretty</code></td><td>Output format: pretty, json, sarif</td></tr>
+<tr><td><code>--commit</code></td><td><code>HEAD</code></td><td>Commit hash to analyze</td></tr>
+<tr><td><code>--arch</code></td><td>none</td><td>Path to architecture TOML file</td></tr>
+<tr><td><code>--output</code></td><td>stdout</td><td>Output file path</td></tr>
+<tr><td><code>--llm</code></td><td>false</td><td>Enable LLM validation (requires Ollama)</td></tr>
+<tr><td><code>--llm-model</code></td><td><code>llama3.2</code></td><td>Ollama model name</td></tr>
+<tr><td><code>--ollama-url</code></td><td><code>http://localhost:11434</code></td><td>Ollama server URL</td></tr>
+<tr><td><code>--port</code></td><td><code>8080</code></td><td>HTTP server port</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3 style="margin-top:32px;">HTTP API</h3>
+<div class="engine-table-wrap">
+<table class="engine-table">
+<thead><tr><th>Endpoint</th><th>Method</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td><code>POST /v1/analyze</code></td><td>POST</td><td>Run analysis with JSON request body</td></tr>
+<tr><td><code>GET /v1/health</code></td><td>GET</td><td>Component health check</td></tr>
+<tr><td><code>GET /v1/status</code></td><td>GET</td><td>All-engine status report</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+
+<footer>
+<div class="container footer-inner">
+<p>Sutra — Because production failures are predictable.</p>
+<p class="footer-meta">Apache 2.0 &middot; Pure Rust &middot; <a href="https://github.com/darshanredkar/sutra">GitHub</a></p>
+</div>
+</footer>
+
+</body>
+</html>

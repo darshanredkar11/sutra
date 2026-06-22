@@ -1,0 +1,22 @@
+[package]
+name = "sutra-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+sutra-schema.workspace = true
+sutra-common.workspace = true
+sutra-mgtg.workspace = true
+sutra-dependency.workspace = true
+sutra-process.workspace = true
+sutra-orchestrator.workspace = true
+sutra-ci.workspace = true
+sutra-ml.workspace = true
+sutra-llm.workspace = true
+sutra-hitl.workspace = true
+clap.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

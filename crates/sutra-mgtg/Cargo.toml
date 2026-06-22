@@ -1,0 +1,16 @@
+[package]
+name = "sutra-mgtg"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Mgtg integration bridge for Sutra"
+
+[lib]
+crate-type = ["lib"]
+
+[dependencies]
+sutra-schema.workspace = true
+sutra-common.workspace = true
+mgtg.workspace = true
+serde.workspace = true
+serde_json.workspace = true
