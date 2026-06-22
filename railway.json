@@ -1,0 +1,10 @@
+{
+  "build": {
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "sutra server --port $PORT",
+    "restartPolicyType": "on_failure",
+    "numReplicas": 1
+  }
+}
