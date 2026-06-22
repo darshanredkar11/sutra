@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "crates/mgtg",
     "crates/sutra-schema",
     "crates/sutra-common",
     "crates/sutra-mgtg",
@@ -54,4 +55,4 @@ sutra-orchestrator = { path = "crates/sutra-orchestrator" }
 sutra-ci = { path = "crates/sutra-ci" }
 sutra-llm = { path = "crates/sutra-llm" }
 sutra-hitl = { path = "crates/sutra-hitl" }
-mgtg = { path = "/Users/darshanredkar/darshan/spantest" }
+mgtg = { path = "crates/mgtg" }

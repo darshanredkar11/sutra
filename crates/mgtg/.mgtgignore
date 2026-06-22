@@ -1,0 +1,10 @@
+# mgtg default suppression rules
+# Uncomment to suppress specific patterns
+
+# Suppress all info-level findings
+# MGTG-C*
+# MGTG-P*
+
+# Suppress specific findings
+# MGTG-C001
+# MGTG-P000

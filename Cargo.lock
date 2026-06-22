@@ -941,6 +941,7 @@ dependencies = [
  "tree-sitter-javascript",
  "tree-sitter-python",
  "uuid",
+ "wasm-bindgen",
 ]
 
 [[package]]

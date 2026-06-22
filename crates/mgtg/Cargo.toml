@@ -1,0 +1,27 @@
+[package]
+name = "mgtg"
+version = "0.1.0"
+edition = "2024"
+description = "Mathematical Graph-Based Testing & Gap analysis — static analysis suite for memory, complexity, gaps, and computation"
+license = "Apache-2.0"
+authors = ["mgtg contributors"]
+repository = "https://github.com/mgtg/mgtg"
+keywords = ["static-analysis", "memory", "complexity", "testing", "graph"]
+categories = ["development-tools::testing", "development-tools::profiling"]
+
+[lib]
+crate-type = ["lib", "cdylib"]
+
+[dependencies]
+clap = { version = "4", features = ["derive"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+uuid = { version = "1", features = ["v4"] }
+tree-sitter = "0.24"
+tree-sitter-python = "0.23"
+tree-sitter-javascript = "0.23"
+wasm-bindgen = { version = "0.2", optional = true }
+
+[features]
+default = []
+wasm = ["wasm-bindgen"]
