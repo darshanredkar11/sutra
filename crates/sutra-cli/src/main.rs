@@ -20,7 +20,7 @@ enum Commands {
     Analyze {
         /// Path to the repository
         path: PathBuf,
-        /// Engine(s) to run (mgtg, dependency, process, ml, all)
+        /// Engine(s) to run (mgtg, dependency, process, ml, rse, all)
         #[arg(short, long, default_value = "all")]
         engine: String,
         /// Output format (pretty, json, sarif)
@@ -90,20 +90,26 @@ fn build_orchestrator(arch_path: Option<PathBuf>) -> Orchestrator {
         Box::new(sutra_hitl::engine::HitlEngine::new()),
     );
 
+    o.register(
+        Engine::RuntimeSurvivability,
+        Box::new(sutra_rse::engine::RseEngine::new()),
+    );
+
     o
 }
 
 fn parse_engines(s: &str) -> Vec<Engine> {
     match s.to_lowercase().as_str() {
-        "all" => vec![Engine::Mgtg, Engine::Dependency, Engine::Process, Engine::Ml, Engine::Hitl],
+        "all" => vec![Engine::Mgtg, Engine::Dependency, Engine::Process, Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability],
         "mgtg" => vec![Engine::Mgtg],
         "dependency" | "dep" => vec![Engine::Dependency],
         "process" | "proc" => vec![Engine::Process],
         "ml" => vec![Engine::Ml],
         "hitl" => vec![Engine::Hitl],
+        "rse" | "runtime" => vec![Engine::RuntimeSurvivability],
         _ => {
             eprintln!("unknown engine '{}', running all", s);
-            vec![Engine::Mgtg, Engine::Dependency, Engine::Process, Engine::Ml, Engine::Hitl]
+            vec![Engine::Mgtg, Engine::Dependency, Engine::Process, Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability]
         }
     }
 }

@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sutra — Predict Production Software Failures</title>
-<meta name="description" content="Sutra is a deterministic, open-source framework that predicts production software failures by fusing 6 analysis engines into a single composable pipeline. 13K+ lines of Rust, 550+ tests, zero external runtime deps.">
+<meta name="description" content="Sutra is a deterministic, open-source framework that predicts production software failures by fusing 7 analysis engines into a single composable pipeline. 18K+ lines of Rust, 682 tests across 13 crates, zero external runtime deps.">
 <meta property="og:title" content="Sutra — Predict Production Failures Before They Happen">
-<meta property="og:description" content="Deterministic failure prediction for production software. Open-core, 6 engines, 550+ tests, pure Rust.">
+<meta property="og:description" content="Deterministic failure prediction for production software. Open-core, 7 engines, 682 tests, pure Rust.">
 <meta property="og:type" content="website">
 <link rel="stylesheet" href="style.css">
 <script defer src="demo.js"></script>
@@ -44,8 +44,8 @@
 <h1>Predict production software failures<br><span class="accent">before they happen.</span></h1>
 <p class="subtitle">
 Every year, software failures cost enterprises <strong>$2T+</strong> in downtime, incident response, and lost revenue.
-Sutra is a deterministic, open-source framework that analyzes source code across <strong>6 dimensions</strong>
-— complexity, dependency, change history, ML regression, LLM validation, and human feedback —
+Sutra is a deterministic, open-source framework that analyzes source code across <strong>7 dimensions</strong>
+— complexity, dependency, runtime survivability, change history, ML regression, LLM validation, and human feedback —
 and produces a single, actionable <strong>risk score</strong> before you deploy.
 </p>
 <div class="header-actions">
@@ -53,10 +53,10 @@ and produces a single, actionable <strong>risk score</strong> before you deploy.
 <a href="#market" class="btn btn-secondary">Why Sutra &darr;</a>
 </div>
 <div class="header-metrics">
-<div class="hm-item"><span class="hm-num">13K+</span><span class="hm-label">Lines of Rust</span></div>
-<div class="hm-item"><span class="hm-num">552</span><span class="hm-label">Tests</span></div>
-<div class="hm-item"><span class="hm-num">11</span><span class="hm-label">Crates</span></div>
-<div class="hm-item"><span class="hm-num">6</span><span class="hm-label">Fused Engines</span></div>
+<div class="hm-item"><span class="hm-num">18K+</span><span class="hm-label">Lines of Rust</span></div>
+<div class="hm-item"><span class="hm-num">682</span><span class="hm-label">Tests</span></div>
+<div class="hm-item"><span class="hm-num">13</span><span class="hm-label">Crates</span></div>
+<div class="hm-item"><span class="hm-num">7</span><span class="hm-label">Fused Engines</span></div>
 <div class="hm-item"><span class="hm-num">0</span><span class="hm-label">External Runtime Deps</span></div>
 </div>
 </div>
@@ -88,7 +88,7 @@ Sutra bridges the gap between static analysis and production reliability.
 <div class="market-card market-solution">
 <h3>Why Sutra</h3>
 <ul>
-<li><strong>6 engines, one pipeline</strong> — complexity + dependency + process + ML + LLM + HITL, fused into a single risk score</li>
+<li><strong>7 engines, one pipeline</strong> — complexity + dependency + RSE + process + ML + LLM + HITL, fused into a single risk score</li>
 <li><strong>Zero external deps</strong> — runs on any system with Rust and a filesystem. No databases, no queues, no SaaS needed</li>
 <li><strong>Deterministic by default</strong> — same repo + commit = identical results. ML and LLM are optional enrichment</li>
 <li><strong>Open core</strong> — all engines are Apache 2.0. Enterprise features (SSO, audit, hosted) are additive</li>
@@ -118,7 +118,7 @@ Sutra bridges the gap between static analysis and production reliability.
 </tbody>
 </table>
 </div>
-<p class="table-footnote">* LLM engine is optional (disabled by default, enabled via <code>--llm</code> flag). Only Sutra fuses all 6 signals into one composable pipeline.</p>
+<p class="table-footnote">* LLM engine is optional (disabled by default, enabled via <code>--llm</code> flag). Only Sutra fuses all 7 signals into one composable pipeline.</p>
 
 </div>
 </section>
@@ -129,7 +129,7 @@ Sutra bridges the gap between static analysis and production reliability.
 <div class="container">
 <h2>Architecture</h2>
 <p class="section-desc">
-Six engines, each with a specific purpose, fused by a deterministic orchestrator into a single unified risk model.
+Seven engines, each with a specific purpose, fused by a deterministic orchestrator into a single unified risk model.
 Every engine implements the <code>AnalysisEngine</code> trait — add or remove engines without changing the pipeline.
 </p>
 
@@ -148,24 +148,30 @@ Every engine implements the <code>AnalysisEngine</code> trait — add or remove 
 <div class="pipeline-arrow">&rarr;</div>
 <div class="pipeline-step">
 <div class="step-number">3</div>
+<h3>rse</h3>
+<p>Runtime survivability<br><span class="step-detail">Queueing &middot; Memory &middot; CPU</span></p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step">
+<div class="step-number">4</div>
 <h3>process</h3>
 <p>Change mining<br><span class="step-detail">Hassan entropy &middot; 14 JIT</span></p>
 </div>
 <div class="pipeline-arrow">&rarr;</div>
 <div class="pipeline-step">
-<div class="step-number">4</div>
+<div class="step-number">5</div>
 <h3>ml</h3>
 <p>Risk regression<br><span class="step-detail">SGD+L2 &middot; AUC</span></p>
 </div>
 <div class="pipeline-arrow optional">&rarr;</div>
 <div class="pipeline-step optional">
-<div class="step-number">5</div>
+<div class="step-number">6</div>
 <h3>llm</h3>
 <p>Finding validation<br><span class="step-detail">Ollama &middot; opt-in</span></p>
 </div>
 <div class="pipeline-arrow">&rarr;</div>
 <div class="pipeline-step">
-<div class="step-number">6</div>
+<div class="step-number">7</div>
 <h3>hitl</h3>
 <p>Feedback loop<br><span class="step-detail">Auto-adjust &middot; learn</span></p>
 </div>
@@ -258,6 +264,26 @@ holistic picture no single tool can provide.
 <div class="engine-deep-section">
 <h4>Output</h4>
 <p>Per-file <code>FeatureMap</code> (HashMap&lt;String, f64&gt;) with all 14 JIT features persisted to SQLite. Findings for high entropy, churn, and coupling.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-rse">
+<div class="engine-deep-header">
+<div class="engine-deep-icon rse"></div>
+<div>
+<h3>rse — Runtime Survivability Engine <span class="crate-badge">sutra-rse</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Complexity and dependencies only tell you if code is well-structured — they don't tell you if it will survive production traffic. RSE models queueing theory (M/M/1, Little's Law), memory pressure, CPU saturation, GC pressure, and thread starvation for every endpoint. Predicts <em>operational</em> failure before a single request is served.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Logic</h4>
+<p>Weight estimation from JSON schema (raw bytes × runtime expansion). Queueing via M/M/1 utilization ρ = λ/µ, active requests N = ρ/(1−ρ), response time R = (1/µ)/(1−ρ). CPU/memory/GC/thread/latency risk from complexity profile. Final survivability = 1 − max(component risks).</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>SurvivabilityScore</code> [0,1] per endpoint. 7 finding types (SURV, CPU, MEM, GC, THREAD, LATENCY, QUEUE). Max safe RPS, predicted memory/req, queue saturation warnings.</p>
 </div>
 </div>
 </div>
@@ -399,16 +425,20 @@ The model uses <strong>standard scaling + sigmoid</strong> — the same math run
 <div class="step-number">1</div><h3>mgtg</h3><p>complexity</p>
 </div>
 <div class="pipeline-arrow">&rarr;</div>
+<div class="pipeline-step demo-step" data-engine="rse">
+<div class="step-number">3</div><h3>rse</h3><p>survivability</p>
+</div>
+<div class="pipeline-arrow">&rarr;</div>
 <div class="pipeline-step demo-step" data-engine="process">
-<div class="step-number">3</div><h3>process</h3><p>change</p>
+<div class="step-number">4</div><h3>process</h3><p>change</p>
 </div>
 <div class="pipeline-arrow">&rarr;</div>
 <div class="pipeline-step demo-step" data-engine="ml">
-<div class="step-number">4</div><h3>ml</h3><p>regression</p>
+<div class="step-number">5</div><h3>ml</h3><p>regression</p>
 </div>
 <div class="pipeline-arrow">&rarr;</div>
 <div class="pipeline-step demo-step" data-engine="hitl">
-<div class="step-number">6</div><h3>hitl</h3><p>feedback</p>
+<div class="step-number">7</div><h3>hitl</h3><p>feedback</p>
 </div>
 </div>
 </div>
@@ -424,7 +454,7 @@ The model uses <strong>standard scaling + sigmoid</strong> — the same math run
 <h2>Analyze Any Public GitHub Repo</h2>
 <p class="section-desc">
 Paste a GitHub URL and Sutra will clone it (<strong>shallow, 1 branch, blobless</strong>),
-run all 5 engines, and return the risk analysis. Takes ~30&ndash;60s depending on repo size.
+run all 7 engines, and return the risk analysis. Takes ~30&ndash;60s depending on repo size.
 </p>
 
 <div class="live-form-wrap">
@@ -459,10 +489,10 @@ Sutra is actively developed. Here is the planned trajectory from open-source fra
 <div class="roadmap-phase">Now</div>
 <h3>Core Framework</h3>
 <ul>
-<li>6 engines fused into single pipeline</li>
+<li>7 engines fused into single pipeline</li>
 <li>CLI with JSON, SARIF, pretty output</li>
 <li>HTTP API (axum)</li>
-<li>552 tests across 11 crates</li>
+<li>682 tests across 13 crates</li>
 <li>Open core under Apache 2.0</li>
 </ul>
 </div>
@@ -521,7 +551,7 @@ The core analysis engine is and will remain Apache 2.0. Enterprise features are 
 <h3>Open Source</h3>
 <div class="monet-price">Free</div>
 <ul>
-<li>All 6 analysis engines</li>
+<li>All 7 analysis engines</li>
 <li>CLI and HTTP API</li>
 <li>SARIF, JSON, pretty output</li>
 <li>Community support (GitHub Issues)</li>
@@ -580,7 +610,7 @@ Sutra was founded by a software engineer who experienced production failures fir
 <div class="team-avatar">DR</div>
 <h3>Darshan Redkar</h3>
 <span class="team-role">Founder &amp; Lead Developer</span>
-<p>Software engineer with deep experience in production systems, distributed systems, and developer tooling. Built Sutra from first principles — 6 engines, 11 crates, 13K+ lines of Rust — to solve the problem of unpredictable production failures.</p>
+<p>Software engineer with deep experience in production systems, distributed systems, and developer tooling. Built Sutra from first principles — 7 engines, 13 crates, 18K+ lines of Rust — to solve the problem of unpredictable production failures.</p>
 <div class="team-links">
 <a href="https://github.com/darshanredkar">GitHub</a>
 </div>
@@ -596,7 +626,7 @@ Sutra was founded by a software engineer who experienced production failures fir
 <section id="tests" class="section section-dark">
 <div class="container">
 <h2>Engineering Rigor</h2>
-<p class="section-desc"><strong>552 test functions</strong> across 42 test files. Property-based fuzzing (proptest), stress tests (10K entries), edge case coverage (NaN, Infinity, empty, unicode, u32::MAX). Every engine isolated via traits.</p>
+<p class="section-desc"><strong>682 test functions</strong> across 82 source files. Property-based fuzzing (proptest), stress tests (10K entries), edge case coverage (NaN, Infinity, empty, unicode, u32::MAX). Every engine isolated via traits.</p>
 
 <div class="test-grid">
 <div class="test-card"><div class="test-header"><span class="test-crate">sutra-dependency</span><span class="test-count">121</span></div><div class="test-bar"><div class="test-fill" style="width:100%"></div></div><p>Import extraction, Tarjan SCC correctness, architecture rules, fan-in/out, 100-node graph stress, serde, fixture isolation</p></div>
@@ -612,6 +642,8 @@ Sutra was founded by a software engineer who experienced production failures fir
 <div class="test-card"><div class="test-header"><span class="test-crate">sutra-hitl</span><span class="test-count">62</span></div><div class="test-bar"><div class="test-fill" style="width:51%"></div></div><p>10K entry stress test, feedback thresholds, auto-confirm/reject precision, unicode/emoji, u32::MAX line, batch consistency, engine lifecycle</p></div>
 
 <div class="test-card"><div class="test-header"><span class="test-crate">sutra-llm</span><span class="test-count">45</span></div><div class="test-bar"><div class="test-fill" style="width:37%"></div></div><p>Config serde, prompt building, response parser with code fence stripping, confidence clamping, 1K cache stress test, connection error handling</p></div>
+
+<div class="test-card"><div class="test-header"><span class="test-crate">sutra-rse</span><span class="test-count">123</span></div><div class="test-bar"><div class="test-fill" style="width:100%"></div></div><p>Queueing overload/zero-rate/NAN, raw bytes bools/num/unicode, all 5 runtimes GC risk, severity boundaries, all 7 finding types, recommendations, all languages/complexity classes</p></div>
 
 <div class="test-card"><div class="test-header"><span class="test-crate">sutra-ci</span><span class="test-count">32</span></div><div class="test-bar"><div class="test-fill" style="width:26%"></div></div><p>SARIF 2.1.0 schema, 1K findings stress, NaN/Infinity safety, u32::MAX line, PR comment formatting with unicode/emoji/100 findings</p></div>
 
@@ -692,7 +724,7 @@ cargo run -- analyze /path/to/repo --format sarif --output results.sarif</code><
 <table class="engine-table">
 <thead><tr><th>Flag</th><th>Default</th><th>Description</th></tr></thead>
 <tbody>
-<tr><td><code>--engine</code></td><td><code>all</code></td><td>Engine(s): mgtg, dependency, process, ml, hitl, all</td></tr>
+<tr><td><code>--engine</code></td><td><code>all</code></td><td>Engine(s): mgtg, dependency, rse, process, ml, llm, hitl, all</td></tr>
 <tr><td><code>--format</code></td><td><code>pretty</code></td><td>Output format: pretty, json, sarif</td></tr>
 <tr><td><code>--commit</code></td><td><code>HEAD</code></td><td>Commit hash to analyze</td></tr>
 <tr><td><code>--arch</code></td><td>none</td><td>Path to architecture TOML file</td></tr>

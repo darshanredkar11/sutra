@@ -1596,6 +1596,7 @@ dependencies = [
  "sutra-ml",
  "sutra-orchestrator",
  "sutra-process",
+ "sutra-rse",
  "sutra-schema",
  "tokio",
  "tracing",
@@ -1696,6 +1697,7 @@ dependencies = [
  "sutra-dependency",
  "sutra-mgtg",
  "sutra-process",
+ "sutra-rse",
  "sutra-schema",
  "tokio",
  "tower",
@@ -1722,6 +1724,18 @@ dependencies = [
  "thiserror 2.0.18",
  "toml",
  "uuid",
+]
+
+[[package]]
+name = "sutra-rse"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "sutra-common",
+ "sutra-schema",
+ "walkdir",
 ]
 
 [[package]]

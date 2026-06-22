@@ -19,9 +19,10 @@
 6. [ML Engine — Logistic Regression for Defect Prediction](#6-ml-engine)
 7. [LLM Engine — Large Language Model Validation](#7-llm-engine)
 8. [HITL Engine — Human-In-The-Loop Feedback](#8-hitl-engine)
-9. [Orchestrator — Fusion & Risk Aggregation](#9-orchestrator)
-10. [API Server — HTTP Interface](#10-api-server)
-11. [End-to-End Example: Predicting a Production Failure in Python](#11-end-to-end-example)
+9. [RSE Engine — Runtime Survivability Prediction](#9-rse-engine)
+10. [Orchestrator — Fusion & Risk Aggregation](#10-orchestrator)
+11. [API Server — HTTP Interface](#11-api-server)
+12. [End-to-End Example: Predicting a Production Failure in Python](#12-end-to-end-example)
 
 ---
 
@@ -1781,15 +1782,185 @@ def compute_global_f1(stats: PerEngineStats) -> float:
 
 ---
 
-## 9. Orchestrator
+## 9. Runtime Survivability Engine (RSE)
 
 ### 9.1 Purpose
 
+Predict runtime behavior — CPU saturation, memory exhaustion, GC pressure, thread starvation, event-loop blockage, worker exhaustion, throughput ceiling, and latency growth — before execution, using only source code, API contracts, and infrastructure constraints.
+
+Unlike load testing, stress testing, or soak testing, RSE requires zero execution. It is a pure mathematical model.
+
+### 9.2 Inputs
+
+**Source Languages:** Java, Kotlin, Python, JavaScript, TypeScript, Rust, Go (AST-extracted via regex pattern matching).
+
+**REST Contracts:** OpenAPI, Swagger, Spring Controllers, FastAPI Routes, Express Routes, Actix Routes.
+
+**Runtime Profiles:** JVM, NodeJS, CPython, Rust, Go — each with predefined mathematical models. No benchmark required.
+
+### 9.3 Mathematical Model
+
+#### 9.3.1 Request Weight
+
+$W_{\text{req}} = \sum \text{field\_size}$
+
+For JSON payloads, raw byte weight is estimated from field name + value lengths. Arrays: $W_{\text{array}} = N \times W_{\text{element}}$. Nested objects: $W_{\text{obj}} = \sum \text{fields}$.
+
+#### 9.3.2 Deserialization Expansion
+
+Raw JSON is not runtime memory. Expansion factor $E(\text{runtime})$:
+
+| Runtime | $E$ range | Average |
+|---------|-----------|---------|
+| JVM | $3 \leq E \leq 10$ | 6.5 |
+| NodeJS | $2 \leq E \leq 6$ | 4.0 |
+| Python | $4 \leq E \leq 12$ | 8.0 |
+| Rust | $1.5 \leq E \leq 4$ | 2.75 |
+| Go | $2 \leq E \leq 5$ | 3.5 |
+
+Runtime memory per request: $M_{\text{req}} = W_{\text{req}} \times E(\text{runtime})$
+
+#### 9.3.3 Computational Complexity
+
+Extracted from source AST via pattern matching. Complexity classes:
+
+| Class | Risk Factor | Loop Depth | Example |
+|-------|-------------|------------|---------|
+| $O(1)$ | 0.0 | 0 | Constant-time operation |
+| $O(\log n)$ | 0.1 | 0 | Binary search |
+| $O(n)$ | 0.3 | 1 | Single iteration |
+| $O(n \log n)$ | 0.4 | 1 | Sort + iterate |
+| $O(n^2)$ | 0.7 | 2+ | Nested loops |
+| $O(n^3)$ | 0.9 | 3+ | Triple-nested loops |
+| $O(2^n)$ | 1.0 | 4+ | Recursive branching |
+
+#### 9.3.4 Allocation Cost
+
+Temporary allocations $M_{\text{temp}}$ derived from object creation, collections, streams, maps, and intermediate transforms. Total request memory: $M_{\text{total}} = M_{\text{req}} + M_{\text{temp}}$
+
+#### 9.3.5 Runtime Capacity
+
+Each runtime has a capacity model:
+
+- **JVM:** Depends on heap size, thread pool, GC model (default 512MB heap, 200 threads)
+- **NodeJS:** Depends on event loop, LibUV pool (default 256MB, 4 threads)
+- **Python:** Depends on worker count, GIL (default 128MB, 8 workers)
+- **Rust:** Depends on Tokio executors, memory (default 128MB, 512 executors)
+- **Go:** Depends on goroutines, memory (default 128MB, 1000 goroutines)
+
+#### 9.3.6 Queueing Theory (Little's Law)
+
+$L = \lambda W$
+
+Where $L$ = active requests, $\lambda$ = arrival rate, $W$ = response time.
+
+$\rho = \frac{\lambda}{\mu}$
+
+Where $\mu$ = service capacity, $\rho$ = utilization.
+
+**Risk Conditions:**
+
+| $\rho$ Range | Status |
+|-------------|--------|
+| $\rho < 0.6$ | Healthy |
+| $0.6 \leq \rho < 0.8$ | Warning |
+| $0.8 \leq \rho < 1$ | Critical |
+| $\rho \geq 1$ | Failure |
+
+#### 9.3.7 Survivability Score
+
+$\text{CPU}_{\text{risk}} = \text{complexity\_risk} + \text{loop\_penalty} + \text{branch\_penalty}$
+
+$\text{MEM}_{\text{risk}} = \frac{M_{\text{total}} \times \text{concurrency}}{\text{memory\_limit}}$
+
+$\text{GC}_{\text{risk}} = f(\text{runtime}, M_{\text{temp}}, \text{allocations})$
+
+$\text{Thread}_{\text{risk}} = \frac{\lambda}{\text{max\_concurrent} \times 10}$
+
+$\text{Latency}_{\text{risk}} = \text{complexity\_risk} + \text{depth\_penalty} + \text{branch\_penalty}$
+
+$S = 1 - \max(\text{CPU}_{\text{risk}}, \text{MEM}_{\text{risk}}, \text{GC}_{\text{risk}}, \text{Thread}_{\text{risk}}, \text{Latency}_{\text{risk}})$
+
+**Range:** $0.0 \leq S \leq 1.0$
+
+| $S$ Range | Meaning |
+|-----------|---------|
+| $S \geq 0.8$ | Healthy |
+| $0.6 \leq S < 0.8$ | Warning |
+| $0.3 \leq S < 0.6$ | Critical — high risk of failure |
+| $S < 0.3$ | Guaranteed failure under load |
+
+### 9.4 RSE Findings
+
+| ID | Condition | Severity |
+|----|-----------|----------|
+| RSE-SURV | Endpoint survivability score | Varies |
+| RSE-CPU | CPU saturation risk $> 0.6$ | Warning |
+| RSE-MEM | Memory exhaustion risk $> 0.6$ | Warning |
+| RSE-GC | GC pressure risk $> 0.6$ | Warning |
+| RSE-THREAD | Thread starvation risk $> 0.6$ | Error |
+| RSE-LATENCY | Latency growth risk $> 0.6$ | Warning |
+| RSE-QUEUE | Queue utilization $\geq 0.8$ | Error / Critical |
+
+### 9.5 Example Calculation
+
+**Endpoint:** `POST /checkout`
+
+**Runtime:** JVM (512MB heap, 200 threads)
+
+**Source Analysis:** 2 nested for-loops → $O(n^2)$, depth 3, 20 allocations, 15 branches
+
+**Request Schema:** 2KB JSON with nested objects
+
+**Expected RPS:** 500
+
+**Computation:**
+
+1. Raw weight: $W_{\text{req}} = 2048$ bytes
+2. JVM expansion: $E = 6.5$, $M_{\text{req}} = 2048 \times 6.5 = 13312$ bytes
+3. Temp allocations: $M_{\text{temp}} = 256$ bytes, $M_{\text{total}} = 13568$ bytes
+4. CPU risk: $0.7 + 0.15 + 0.075 = 0.925$
+5. Memory risk: $(13568 / (512 \times 1024 \times 1024)) \times 200 \approx 0.005$
+6. GC risk: JVM allocation rate → $0.6$
+7. Thread risk: $500 / (200 \times 10) = 0.25$
+8. Latency risk: $0.7 + 0.09 + 0.15 = 0.94$
+9. Queue utilization: $\rho = 500 / 2000 = 0.25$
+10. Survivability: $S = 1 - \max(0.925, 0.005, 0.6, 0.25, 0.94) = 0.06$
+
+**Result:** $S = 0.06$ → Guaranteed failure under load. Queue is healthy ($\rho = 0.25$) but computational complexity ($O(n^2)$) and latency growth dominate.
+
+**Findings:**
+- `RSE-CPU`: CPU saturation risk 0.925 — complexity O(n²)
+- `RSE-LATENCY`: Latency growth risk 0.94 — estimated 4.2s response time
+- `RSE-GC`: GC pressure risk 0.6 — 20 allocations per request
+
+### 9.6 Orchestrator Integration
+
+```rust
+OverallRisk = max(
+    MGTG,
+    Dependency,
+    Process,
+    RuntimeSurvivability,
+    ML,
+    LLM,
+    HITL
+)
+```
+
+RSE becomes a first-class engine inside Sutra, registered as `Engine::RuntimeSurvivability` with short name `"rse"`.
+
+---
+
+## 10. Orchestrator
+
+### 10.1 Purpose
+
 Coordinate all engines, fuse their results, and produce a single unified analysis.
 
-### 9.2 Mathematical Formulas
+### 10.2 Mathematical Formulas
 
-#### 9.2.1 Risk Fusion (Max Strategy)
+#### 10.2.1 Risk Fusion (Max Strategy)
 
 $$\text{Risk}_{\text{final}} = \min\left(1.0, \max_{e \in \text{engines}} \text{Risk}_e\right)$$
 
@@ -1798,7 +1969,7 @@ If any engine produces NaN, it is treated as 0.0.
 **Rationale:** A single high-risk signal from any engine is sufficient to flag a commit.
 Max fusion is conservative — it prefers false positives over false negatives.
 
-#### 9.2.2 Metrics Merging (Per-Field Max)
+#### 10.2.2 Metrics Merging (Per-Field Max)
 
 For each metric field:
 
@@ -1806,13 +1977,13 @@ $$M_{\text{merged},i} = \max_{e \in \text{engines}} M_{e,i}$$
 
 This means the merged metrics reflect the worst-case across all engines.
 
-#### 9.2.3 Blocked Merge
+#### 10.2.3 Blocked Merge
 
 $$\text{Blocked} = \bigvee_{e \in \text{engines}} \text{Blocked}_e$$
 
 If any engine says blocked_merge, the commit is blocked.
 
-#### 9.2.4 Panic Safety
+#### 10.2.4 Panic Safety
 
 Every engine runs inside `catch_unwind`:
 
@@ -1825,7 +1996,7 @@ let engine_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
 On panic, an error finding is created:
 $$\text{Finding}_{\text{panic}} = (\text{id}: \text{ORCH-}\{\text{engine}\}-\text{ERR}, \text{severity}: \text{Error})$$
 
-### 9.3 Code Implementation
+### 10.3 Code Implementation
 
 #### Rust (production)
 
@@ -1968,9 +2139,9 @@ class Orchestrator:
 
 ---
 
-## 10. API Server
+## 11. API Server
 
-### 10.1 Endpoints
+### 11.1 Endpoints
 
 | Method | Path | Description |
 |--------|------|-------------|
@@ -1980,7 +2151,7 @@ class Orchestrator:
 | GET | `/v1/health` | Health check for all engines |
 | GET | `/v1/status` | Server version, uptime, registered engines |
 
-### 10.2 Risk Labels
+### 11.2 Risk Labels
 
 $$\text{Label} = \begin{cases}
 \text{LOW} & \text{if } \text{Risk} < 0.3 \\
@@ -1989,7 +2160,7 @@ $$\text{Label} = \begin{cases}
 \text{CRITICAL} & \text{if } \text{Risk} \geq 0.8
 \end{cases}$$
 
-### 10.3 Demo Endpoint Algorithm
+### 11.3 Demo Endpoint Algorithm
 
 ```
 POST /v1/demo {"repo_url": "https://github.com/owner/repo"}
@@ -2006,7 +2177,7 @@ POST /v1/demo {"repo_url": "https://github.com/owner/repo"}
 
 ---
 
-## 11. End-to-End Example
+## 12. End-to-End Example
 
 ### Predicting a Production Failure in Python
 
@@ -2866,6 +3037,7 @@ FINAL RESULT
 | ML | $J = -\frac{1}{n}\sum[y\ln\hat{y} + (1-y)\ln(1-\hat{y})] + \frac{\lambda}{2n}\sum w^2$ | [0,$\infty$) | Log-loss + L2 |
 | ORCH | $\text{Risk}_{\text{final}} = \min(1, \max_e \text{Risk}_e)$ | [0,1] | Max fusion |
 | HITL | $P_e = \frac{C_e}{C_e + F_e}$ | [0,1] | Precision per engine |
+| RSE | $S = 1 - \max(\text{CPU}, \text{MEM}, \text{GC}, \text{Thread}, \text{Latency})$ | [0,1] | Higher = more survivable |
 
 ---
 

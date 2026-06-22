@@ -12,6 +12,7 @@ sutra-common.workspace = true
 sutra-mgtg.workspace = true
 sutra-dependency.workspace = true
 sutra-process.workspace = true
+sutra-rse.workspace = true
 tokio.workspace = true
 axum.workspace = true
 tower-http.workspace = true

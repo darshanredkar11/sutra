@@ -11,10 +11,11 @@ pub enum Engine {
     Dependency,
     Ml,
     Hitl,
+    RuntimeSurvivability,
 }
 
 impl Engine {
-    pub const ALL: [Engine; 5] = [Engine::Mgtg, Engine::Process, Engine::Dependency, Engine::Ml, Engine::Hitl];
+    pub const ALL: [Engine; 6] = [Engine::Mgtg, Engine::Process, Engine::Dependency, Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability];
 
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -23,6 +24,7 @@ impl Engine {
             Engine::Dependency => "dependency",
             Engine::Ml => "ml",
             Engine::Hitl => "hitl",
+            Engine::RuntimeSurvivability => "rse",
         }
     }
 
@@ -33,6 +35,7 @@ impl Engine {
             "dependency" => Some(Engine::Dependency),
             "ml" => Some(Engine::Ml),
             "hitl" => Some(Engine::Hitl),
+            "rse" | "runtime" => Some(Engine::RuntimeSurvivability),
             _ => None,
         }
     }
@@ -199,6 +202,14 @@ pub struct MetricsSummary {
     pub dependency_fan_out_max: f64,
     #[serde(default)]
     pub circular_dependencies: u32,
+    #[serde(default)]
+    pub rse_survivability: f64,
+    #[serde(default)]
+    pub rse_complexity_max: f64,
+    #[serde(default)]
+    pub rse_memory_per_request: f64,
+    #[serde(default)]
+    pub rse_safe_rps: f64,
 }
 
 impl MetricsSummary {
@@ -211,6 +222,10 @@ impl MetricsSummary {
             || self.dependency_fan_in_max != 0.0
             || self.dependency_fan_out_max != 0.0
             || self.circular_dependencies != 0
+            || self.rse_survivability != 0.0
+            || self.rse_complexity_max != 0.0
+            || self.rse_memory_per_request != 0.0
+            || self.rse_safe_rps != 0.0
     }
 }
 
@@ -380,7 +395,7 @@ mod tests {
 
     #[test]
     fn test_engine_all_includes_all() {
-        assert_eq!(Engine::ALL.len(), 5);
+        assert_eq!(Engine::ALL.len(), 6);
     }
 
     #[test]
@@ -390,6 +405,7 @@ mod tests {
         assert_eq!(Engine::Dependency.as_str(), "dependency");
         assert_eq!(Engine::Ml.as_str(), "ml");
         assert_eq!(Engine::Hitl.as_str(), "hitl");
+        assert_eq!(Engine::RuntimeSurvivability.as_str(), "rse");
     }
 
     #[test]
@@ -399,6 +415,8 @@ mod tests {
         assert_eq!(Engine::from_name("dependency"), Some(Engine::Dependency));
         assert_eq!(Engine::from_name("ml"), Some(Engine::Ml));
         assert_eq!(Engine::from_name("hitl"), Some(Engine::Hitl));
+        assert_eq!(Engine::from_name("rse"), Some(Engine::RuntimeSurvivability));
+        assert_eq!(Engine::from_name("runtime"), Some(Engine::RuntimeSurvivability));
         assert_eq!(Engine::from_name("unknown"), None);
     }
 
@@ -596,6 +614,10 @@ mod tests {
             dependency_fan_in_max: 0.0,
             dependency_fan_out_max: 0.0,
             circular_dependencies: 0,
+            rse_survivability: 0.0,
+            rse_complexity_max: 0.0,
+            rse_memory_per_request: 0.0,
+            rse_safe_rps: 0.0,
         };
         assert!(!m.any_non_default());
     }
@@ -626,6 +648,10 @@ mod tests {
             dependency_fan_in_max: 30.0,
             dependency_fan_out_max: 15.0,
             circular_dependencies: 2,
+            rse_survivability: 0.85,
+            rse_complexity_max: 3.0,
+            rse_memory_per_request: 4096.0,
+            rse_safe_rps: 500.0,
         };
         let json = serde_json::to_string(&m).unwrap();
         let back: MetricsSummary = serde_json::from_str(&json).unwrap();
@@ -1013,6 +1039,7 @@ include_metrics = true
             Engine::Dependency,
             Engine::Ml,
             Engine::Hitl,
+            Engine::RuntimeSurvivability,
         ])
     }
 
@@ -1073,9 +1100,13 @@ include_metrics = true
             0.0f64..1e4,
             0.0f64..1e4,
             any::<u32>(),
+            0.0f64..1.0,
+            0.0f64..1e4,
+            0.0f64..1e9,
+            0.0f64..1e5,
         )
             .prop_map(
-                |(cmax, cogmax, nmax, tfunc, tfiles, dfan_in, dfan_out, circ)| MetricsSummary {
+                |(cmax, cogmax, nmax, tfunc, tfiles, dfan_in, dfan_out, circ, rse_surv, rse_cplx, rse_mem, rse_rps)| MetricsSummary {
                     cyclomatic_max: cmax,
                     cognitive_max: cogmax,
                     nesting_max: nmax,
@@ -1084,6 +1115,10 @@ include_metrics = true
                     dependency_fan_in_max: dfan_in,
                     dependency_fan_out_max: dfan_out,
                     circular_dependencies: circ,
+                    rse_survivability: rse_surv,
+                    rse_complexity_max: rse_cplx,
+                    rse_memory_per_request: rse_mem,
+                    rse_safe_rps: rse_rps,
                 },
             )
     }
@@ -1261,6 +1296,10 @@ include_metrics = true
             dependency_fan_in_max: f64::MAX,
             dependency_fan_out_max: f64::MAX,
             circular_dependencies: u32::MAX,
+            rse_survivability: 1.0,
+            rse_complexity_max: f64::MAX,
+            rse_memory_per_request: f64::MAX,
+            rse_safe_rps: f64::MAX,
         };
         let json = serde_json::to_string(&m).unwrap();
         let back: MetricsSummary = serde_json::from_str(&json).unwrap();

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Documentation — Sutra</title>
-<meta name="description" content="Complete mathematical and computational reference for Sutra's 6 analysis engines.">
+<meta name="description" content="Complete mathematical and computational reference for Sutra's analysis engines including Runtime Survivability.">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -68,15 +68,22 @@
       <a href="#81-purpose" class="toc-level-2">8.1 Purpose</a>
       <a href="#82-mathematical-formulas" class="toc-level-2">8.2 Mathematical Formulas</a>
       <a href="#83-code-implementation" class="toc-level-2">8.3 Code Implementation</a>
-      <a href="#9-orchestrator" class="toc-level-1">9. Orchestrator</a>
+      <a href="#9-runtime-survivability-engine-rse" class="toc-level-1">9. Runtime Survivability Engine (RSE)</a>
       <a href="#91-purpose" class="toc-level-2">9.1 Purpose</a>
-      <a href="#92-mathematical-formulas" class="toc-level-2">9.2 Mathematical Formulas</a>
-      <a href="#93-code-implementation" class="toc-level-2">9.3 Code Implementation</a>
-      <a href="#10-api-server" class="toc-level-1">10. API Server</a>
-      <a href="#101-endpoints" class="toc-level-2">10.1 Endpoints</a>
-      <a href="#102-risk-labels" class="toc-level-2">10.2 Risk Labels</a>
-      <a href="#103-demo-endpoint-algorithm" class="toc-level-2">10.3 Demo Endpoint Algorithm</a>
-      <a href="#11-end-to-end-example" class="toc-level-1">11. End-to-End Example</a>
+      <a href="#92-inputs" class="toc-level-2">9.2 Inputs</a>
+      <a href="#93-mathematical-model" class="toc-level-2">9.3 Mathematical Model</a>
+      <a href="#94-rse-findings" class="toc-level-2">9.4 RSE Findings</a>
+      <a href="#95-example-calculation" class="toc-level-2">9.5 Example Calculation</a>
+      <a href="#96-orchestrator-integration" class="toc-level-2">9.6 Orchestrator Integration</a>
+      <a href="#10-orchestrator" class="toc-level-1">10. Orchestrator</a>
+      <a href="#101-purpose" class="toc-level-2">10.1 Purpose</a>
+      <a href="#102-mathematical-formulas" class="toc-level-2">10.2 Mathematical Formulas</a>
+      <a href="#103-code-implementation" class="toc-level-2">10.3 Code Implementation</a>
+      <a href="#11-api-server" class="toc-level-1">11. API Server</a>
+      <a href="#111-endpoints" class="toc-level-2">11.1 Endpoints</a>
+      <a href="#112-risk-labels" class="toc-level-2">11.2 Risk Labels</a>
+      <a href="#113-demo-endpoint-algorithm" class="toc-level-2">11.3 Demo Endpoint Algorithm</a>
+      <a href="#12-end-to-end-example" class="toc-level-1">12. End-to-End Example</a>
       <a href="#predicting-a-production-failure-in-python" class="toc-level-2">Predicting a Production Failure in Python</a>
       <a href="#expected-output" class="toc-level-2">Expected Output</a>
       <a href="#appendix-all-formulas-at-a-glance" class="toc-level-1">Appendix: All Formulas at a Glance</a>
@@ -100,14 +107,15 @@
 <li><a href="#6-ml-engine">ML Engine — Logistic Regression for Defect Prediction</a></li>
 <li><a href="#7-llm-engine">LLM Engine — Large Language Model Validation</a></li>
 <li><a href="#8-hitl-engine">HITL Engine — Human-In-The-Loop Feedback</a></li>
-<li><a href="#9-orchestrator">Orchestrator — Fusion &amp; Risk Aggregation</a></li>
-<li><a href="#10-api-server">API Server — HTTP Interface</a></li>
-<li><a href="#11-end-to-end-example">End-to-End Example: Predicting a Production Failure in Python</a></li>
+<li><a href="#9-rse-engine">RSE Engine — Runtime Survivability Prediction</a></li>
+<li><a href="#10-orchestrator">Orchestrator — Fusion &amp; Risk Aggregation</a></li>
+<li><a href="#11-api-server">API Server — HTTP Interface</a></li>
+<li><a href="#12-end-to-end-example">End-to-End Example: Predicting a Production Failure in Python</a></li>
 </ol>
 <hr>
 <h2 id="1-philosophy-amp-architecture">1. Philosophy &amp; Architecture</h2>
 <h3 id="11-the-core-insight">1.1 The Core Insight</h3>
-<p>Production software failures are rarely caused by a single defect. They emerge from the<br><em>interaction</em> of multiple risk factors: complex code, tangled dependencies, chaotic<br>development processes, and blind spots in review. Sutra fuses <strong>six analysis engines</strong><br>into one composable pipeline, producing a single deterministic risk score for every<br>commit.</p>
+<p>Production software failures are rarely caused by a single defect. They emerge from the<br><em>interaction</em> of multiple risk factors: complex code, tangled dependencies, chaotic<br>development processes, and blind spots in review. Sutra fuses <strong>seven analysis engines</strong><br>into one composable pipeline, producing a single deterministic risk score for every<br>commit.</p>
 <h3 id="12-architecture-overview">1.2 Architecture Overview</h3>
 <pre><code>┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │  MGTG Engine │     │ Dependency   │     │  Process     │
@@ -1799,29 +1807,289 @@ def compute_global_f1(stats: PerEngineStats) -&gt; float:
     return 2 * precision * recall / (precision + recall)
 </code></pre>
 <hr>
-<h2 id="9-orchestrator">9. Orchestrator</h2>
+<h2 id="9-runtime-survivability-engine-rse">9. Runtime Survivability Engine (RSE)</h2>
 <h3 id="91-purpose">9.1 Purpose</h3>
+<p>Predict runtime behavior — CPU saturation, memory exhaustion, GC pressure, thread starvation, event-loop blockage, worker exhaustion, throughput ceiling, and latency growth — before execution, using only source code, API contracts, and infrastructure constraints.</p>
+<p>Unlike load testing, stress testing, or soak testing, RSE requires zero execution. It is a pure mathematical model.</p>
+<h3 id="92-inputs">9.2 Inputs</h3>
+<p><strong>Source Languages:</strong> Java, Kotlin, Python, JavaScript, TypeScript, Rust, Go (AST-extracted via regex pattern matching).</p>
+<p><strong>REST Contracts:</strong> OpenAPI, Swagger, Spring Controllers, FastAPI Routes, Express Routes, Actix Routes.</p>
+<p><strong>Runtime Profiles:</strong> JVM, NodeJS, CPython, Rust, Go — each with predefined mathematical models. No benchmark required.</p>
+<h3 id="93-mathematical-model">9.3 Mathematical Model</h3>
+<h4>9.3.1 Request Weight</h4>
+<p>$W_{\text{req}} = \sum \text{field_size}$</p>
+<p>For JSON payloads, raw byte weight is estimated from field name + value lengths. Arrays: $W_{\text{array}} = N \times W_{\text{element}}$. Nested objects: $W_{\text{obj}} = \sum \text{fields}$.</p>
+<h4>9.3.2 Deserialization Expansion</h4>
+<p>Raw JSON is not runtime memory. Expansion factor $E(\text{runtime})$:</p>
+<table>
+<thead>
+<tr>
+<th>Runtime</th>
+<th>$E$ range</th>
+<th>Average</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>JVM</td>
+<td>$3 \leq E \leq 10$</td>
+<td>6.5</td>
+</tr>
+<tr>
+<td>NodeJS</td>
+<td>$2 \leq E \leq 6$</td>
+<td>4.0</td>
+</tr>
+<tr>
+<td>Python</td>
+<td>$4 \leq E \leq 12$</td>
+<td>8.0</td>
+</tr>
+<tr>
+<td>Rust</td>
+<td>$1.5 \leq E \leq 4$</td>
+<td>2.75</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>$2 \leq E \leq 5$</td>
+<td>3.5</td>
+</tr>
+</tbody></table>
+<p>Runtime memory per request: $M_{\text{req}} = W_{\text{req}} \times E(\text{runtime})$</p>
+<h4>9.3.3 Computational Complexity</h4>
+<p>Extracted from source AST via pattern matching. Complexity classes:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Risk Factor</th>
+<th>Loop Depth</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$O(1)$</td>
+<td>0.0</td>
+<td>0</td>
+<td>Constant-time operation</td>
+</tr>
+<tr>
+<td>$O(\log n)$</td>
+<td>0.1</td>
+<td>0</td>
+<td>Binary search</td>
+</tr>
+<tr>
+<td>$O(n)$</td>
+<td>0.3</td>
+<td>1</td>
+<td>Single iteration</td>
+</tr>
+<tr>
+<td>$O(n \log n)$</td>
+<td>0.4</td>
+<td>1</td>
+<td>Sort + iterate</td>
+</tr>
+<tr>
+<td>$O(n^2)$</td>
+<td>0.7</td>
+<td>2+</td>
+<td>Nested loops</td>
+</tr>
+<tr>
+<td>$O(n^3)$</td>
+<td>0.9</td>
+<td>3+</td>
+<td>Triple-nested loops</td>
+</tr>
+<tr>
+<td>$O(2^n)$</td>
+<td>1.0</td>
+<td>4+</td>
+<td>Recursive branching</td>
+</tr>
+</tbody></table>
+<h4>9.3.4 Allocation Cost</h4>
+<p>Temporary allocations $M_{\text{temp}}$ derived from object creation, collections, streams, maps, and intermediate transforms. Total request memory: $M_{\text{total}} = M_{\text{req}} + M_{\text{temp}}$</p>
+<h4>9.3.5 Runtime Capacity</h4>
+<p>Each runtime has a capacity model:</p>
+<ul>
+<li><strong>JVM:</strong> Depends on heap size, thread pool, GC model (default 512MB heap, 200 threads)</li>
+<li><strong>NodeJS:</strong> Depends on event loop, LibUV pool (default 256MB, 4 threads)</li>
+<li><strong>Python:</strong> Depends on worker count, GIL (default 128MB, 8 workers)</li>
+<li><strong>Rust:</strong> Depends on Tokio executors, memory (default 128MB, 512 executors)</li>
+<li><strong>Go:</strong> Depends on goroutines, memory (default 128MB, 1000 goroutines)</li>
+</ul>
+<h4>9.3.6 Queueing Theory (Little&#39;s Law)</h4>
+<p>$L = \lambda W$</p>
+<p>Where $L$ = active requests, $\lambda$ = arrival rate, $W$ = response time.</p>
+<p>$\rho = \frac{\lambda}{\mu}$</p>
+<p>Where $\mu$ = service capacity, $\rho$ = utilization.</p>
+<p><strong>Risk Conditions:</strong></p>
+<table>
+<thead>
+<tr>
+<th>$\rho$ Range</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$\rho &lt; 0.6$</td>
+<td>Healthy</td>
+</tr>
+<tr>
+<td>$0.6 \leq \rho &lt; 0.8$</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>$0.8 \leq \rho &lt; 1$</td>
+<td>Critical</td>
+</tr>
+<tr>
+<td>$\rho \geq 1$</td>
+<td>Failure</td>
+</tr>
+</tbody></table>
+<h4>9.3.7 Survivability Score</h4>
+<p>$\text{CPU}_{\text{risk}} = \text{complexity_risk} + \text{loop_penalty} + \text{branch_penalty}$</p>
+<p>$\text{MEM}<em>{\text{risk}} = \frac{M</em>{\text{total}} \times \text{concurrency}}{\text{memory_limit}}$</p>
+<p>$\text{GC}<em>{\text{risk}} = f(\text{runtime}, M</em>{\text{temp}}, \text{allocations})$</p>
+<p>$\text{Thread}_{\text{risk}} = \frac{\lambda}{\text{max_concurrent} \times 10}$</p>
+<p>$\text{Latency}_{\text{risk}} = \text{complexity_risk} + \text{depth_penalty} + \text{branch_penalty}$</p>
+<p>$S = 1 - \max(\text{CPU}<em>{\text{risk}}, \text{MEM}</em>{\text{risk}}, \text{GC}<em>{\text{risk}}, \text{Thread}</em>{\text{risk}}, \text{Latency}_{\text{risk}})$</p>
+<p><strong>Range:</strong> $0.0 \leq S \leq 1.0$</p>
+<table>
+<thead>
+<tr>
+<th>$S$ Range</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>$S \geq 0.8$</td>
+<td>Healthy</td>
+</tr>
+<tr>
+<td>$0.6 \leq S &lt; 0.8$</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>$0.3 \leq S &lt; 0.6$</td>
+<td>Critical — high risk of failure</td>
+</tr>
+<tr>
+<td>$S &lt; 0.3$</td>
+<td>Guaranteed failure under load</td>
+</tr>
+</tbody></table>
+<h3 id="94-rse-findings">9.4 RSE Findings</h3>
+<table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Condition</th>
+<th>Severity</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RSE-SURV</td>
+<td>Endpoint survivability score</td>
+<td>Varies</td>
+</tr>
+<tr>
+<td>RSE-CPU</td>
+<td>CPU saturation risk $&gt; 0.6$</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>RSE-MEM</td>
+<td>Memory exhaustion risk $&gt; 0.6$</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>RSE-GC</td>
+<td>GC pressure risk $&gt; 0.6$</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>RSE-THREAD</td>
+<td>Thread starvation risk $&gt; 0.6$</td>
+<td>Error</td>
+</tr>
+<tr>
+<td>RSE-LATENCY</td>
+<td>Latency growth risk $&gt; 0.6$</td>
+<td>Warning</td>
+</tr>
+<tr>
+<td>RSE-QUEUE</td>
+<td>Queue utilization $\geq 0.8$</td>
+<td>Error / Critical</td>
+</tr>
+</tbody></table>
+<h3 id="95-example-calculation">9.5 Example Calculation</h3>
+<p><strong>Endpoint:</strong> <code>POST /checkout</code></p>
+<p><strong>Runtime:</strong> JVM (512MB heap, 200 threads)</p>
+<p><strong>Source Analysis:</strong> 2 nested for-loops → $O(n^2)$, depth 3, 20 allocations, 15 branches</p>
+<p><strong>Request Schema:</strong> 2KB JSON with nested objects</p>
+<p><strong>Expected RPS:</strong> 500</p>
+<p><strong>Computation:</strong></p>
+<ol>
+<li>Raw weight: $W_{\text{req}} = 2048$ bytes</li>
+<li>JVM expansion: $E = 6.5$, $M_{\text{req}} = 2048 \times 6.5 = 13312$ bytes</li>
+<li>Temp allocations: $M_{\text{temp}} = 256$ bytes, $M_{\text{total}} = 13568$ bytes</li>
+<li>CPU risk: $0.7 + 0.15 + 0.075 = 0.925$</li>
+<li>Memory risk: $(13568 / (512 \times 1024 \times 1024)) \times 200 \approx 0.005$</li>
+<li>GC risk: JVM allocation rate → $0.6$</li>
+<li>Thread risk: $500 / (200 \times 10) = 0.25$</li>
+<li>Latency risk: $0.7 + 0.09 + 0.15 = 0.94$</li>
+<li>Queue utilization: $\rho = 500 / 2000 = 0.25$</li>
+<li>Survivability: $S = 1 - \max(0.925, 0.005, 0.6, 0.25, 0.94) = 0.06$</li>
+</ol>
+<p><strong>Result:</strong> $S = 0.06$ → Guaranteed failure under load. Queue is healthy ($\rho = 0.25$) but computational complexity ($O(n^2)$) and latency growth dominate.</p>
+<p><strong>Findings:</strong></p>
+<ul>
+<li><code>RSE-CPU</code>: CPU saturation risk 0.925 — complexity O(n²)</li>
+<li><code>RSE-LATENCY</code>: Latency growth risk 0.94 — estimated 4.2s response time</li>
+<li><code>RSE-GC</code>: GC pressure risk 0.6 — 20 allocations per request</li>
+</ul>
+<h3 id="96-orchestrator-integration">9.6 Orchestrator Integration</h3>
+<pre><code class="language-rust">OverallRisk = max(
+    MGTG,
+    Dependency,
+    Process,
+    RuntimeSurvivability,
+    ML,
+    LLM,
+    HITL
+)
+</code></pre>
+<p>RSE becomes a first-class engine inside Sutra, registered as <code>Engine::RuntimeSurvivability</code> with short name <code>&quot;rse&quot;</code>.</p>
+<hr>
+<h2 id="10-orchestrator">10. Orchestrator</h2>
+<h3 id="101-purpose">10.1 Purpose</h3>
 <p>Coordinate all engines, fuse their results, and produce a single unified analysis.</p>
-<h3 id="92-mathematical-formulas">9.2 Mathematical Formulas</h3>
-<h4>9.2.1 Risk Fusion (Max Strategy)</h4>
+<h3 id="102-mathematical-formulas">10.2 Mathematical Formulas</h3>
+<h4>10.2.1 Risk Fusion (Max Strategy)</h4>
 <p>$$\text{Risk}<em>{\text{final}} = \min\left(1.0, \max</em>{e \in \text{engines}} \text{Risk}_e\right)$$</p>
 <p>If any engine produces NaN, it is treated as 0.0.</p>
 <p><strong>Rationale:</strong> A single high-risk signal from any engine is sufficient to flag a commit.<br>Max fusion is conservative — it prefers false positives over false negatives.</p>
-<h4>9.2.2 Metrics Merging (Per-Field Max)</h4>
+<h4>10.2.2 Metrics Merging (Per-Field Max)</h4>
 <p>For each metric field:</p>
 <p>$$M_{\text{merged},i} = \max_{e \in \text{engines}} M_{e,i}$$</p>
 <p>This means the merged metrics reflect the worst-case across all engines.</p>
-<h4>9.2.3 Blocked Merge</h4>
+<h4>10.2.3 Blocked Merge</h4>
 <p>$$\text{Blocked} = \bigvee_{e \in \text{engines}} \text{Blocked}_e$$</p>
 <p>If any engine says blocked_merge, the commit is blocked.</p>
-<h4>9.2.4 Panic Safety</h4>
+<h4>10.2.4 Panic Safety</h4>
 <p>Every engine runs inside <code>catch_unwind</code>:</p>
 <pre><code class="language-rust">let engine_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
     engine.analyze(request)
 }));
 </code></pre>
 <p>On panic, an error finding is created:<br>$$\text{Finding}_{\text{panic}} = (\text{id}: \text{ORCH-}{\text{engine}}-\text{ERR}, \text{severity}: \text{Error})$$</p>
-<h3 id="93-code-implementation">9.3 Code Implementation</h3>
+<h3 id="103-code-implementation">10.3 Code Implementation</h3>
 <h4>Rust (production)</h4>
 <pre><code class="language-rust">// crates/sutra-orchestrator/src/coordinator.rs
 pub fn analyze(&amp;self, request: &amp;AnalyzeRequest) -&gt; SutraResult&lt;AnalysisResult&gt; {
@@ -1956,8 +2224,8 @@ class Orchestrator:
         }
 </code></pre>
 <hr>
-<h2 id="10-api-server">10. API Server</h2>
-<h3 id="101-endpoints">10.1 Endpoints</h3>
+<h2 id="11-api-server">11. API Server</h2>
+<h3 id="111-endpoints">11.1 Endpoints</h3>
 <table>
 <thead>
 <tr>
@@ -1992,9 +2260,9 @@ class Orchestrator:
 <td>Server version, uptime, registered engines</td>
 </tr>
 </tbody></table>
-<h3 id="102-risk-labels">10.2 Risk Labels</h3>
+<h3 id="112-risk-labels">11.2 Risk Labels</h3>
 <p>$$\text{Label} = \begin{cases}<br>\text{LOW} &amp; \text{if } \text{Risk} &lt; 0.3 \<br>\text{MODERATE} &amp; \text{if } 0.3 \leq \text{Risk} &lt; 0.6 \<br>\text{HIGH} &amp; \text{if } 0.6 \leq \text{Risk} &lt; 0.8 \<br>\text{CRITICAL} &amp; \text{if } \text{Risk} \geq 0.8<br>\end{cases}$$</p>
-<h3 id="103-demo-endpoint-algorithm">10.3 Demo Endpoint Algorithm</h3>
+<h3 id="113-demo-endpoint-algorithm">11.3 Demo Endpoint Algorithm</h3>
 <pre><code>POST /v1/demo {&quot;repo_url&quot;: &quot;https://github.com/owner/repo&quot;}
 
 1. Validate URL is a public GitHub URL
@@ -2007,7 +2275,7 @@ class Orchestrator:
 8. Return JSON response
 </code></pre>
 <hr>
-<h2 id="11-end-to-end-example">11. End-to-End Example</h2>
+<h2 id="12-end-to-end-example">12. End-to-End Example</h2>
 <h3 id="predicting-a-production-failure-in-python">Predicting a Production Failure in Python</h3>
 <p>The following comprehensive example simulates a <em>near-production failure</em> using<br>Sutra&#39;s methodology. It creates a synthetic microservice repository with deliberately<br>dangerous characteristics, runs it through all engines, and shows how each formula<br>contributes to the final risk score.</p>
 <pre><code class="language-python">&quot;&quot;&quot;
@@ -2911,10 +3179,15 @@ FINAL RESULT
 <td>[0,1]</td>
 <td>Precision per engine</td>
 </tr>
+<tr>
+<td>RSE</td>
+<td>$S = 1 - \max(\text{CPU}, \text{MEM}, \text{GC}, \text{Thread}, \text{Latency})$</td>
+<td>[0,1]</td>
+<td>Higher = more survivable</td>
+</tr>
 </tbody></table>
 <hr>
 <p><em>This document is a living reference. As Sutra evolves, new formulas and engines<br>will be added. For the latest version, see the source code at<br><code>github.com/darshanredkar11/sutra</code>.</em></p>
-
 
 </main>
 </div>

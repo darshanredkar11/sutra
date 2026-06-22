@@ -1060,6 +1060,7 @@ footer {
 .engine-deep-icon.ml   { background: #818cf8; }
 .engine-deep-icon.llm  { background: #6366f1; opacity: 0.6; }
 .engine-deep-icon.hitl { background: #a5b4fc; }
+.engine-deep-icon.rse  { background: #f59e0b; }
 .engine-deep-icon.orch { background: linear-gradient(135deg, #6366f1, #a5b4fc); }
 
 .engine-deep-body {

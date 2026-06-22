@@ -61,6 +61,10 @@ impl Orchestrator {
                         m.dependency_fan_in_max = m.dependency_fan_in_max.max(metrics.dependency_fan_in_max);
                         m.dependency_fan_out_max = m.dependency_fan_out_max.max(metrics.dependency_fan_out_max);
                         m.circular_dependencies = m.circular_dependencies.max(metrics.circular_dependencies);
+                        m.rse_survivability = m.rse_survivability.max(metrics.rse_survivability);
+                        m.rse_complexity_max = m.rse_complexity_max.max(metrics.rse_complexity_max);
+                        m.rse_memory_per_request = m.rse_memory_per_request.max(metrics.rse_memory_per_request);
+                        m.rse_safe_rps = m.rse_safe_rps.max(metrics.rse_safe_rps);
                     }
                 }
                 Ok(Err(e)) => {

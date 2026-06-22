@@ -6,14 +6,14 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0)
 [![SARIF](https://img.shields.io/badge/SARIF-2.1.0-orange)](https://docs.oasis-open.org/sarif/sarif/v2.1.0/)
 
-Sutra is a deterministic, math-first framework that estimates production failure risk from source code. It fuses five analysis engines — complexity metrics, dependency analysis, process/change mining, logistic regression, and LLM validation — into a single composable pipeline.
+Sutra is a deterministic, math-first framework that estimates production failure risk from source code. It fuses **7 analysis engines** — complexity, dependency, runtime survivability (RSE), process/change mining, logistic regression, LLM validation, and human feedback — into a single composable pipeline. **18K+ lines of Rust, 682 tests, 13 crates, zero external runtime deps.**
 
 ---
 
 ## Quick Start
 
 ```bash
-# Analyze a repository with all engines
+# Analyze a repository with all 7 engines
 cargo run -- analyze /path/to/repo
 
 # Start the HTTP API server
@@ -34,27 +34,32 @@ cargo run -- analyze /path/to/repo --format sarif --output results.sarif
 ## How It Works
 
 ```
-┌──────────────────────────────────────────────────┐
-│                   sutra analyze                    │
-├──────────────────────────────────────────────────┤
-│  mgtg        → complexity metrics (McCabe, etc.)  │
-│  dependency  → import graph + Tarjan SCC cycles   │
-│  process     → git history + entropy + JIT feats  │
-│  ml          → logistic regression (14 features)   │
-│  llm         → Ollama-based finding validation     │
-│  hitl        → human feedback precision tracking   │
-├──────────────────────────────────────────────────┤
-│  Output: unified risk score + findings + SARIF     │
-└──────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│                     sutra analyze                      │
+├──────────────────────────────────────────────────────┤
+│  mgtg        → complexity metrics (McCabe, Cognitive)  │
+│  dependency  → import graph + Tarjan SCC cycles        │
+│  rse         → runtime survivability (queueing, mem)   │
+│  process     → git history + Hassan entropy + 14 JIT   │
+│  ml          → logistic regression (SGD+L2, 14 feats)  │
+│  llm         → Ollama-based finding validation (opt)   │
+│  hitl        → human feedback precision tracking       │
+├──────────────────────────────────────────────────────┤
+│  Output: unified risk score + findings + SARIF          │
+└──────────────────────────────────────────────────────┘
 ```
 
-Each engine implements the `AnalysisEngine` trait and can run independently or orchestrated:
+Each engine implements the `AnalysisEngine` trait:
 
 ```rust
 let mut orchestrator = Orchestrator::new();
 orchestrator.register(Engine::Mgtg, Box::new(MgtgEngine::new()));
 orchestrator.register(Engine::Dependency, Box::new(DependencyEngine::new()));
+orchestrator.register(Engine::Rse, Box::new(RseEngine::new()));
 orchestrator.register(Engine::Process, Box::new(ProcessEngine::new()));
+orchestrator.register(Engine::Ml, Box::new(MlEngine::new()));
+orchestrator.register(Engine::Llm, Box::new(LlmEngine::new()));
+orchestrator.register(Engine::Hitl, Box::new(HitlEngine::new()));
 
 let result = orchestrator.analyze(&request)?;
 ```
@@ -63,14 +68,19 @@ let result = orchestrator.analyze(&request)?;
 
 ## Engines
 
-| Engine | Crate | What It Does | Deterministic |
-|--------|-------|-------------|:---:|
-| **mgtg** (7 tests) | `sutra-mgtg` | Cyclomatic/cognitive complexity via tree-sitter | Yes |
-| **dependency** (121 tests) | `sutra-dependency` | Import graph, circular dep detection (Tarjan SCC), architecture rules | Yes |
-| **process** (66 tests) | `sutra-process` | Git history mining, Hassan entropy, co-change graph, 14 JIT features | Yes |
-| **ml** (70 tests) | `sutra-ml` | Logistic regression with SGD + L2, AUC evaluation, model persistence | No* |
-| **llm** (45 tests) | `sutra-llm` | Finding validation via Ollama (optional, disabled by default) | No |
-| **hitl** (62 tests) | `sutra-hitl` | Human feedback collection, per-engine precision, auto-adjust findings | Yes |
+| Engine | Crate | Tests | What It Does | Deterministic |
+|--------|-------|-------|-------------|:---:|
+| **mgtg** | `sutra-mgtg` | 7 | Cyclomatic/cognitive complexity via regex patterns | Yes |
+| **dependency** | `sutra-dependency` | 121 | Import graph, Tarjan SCC cycles, architecture layer rules, fan-in/out | Yes |
+| **rse** | `sutra-rse` | 123 | Runtime survivability: M/M/1 queueing, CPU/memory/GC/thread/latency risk | Yes |
+| **process** | `sutra-process` | 66 | Git history mining, Hassan entropy, co-change matrix, 14 JIT features | Yes |
+| **ml** | `sutra-ml` | 70 | Logistic regression (SGD+L2), AUC evaluation, model persistence | No\* |
+| **llm** | `sutra-llm` | 45 | Finding validation via Ollama (optional, disabled by default) | No |
+| **hitl** | `sutra-hitl` | 62 | Human feedback, per-engine precision tracking, auto-adjust findings | Yes |
+| **orchestrator** | `sutra-orchestrator` | 22 | Engine registration, risk fusion (max), panic safety, HTTP API | Yes |
+| **schema** | `sutra-schema` | 68 | Core types, serde JSON/YAML/TOML, proptest fuzzing | — |
+| **common** | `sutra-common` | 66 | Shared traits, errors, config, health, metrics | — |
+| **ci** | `sutra-ci` | 32 | SARIF 2.1.0 output, markdown PR comments | — |
 
 \* ML is deterministic for a given trained model; training itself is not deterministic.
 
@@ -79,21 +89,20 @@ let result = orchestrator.analyze(&request)?;
 ## CLI Reference
 
 ```bash
-# General
 sutra --help
 sutra --version
 
 # Run analysis
 sutra analyze <path>
-sutra analyze <path> --engine mgtg        # single engine
-sutra analyze <path> --engine all         # all 5 engines (default)
-sutra analyze <path> --format json        # JSON output
-sutra analyze <path> --format sarif       # SARIF 2.1.0 output
+sutra analyze <path> --engine mgtg         # single engine
+sutra analyze <path> --engine all          # all 7 engines (default)
+sutra analyze <path> --format json         # JSON output
+sutra analyze <path> --format sarif        # SARIF 2.1.0 output
 sutra analyze <path> --output results.sarif
-sutra analyze <path> --commit abc123      # specific commit
-sutra analyze <path> --arch arch.toml     # dependency architecture rules
-sutra analyze <path> --llm                # enable LLM validation
-sutra analyze <path> --llm-model llama3.1
+sutra analyze <path> --commit abc123       # specific commit
+sutra analyze <path> --arch arch.toml      # dependency architecture rules
+sutra analyze <path> --llm                 # enable LLM validation
+sutra analyze <path> --llm-model llama3.2
 sutra analyze <path> --ollama-url http://localhost:11434
 
 # Health check
@@ -107,9 +116,11 @@ sutra server --port 8080
 
 | Endpoint | Method | Description |
 |----------|--------|-------------|
-| `POST /v1/analyze` | POST | Run analysis with JSON request |
+| `POST /v1/analyze` | POST | Run analysis with JSON request body |
 | `GET /v1/health` | GET | Component health check |
 | `GET /v1/status` | GET | Server and engine status |
+| `GET /v1/report` | GET | HTML report page with interactive analysis form |
+| `POST /v1/demo` | POST | Clone any public GitHub repo and run all 7 engines |
 
 ---
 
@@ -117,47 +128,34 @@ sutra server --port 8080
 
 ```
 sutra/
-├── Cargo.toml                  # Workspace root
+├── Cargo.toml                    # Workspace root
 ├── crates/
-│   ├── sutra-schema/           # Core types & serde
-│   ├── sutra-common/           # Shared traits & errors
-│   ├── sutra-mgtg/             # Complexity engine
-│   ├── sutra-dependency/       # Dependency analysis
-│   ├── sutra-process/          # Change mining
-│   ├── sutra-ml/               # Logistic regression
-│   ├── sutra-llm/              # LLM validation
-│   ├── sutra-hitl/             # Human feedback
-│   ├── sutra-orchestrator/     # Engine coordinator
-│   ├── sutra-ci/               # SARIF & PR comments
-│   └── sutra-cli/              # CLI entry point
-├── WHITEPAPER.md               # Technical white paper
-├── CHANGELOG.md                # Release history
-└── README.md                   # This file
+│   ├── sutra-schema/             # Core types & serde (68 tests)
+│   ├── sutra-common/             # Shared traits & errors (66 tests)
+│   ├── sutra-mgtg/               # Complexity metrics (7 tests)
+│   ├── sutra-dependency/         # Dependency analysis (121 tests)
+│   ├── sutra-rse/                # Runtime survivability (123 tests)
+│   ├── sutra-process/            # Change mining (66 tests)
+│   ├── sutra-ml/                 # Logistic regression (70 tests)
+│   ├── sutra-llm/                # LLM validation (45 tests)
+│   ├── sutra-hitl/               # Human feedback (62 tests)
+│   ├── sutra-orchestrator/       # Engine coordinator (22 tests)
+│   ├── sutra-ci/                 # SARIF & PR comments (32 tests)
+│   └── sutra-cli/                # CLI entry point
+├── docs/
+│   ├── book.md                   # Complete mathematical reference
+│   ├── example.py                # End-to-end Python example
+│   └── arch.md                   # Architecture documentation
+├── website/
+│   ├── index.html                # Landing page
+│   ├── book.html                 # Rendered reference book
+│   ├── example.html              # Rendered example
+│   ├── style.css                 # Styles
+│   ├── demo.js                   # Interactive risk calculator
+│   └── live-demo.js              # GitHub repo analysis
+├── WHITEPAPER.md                 # Technical white paper
+└── CHANGELOG.md                  # Release history
 ```
-
----
-
-## Configuration
-
-### Architecture Rules (Dependency Engine)
-
-Create an `arch.toml` file to define layer constraints:
-
-```toml
-[layer.presentation]
-allowed_deps = ["application"]
-
-[layer.application]
-allowed_deps = ["domain", "infrastructure"]
-
-[layer.domain]
-allowed_deps = []
-
-[layer.infrastructure]
-allowed_deps = []
-```
-
-Pass it with `sutra analyze . --arch arch.toml`.
 
 ---
 

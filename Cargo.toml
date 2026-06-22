@@ -13,6 +13,7 @@ members = [
     "crates/sutra-ml",
     "crates/sutra-llm",
     "crates/sutra-hitl",
+    "crates/sutra-rse",
 ]
 
 [workspace.package]
@@ -55,4 +56,5 @@ sutra-orchestrator = { path = "crates/sutra-orchestrator" }
 sutra-ci = { path = "crates/sutra-ci" }
 sutra-llm = { path = "crates/sutra-llm" }
 sutra-hitl = { path = "crates/sutra-hitl" }
+sutra-rse = { path = "crates/sutra-rse" }
 mgtg = { path = "crates/mgtg" }
