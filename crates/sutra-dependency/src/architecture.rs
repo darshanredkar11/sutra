@@ -30,8 +30,15 @@ impl ArchEngine {
     }
 
     pub fn detect_layer(&self, module_path: &str) -> Option<String> {
+        // ponytail: improved layer detection — match path hierarchy, not just substring
+        // Examples: "api/users.rs" matches "api" layer, "internal/cache.rs" matches "internal"
+        // but "api_deprecated.rs" should NOT match "api" layer
         for (layer_name, _) in &self.layer_map {
-            if module_path.contains(layer_name) {
+            // Match layer as first path component or explicit directory boundary
+            if module_path == layer_name
+                || module_path.starts_with(&format!("{}/", layer_name))
+                || module_path.starts_with(&format!("src/{}/", layer_name))
+            {
                 return Some(layer_name.clone());
             }
         }
