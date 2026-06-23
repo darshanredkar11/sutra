@@ -28,6 +28,9 @@ fn convert_findings(mgtg_files: &[mgtg::ir::AnalysisFile]) -> Vec<Finding> {
                 severity: convert_severity(&mf.severity),
                 validated: false,
                 suggested_fix: None,
+                spec_data: None,
+                confidence: None,
+                edge_cases: None,
             });
         }
     }

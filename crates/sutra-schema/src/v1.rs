@@ -164,6 +164,12 @@ pub struct Finding {
     pub validated: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub suggested_fix: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub spec_data: Option<serde_json::Value>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub confidence: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub edge_cases: Option<Vec<String>>,
 }
 
 const fn default_validated() -> bool {
@@ -188,6 +194,9 @@ impl Finding {
             severity,
             validated: false,
             suggested_fix: None,
+            spec_data: None,
+            confidence: None,
+            edge_cases: None,
         }
     }
 
@@ -198,6 +207,21 @@ impl Finding {
 
     pub fn with_validated(mut self, v: bool) -> Self {
         self.validated = v;
+        self
+    }
+
+    pub fn with_confidence(mut self, confidence: f64) -> Self {
+        self.confidence = Some(confidence);
+        self
+    }
+
+    pub fn with_edge_cases(mut self, cases: Vec<String>) -> Self {
+        self.edge_cases = Some(cases);
+        self
+    }
+
+    pub fn with_spec_data(mut self, spec: serde_json::Value) -> Self {
+        self.spec_data = Some(spec);
         self
     }
 }
@@ -1278,6 +1302,9 @@ include_metrics = true
             severity: Severity::Info,
             validated: false,
             suggested_fix: None,
+                spec_data: None,
+                confidence: None,
+                edge_cases: None,
         };
         let json = serde_json::to_string(&f).unwrap();
         assert!(json.contains(r#""id":""#));
