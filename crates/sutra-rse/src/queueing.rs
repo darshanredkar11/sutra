@@ -8,23 +8,31 @@ pub fn compute_queueing(
 ) -> QueueingMetrics {
     let arrival_rate = expected_rps;
     let service_rate = estimate_service_rate(runtime, complexity, weight_bytes);
+
+    // ponytail: empirical model (no exponential assumption)
+    // Utilization = λ/μ clamped to [0, 1]
     let utilization = if service_rate > 0.0 {
-        (arrival_rate / service_rate).min(100.0)
+        (arrival_rate / service_rate).min(1.0)
     } else {
         1.0
     };
-    let active_requests = if service_rate > arrival_rate {
-        utilization / (1.0 - utilization)
+
+    // Active requests = arrival_rate * mean_latency (Little's Law, works for any distribution)
+    let p50_latency_sec = (1.0 / service_rate).max(0.001);
+    let active_requests = arrival_rate * p50_latency_sec;
+
+    // Response time: use empirical percentiles (p50, p95, p99) instead of M/M/1 mean
+    // p50 ≈ 1/μ, p95 ≈ 1/μ * (1 + 3*ρ), p99 ≈ 1/μ * (1 + 5*ρ) [empirical, not theoretical]
+    let p95_latency_sec = p50_latency_sec * (1.0 + 3.0 * utilization);
+    let response_time_ms = (p95_latency_sec * 1000.0).min(30000.0);
+
+    // Safe RPS: load where p95 latency ≤ 500ms (typical SLA threshold)
+    let safe_rps = if p50_latency_sec > 0.0 {
+        let max_utilization_for_sla = ((0.5 / p50_latency_sec) - 1.0).max(0.0) / 3.0;
+        service_rate * max_utilization_for_sla.min(0.7)
     } else {
-        f64::MAX
+        0.0
     };
-    let response_time_ms = if service_rate > 0.0 {
-        let r = (1.0 / service_rate) / (1.0 - utilization);
-        (r * 1000.0).min(30000.0)
-    } else {
-        30000.0
-    };
-    let safe_rps = service_rate * 0.6;
 
     QueueingMetrics {
         arrival_rate,
@@ -89,7 +97,7 @@ mod tests {
     }
 
     #[test]
-    fn test_compute_queueing_overload_active_requests_infinite() {
+    fn test_compute_queueing_overload_active_requests_grows() {
         let profile = ComplexityProfile {
             time_complexity: ComplexityClass::ON3,
             loop_depth: 10,
@@ -98,8 +106,10 @@ mod tests {
             function_count: 20,
         };
         let q = compute_queueing(Runtime::Python, &profile, 999999.0, 102400.0);
-        assert_eq!(q.active_requests, f64::MAX);
-        assert!(q.utilization >= 1.0 || q.utilization.is_nan());
+        // Under high load, active requests = arrival_rate * latency is very large but finite
+        assert!(q.active_requests.is_finite());
+        assert!(q.active_requests > 10000.0);
+        assert!(q.utilization >= 1.0);
     }
 
     #[test]
@@ -168,7 +178,8 @@ mod tests {
     }
 
     #[test]
-    fn test_safe_rps_is_sixty_percent() {
+    fn test_safe_rps_based_on_sla() {
+        // Safe RPS is where p95 latency ≤ 500ms (SLA threshold)
         let q = compute_queueing(Runtime::Jvm, &ComplexityProfile {
             time_complexity: ComplexityClass::ON,
             loop_depth: 1,
@@ -176,7 +187,9 @@ mod tests {
             branch_count: 5,
             function_count: 3,
         }, 100.0, 2048.0);
-        assert!((q.safe_rps - q.service_rate * 0.6).abs() < 1.0);
+        // Verify safe_rps is less than service_rate (we're staying under SLA)
+        assert!(q.safe_rps <= q.service_rate);
+        assert!(q.safe_rps > 0.0);
     }
 
     #[test]

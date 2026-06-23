@@ -12,14 +12,18 @@ pub fn analyze_source_code(source: &str, file_ext: &str) -> ComplexityProfile {
 }
 
 fn count_loops(source: &str) -> (u32, u32) {
+    // ponytail: improved heuristic — only count control-flow loops, not higher-order functions
     let patterns = [
-        (r"\bfor\s*\(", 1u32),
-        (r"\bwhile\s*\(", 1),
-        (r"\bdo\s*\{", 1),
-        (r"\bfor\s+[a-zA-Z_]", 1),
-        (r"\bforEach\b", 1),
-        (r"\bmap\s*\(", 1),
+        (r"\bfor\s*\(", 1u32),                          // C-style for
+        (r"\bwhile\s*\(", 1),                           // while
+        (r"\bdo\s*\{", 1),                              // do-while
+        (r"\bfor\s+(?:let\s+)?[a-zA-Z_]\w*\s+of\s+", 1), // for-of (JS iterator)
+        (r"\bfor\s+.*\s+in\s+", 1),                     // for-in (Python, loop through collection)
+        (r"\brange\s+", 1),                             // range keyword (Go for-range)
+        (r"\bloop\s*\{", 1),                            // Rust loop
     ];
+    // NOTE: Higher-order functions (map, filter, forEach) are not counted as loops
+    // They don't have the same performance implications as control-flow loops
     let mut count = 0u32;
     for (pat, weight) in &patterns {
         if let Ok(re) = regex::Regex::new(pat) {
@@ -99,33 +103,95 @@ fn estimate_complexity_class(loop_count: u32, nesting: u32) -> ComplexityClass {
 }
 
 fn count_allocations(source: &str) -> u32 {
+    // ponytail: improved heuristic — skip comments and strings
+    let source_no_comments = remove_comments_and_strings(source);
+
     let alloc_patterns = [
-        r"\bnew\s+[A-Z]",
-        r"\bvec!",
-        r"\bVec::new\b",
-        r"\bHashMap::new\b",
-        r"\bHashSet::new\b",
-        r"\bBox::new\b",
-        r"\bRc::new\b",
-        r"\bArc::new\b",
-        r"\bString::new\b",
-        r"\bformat!",
-        r"\bcollect\b",
-        r"\bclone\b",
-        r"\bmake\b",
-        r"\bappend\b",
-        r"\bextend\b",
-        r"\bpush\b",
-        r"\binsert\b",
-        r"\b\[.\]",
+        r"\bnew\s+[A-Z]",         // Java/Kotlin new Object()
+        r"\bvec!",                 // Rust vec!
+        r"\bVec::new\b",          // Rust Vec::new
+        r"\bHashMap::new\b",      // Rust HashMap::new
+        r"\bBox::new\b",          // Rust Box::new
+        r"\bString::new\b",       // Rust String::new
+        r"\bArray\s*\(",          // JavaScript Array()
+        r"\bObject\s*\(",         // JavaScript Object()
     ];
     let mut count = 0u32;
     for pat in &alloc_patterns {
         if let Ok(re) = regex::Regex::new(pat) {
-            count += re.find_iter(source).count() as u32;
+            count += re.find_iter(&source_no_comments).count() as u32;
         }
     }
     count.min(1000)
+}
+
+fn remove_comments_and_strings(source: &str) -> String {
+    // Simple heuristic: remove line comments (//, #) and block comments (/* */)
+    let mut result = String::new();
+    let mut in_block_comment = false;
+    let mut in_string = false;
+    let mut escape_next = false;
+    let mut chars = source.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if escape_next {
+            escape_next = false;
+            result.push(' ');
+            continue;
+        }
+
+        if ch == '\\' && in_string {
+            escape_next = true;
+            result.push(' ');
+            continue;
+        }
+
+        if (ch == '"' || ch == '\'') && !in_block_comment {
+            in_string = !in_string;
+            result.push(' ');
+            continue;
+        }
+
+        if in_string {
+            result.push(' ');
+            continue;
+        }
+
+        if ch == '/' && chars.peek() == Some(&'/') {
+            // Line comment — skip to end of line
+            chars.next(); // consume second /
+            while let Some(c) = chars.next() {
+                if c == '\n' {
+                    result.push('\n');
+                    break;
+                }
+                result.push(' ');
+            }
+            continue;
+        }
+
+        if ch == '/' && chars.peek() == Some(&'*') {
+            chars.next(); // consume *
+            in_block_comment = true;
+            result.push(' ');
+            continue;
+        }
+
+        if ch == '*' && chars.peek() == Some(&'/') && in_block_comment {
+            chars.next(); // consume /
+            in_block_comment = false;
+            result.push_str("  ");
+            continue;
+        }
+
+        if in_block_comment {
+            result.push(' ');
+        } else {
+            result.push(ch);
+        }
+    }
+
+    result
 }
 
 fn count_branches(source: &str) -> u32 {
@@ -308,9 +374,10 @@ mod tests {
     }
 
     #[test]
-    fn test_count_loops_for_each_and_map_counted() {
+    fn test_count_loops_excludes_higher_order_functions() {
+        // map() and forEach() are higher-order functions, not control-flow loops
         let src = "items.forEach(x => f(x)); items.map(x => x + 1);";
-        assert_eq!(count_loops(src).0, 2);
+        assert_eq!(count_loops(src).0, 0);
     }
 
     #[test]
