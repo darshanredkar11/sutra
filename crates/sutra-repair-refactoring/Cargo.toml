@@ -1,0 +1,14 @@
+[package]
+name = "sutra-repair-refactoring"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Repair Engine 1: detects structural issues and proposes concrete refactorings with quantified complexity reduction"
+
+[dependencies]
+sutra-schema.workspace = true
+sutra-common.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+regex.workspace = true

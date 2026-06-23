@@ -1,0 +1,14 @@
+[package]
+name = "sutra-repair-debt-roi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Repair Engine 5: ranks technical debt items by return-on-investment (effort vs incident prevention)"
+
+[dependencies]
+sutra-schema.workspace = true
+sutra-common.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+regex.workspace = true

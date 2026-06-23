@@ -14,6 +14,11 @@ members = [
     "crates/sutra-llm",
     "crates/sutra-hitl",
     "crates/sutra-rse",
+    "crates/sutra-repair-refactoring",
+    "crates/sutra-repair-coupling",
+    "crates/sutra-repair-performance",
+    "crates/sutra-repair-testing-gap",
+    "crates/sutra-repair-debt-roi",
 ]
 
 [workspace.package]
@@ -59,3 +64,8 @@ sutra-llm = { path = "crates/sutra-llm" }
 sutra-hitl = { path = "crates/sutra-hitl" }
 sutra-rse = { path = "crates/sutra-rse" }
 mgtg = { path = "crates/mgtg" }
+sutra-repair-refactoring = { path = "crates/sutra-repair-refactoring" }
+sutra-repair-coupling = { path = "crates/sutra-repair-coupling" }
+sutra-repair-performance = { path = "crates/sutra-repair-performance" }
+sutra-repair-testing-gap = { path = "crates/sutra-repair-testing-gap" }
+sutra-repair-debt-roi = { path = "crates/sutra-repair-debt-roi" }

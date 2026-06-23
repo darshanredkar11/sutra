@@ -95,21 +95,61 @@ fn build_orchestrator(arch_path: Option<PathBuf>) -> Orchestrator {
         Box::new(sutra_rse::engine::RseEngine::new()),
     );
 
+    o.register(
+        Engine::Refactoring,
+        Box::new(sutra_repair_refactoring::engine::RefactoringEngine::new()),
+    );
+
+    o.register(
+        Engine::CouplingResolution,
+        Box::new(sutra_repair_coupling::engine::CouplingEngine::new()),
+    );
+
+    o.register(
+        Engine::Performance,
+        Box::new(sutra_repair_performance::engine::PerformanceEngine::new()),
+    );
+
+    o.register(
+        Engine::TestingGap,
+        Box::new(sutra_repair_testing_gap::engine::TestingGapEngine::new()),
+    );
+
+    o.register(
+        Engine::DebtRoi,
+        Box::new(sutra_repair_debt_roi::engine::DebtRoiEngine::new()),
+    );
+
     o
 }
 
 fn parse_engines(s: &str) -> Vec<Engine> {
     match s.to_lowercase().as_str() {
-        "all" => vec![Engine::Mgtg, Engine::Dependency, Engine::Process, Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability],
+        "all" => vec![
+            Engine::Mgtg, Engine::Dependency, Engine::Process,
+            Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability,
+            Engine::Refactoring, Engine::CouplingResolution,
+            Engine::Performance, Engine::TestingGap, Engine::DebtRoi,
+        ],
         "mgtg" => vec![Engine::Mgtg],
         "dependency" | "dep" => vec![Engine::Dependency],
         "process" | "proc" => vec![Engine::Process],
         "ml" => vec![Engine::Ml],
         "hitl" => vec![Engine::Hitl],
         "rse" | "runtime" => vec![Engine::RuntimeSurvivability],
+        "refactoring" | "ref" => vec![Engine::Refactoring],
+        "coupling" | "coup" => vec![Engine::CouplingResolution],
+        "performance" | "perf" => vec![Engine::Performance],
+        "testing_gap" | "testgap" => vec![Engine::TestingGap],
+        "debt_roi" | "debt" => vec![Engine::DebtRoi],
         _ => {
             eprintln!("unknown engine '{}', running all", s);
-            vec![Engine::Mgtg, Engine::Dependency, Engine::Process, Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability]
+            vec![
+                Engine::Mgtg, Engine::Dependency, Engine::Process,
+                Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability,
+                Engine::Refactoring, Engine::CouplingResolution,
+                Engine::Performance, Engine::TestingGap, Engine::DebtRoi,
+            ]
         }
     }
 }

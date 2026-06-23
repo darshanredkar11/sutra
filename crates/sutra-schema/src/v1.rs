@@ -12,10 +12,20 @@ pub enum Engine {
     Ml,
     Hitl,
     RuntimeSurvivability,
+    Refactoring,
+    CouplingResolution,
+    Performance,
+    TestingGap,
+    DebtRoi,
 }
 
 impl Engine {
-    pub const ALL: [Engine; 6] = [Engine::Mgtg, Engine::Process, Engine::Dependency, Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability];
+    pub const ALL: [Engine; 11] = [
+        Engine::Mgtg, Engine::Process, Engine::Dependency,
+        Engine::Ml, Engine::Hitl, Engine::RuntimeSurvivability,
+        Engine::Refactoring, Engine::CouplingResolution,
+        Engine::Performance, Engine::TestingGap, Engine::DebtRoi,
+    ];
 
     pub fn as_str(&self) -> &'static str {
         match self {
@@ -25,6 +35,11 @@ impl Engine {
             Engine::Ml => "ml",
             Engine::Hitl => "hitl",
             Engine::RuntimeSurvivability => "rse",
+            Engine::Refactoring => "refactoring",
+            Engine::CouplingResolution => "coupling",
+            Engine::Performance => "performance",
+            Engine::TestingGap => "testing_gap",
+            Engine::DebtRoi => "debt_roi",
         }
     }
 
@@ -36,6 +51,11 @@ impl Engine {
             "ml" => Some(Engine::Ml),
             "hitl" => Some(Engine::Hitl),
             "rse" | "runtime" => Some(Engine::RuntimeSurvivability),
+            "refactoring" | "ref" => Some(Engine::Refactoring),
+            "coupling" | "coup" => Some(Engine::CouplingResolution),
+            "performance" | "perf" => Some(Engine::Performance),
+            "testing_gap" | "testgap" => Some(Engine::TestingGap),
+            "debt_roi" | "debt" => Some(Engine::DebtRoi),
             _ => None,
         }
     }
@@ -398,7 +418,7 @@ mod tests {
 
     #[test]
     fn test_engine_all_includes_all() {
-        assert_eq!(Engine::ALL.len(), 6);
+        assert_eq!(Engine::ALL.len(), 11);
     }
 
     #[test]
@@ -409,6 +429,11 @@ mod tests {
         assert_eq!(Engine::Ml.as_str(), "ml");
         assert_eq!(Engine::Hitl.as_str(), "hitl");
         assert_eq!(Engine::RuntimeSurvivability.as_str(), "rse");
+        assert_eq!(Engine::Refactoring.as_str(), "refactoring");
+        assert_eq!(Engine::CouplingResolution.as_str(), "coupling");
+        assert_eq!(Engine::Performance.as_str(), "performance");
+        assert_eq!(Engine::TestingGap.as_str(), "testing_gap");
+        assert_eq!(Engine::DebtRoi.as_str(), "debt_roi");
     }
 
     #[test]
@@ -420,6 +445,15 @@ mod tests {
         assert_eq!(Engine::from_name("hitl"), Some(Engine::Hitl));
         assert_eq!(Engine::from_name("rse"), Some(Engine::RuntimeSurvivability));
         assert_eq!(Engine::from_name("runtime"), Some(Engine::RuntimeSurvivability));
+        assert_eq!(Engine::from_name("refactoring"), Some(Engine::Refactoring));
+        assert_eq!(Engine::from_name("ref"), Some(Engine::Refactoring));
+        assert_eq!(Engine::from_name("coupling"), Some(Engine::CouplingResolution));
+        assert_eq!(Engine::from_name("coup"), Some(Engine::CouplingResolution));
+        assert_eq!(Engine::from_name("performance"), Some(Engine::Performance));
+        assert_eq!(Engine::from_name("testing_gap"), Some(Engine::TestingGap));
+        assert_eq!(Engine::from_name("testgap"), Some(Engine::TestingGap));
+        assert_eq!(Engine::from_name("debt_roi"), Some(Engine::DebtRoi));
+        assert_eq!(Engine::from_name("debt"), Some(Engine::DebtRoi));
         assert_eq!(Engine::from_name("unknown"), None);
     }
 
@@ -1045,6 +1079,11 @@ include_metrics = true
             Engine::Ml,
             Engine::Hitl,
             Engine::RuntimeSurvivability,
+            Engine::Refactoring,
+            Engine::CouplingResolution,
+            Engine::Performance,
+            Engine::TestingGap,
+            Engine::DebtRoi,
         ])
     }
 

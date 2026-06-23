@@ -1,0 +1,14 @@
+[package]
+name = "sutra-repair-testing-gap"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Repair Engine 4: detects untested code paths and proposes test patterns with quantified coverage improvement"
+
+[dependencies]
+sutra-schema.workspace = true
+sutra-common.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+regex.workspace = true

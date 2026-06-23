@@ -54,6 +54,11 @@ fn build_all_engines() -> Orchestrator {
     o.register(Engine::Ml, Box::new(sutra_ml::engine::MlEngine::new()));
     o.register(Engine::Hitl, Box::new(sutra_hitl::engine::HitlEngine::new()));
     o.register(Engine::RuntimeSurvivability, Box::new(sutra_rse::engine::RseEngine::new()));
+    o.register(Engine::Refactoring, Box::new(sutra_repair_refactoring::engine::RefactoringEngine::new()));
+    o.register(Engine::CouplingResolution, Box::new(sutra_repair_coupling::engine::CouplingEngine::new()));
+    o.register(Engine::Performance, Box::new(sutra_repair_performance::engine::PerformanceEngine::new()));
+    o.register(Engine::TestingGap, Box::new(sutra_repair_testing_gap::engine::TestingGapEngine::new()));
+    o.register(Engine::DebtRoi, Box::new(sutra_repair_debt_roi::engine::DebtRoiEngine::new()));
     o
 }
 
@@ -168,14 +173,19 @@ fn test_all_engines_register_and_health() {
     assert!(names.contains(&"ml"));
     assert!(names.contains(&"hitl"));
     assert!(names.contains(&"rse"));
-    assert_eq!(names.len(), 6);
+    assert!(names.contains(&"refactoring"));
+    assert!(names.contains(&"coupling"));
+    assert!(names.contains(&"performance"));
+    assert!(names.contains(&"testing_gap"));
+    assert!(names.contains(&"debt_roi"));
+    assert_eq!(names.len(), 11);
 }
 
 #[test]
 fn test_health_check_all_healthy() {
     let orchestrator = build_all_engines();
     let health = orchestrator.health_check();
-    assert_eq!(health.len(), 6);
+    assert_eq!(health.len(), 11);
     assert!(health.iter().all(|(_engine, ok)| *ok));
 }
 

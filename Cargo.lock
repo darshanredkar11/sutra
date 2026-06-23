@@ -1647,6 +1647,11 @@ dependencies = [
  "sutra-ml",
  "sutra-orchestrator",
  "sutra-process",
+ "sutra-repair-coupling",
+ "sutra-repair-debt-roi",
+ "sutra-repair-performance",
+ "sutra-repair-refactoring",
+ "sutra-repair-testing-gap",
  "sutra-rse",
  "sutra-schema",
  "tokio",
@@ -1752,6 +1757,11 @@ dependencies = [
  "sutra-mgtg",
  "sutra-ml",
  "sutra-process",
+ "sutra-repair-coupling",
+ "sutra-repair-debt-roi",
+ "sutra-repair-performance",
+ "sutra-repair-refactoring",
+ "sutra-repair-testing-gap",
  "sutra-rse",
  "sutra-schema",
  "tempfile",
@@ -1780,6 +1790,66 @@ dependencies = [
  "thiserror 2.0.18",
  "toml",
  "uuid",
+]
+
+[[package]]
+name = "sutra-repair-coupling"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "sutra-common",
+ "sutra-schema",
+ "walkdir",
+]
+
+[[package]]
+name = "sutra-repair-debt-roi"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "sutra-common",
+ "sutra-schema",
+ "walkdir",
+]
+
+[[package]]
+name = "sutra-repair-performance"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "sutra-common",
+ "sutra-schema",
+ "walkdir",
+]
+
+[[package]]
+name = "sutra-repair-refactoring"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "sutra-common",
+ "sutra-schema",
+ "walkdir",
+]
+
+[[package]]
+name = "sutra-repair-testing-gap"
+version = "0.1.0"
+dependencies = [
+ "regex",
+ "serde",
+ "serde_json",
+ "sutra-common",
+ "sutra-schema",
+ "walkdir",
 ]
 
 [[package]]

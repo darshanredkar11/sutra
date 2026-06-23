@@ -1,0 +1,14 @@
+[package]
+name = "sutra-repair-performance"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Repair Engine 3: analyzes runtime bottlenecks and proposes concrete optimizations with quantified latency/throughput impact"
+
+[dependencies]
+sutra-schema.workspace = true
+sutra-common.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+walkdir.workspace = true
+regex.workspace = true

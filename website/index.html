@@ -462,7 +462,7 @@ holistic picture no single tool can provide.
 <div class="engine-deep-section">
 <h4>Merge Semantics</h4>
 <ul>
-<li><strong>Risk</strong>: <code>total_risk = max(engine.risk)</code></li>
+<li><strong>Risk</strong>: <code>total_risk = weighted_avg(engine.risk)</code></li>
 <li><strong>Findings</strong>: union across engines, deduped by ID</li>
 <li><strong>Metrics</strong>: per-field <code>max()</code></li>
 <li><strong>Failures</strong>: engine errors produce <code>ORCH-{ENGINE}-ERR</code> findings</li>
@@ -471,6 +471,112 @@ holistic picture no single tool can provide.
 <div class="engine-deep-section">
 <h4>Output</h4>
 <p>Unified <code>AnalysisResult</code>, SARIF 2.1.0 JSON, markdown PR comments with emoji severity badges.</p>
+</div>
+</div>
+</div>
+
+<h3 style="margin-top: 72px; text-align: center; font-weight: 600; color: #1f2937;">Repair Engines (Actionable Specifications)</h3>
+<p style="text-align: center; color: #6b7280; margin-bottom: 48px;">
+Sutra doesn't just find problems — it proposes structured solutions with quantified impact.
+These 5 engines generate detailed repair specifications for human and AI reasoning.
+</p>
+
+<div class="engine-deep" id="engine-refactoring">
+<div class="engine-deep-header">
+<div class="engine-deep-icon ref"></div>
+<div>
+<h3>refactoring — Code Restructuring Engine <span class="crate-badge">sutra-repair-refactoring</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> High complexity classes and tight coupling between methods are the root cause of defects. Refactoring proposes concrete class/method extraction with quantified complexity reduction and effort estimates.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Detects</h4>
+<p>Cyclomatic complexity &gt; 15 per method, classes &gt; 300 LOC, method coupling &gt; 0.7, code duplication &gt; 20%, nesting depth &gt; 5.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>RefactoringSpec</code> with: current_state (complexity metrics), proposed_state (after refactor), impact (% reduction), effort (hours + risk), ROI (incident prevention value), validation strategy.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-coupling">
+<div class="engine-deep-header">
+<div class="engine-deep-icon coup"></div>
+<div>
+<h3>coupling — Architecture Decoupling Engine <span class="crate-badge">sutra-repair-coupling</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Tight module coupling causes sequential bottlenecks and cascading failures. This engine analyzes co-change patterns and import graphs, then proposes decoupling strategies (async queues, event-driven, module boundaries) with throughput/latency impact.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Detects</h4>
+<p>Circular dependencies, high fan-in/fan-out hubs, co-change clusters (files that change together), sequential call chains, critical path bottlenecks.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>CouplingSpec</code> with: current_architecture, proposed_architecture (async queue, event-driven, etc.), impact (RPS gain, latency reduction, coupling score before/after), migration plan, edge cases.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-performance">
+<div class="engine-deep-header">
+<div class="engine-deep-icon perf"></div>
+<div>
+<h3>performance — Runtime Optimization Engine <span class="crate-badge">sutra-repair-performance</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Latency bottlenecks and resource saturation are the #1 cause of production incidents. This engine profiles each code path, identifies I/O stalls and CPU hotspots, then proposes targeted optimizations (batching, caching, indexing, parallelization) with measured impact.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Detects</h4>
+<p>I/O latency &gt; 100ms, memory pressure, CPU hotspots, GC pauses, algorithmic inefficiencies, N+1 queries, missing database indexes.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>PerformanceSpec</code> with: bottleneck (latency breakdown), root_cause, optimization_strategies (batch, cache, index, parallelize), impact (latency reduction %), effort (hours), confidence score, validation strategy.</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-testing">
+<div class="engine-deep-header">
+<div class="engine-deep-icon test"></div>
+<div>
+<h3>testing_gap — Test Coverage Planner <span class="crate-badge">sutra-repair-testing-gap</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> Untested edge cases and error paths are reliable sources of production surprises. This engine identifies untested branches and recommends specific test patterns (parametrized, integration, property-based) with coverage improvement estimates.</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Detects</h4>
+<p>Branch coverage &lt; 70%, untested error paths, missing integration tests, uncovered edge cases (null, empty, timeout).</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>TestingGapSpec</code> with: coverage_before, coverage_after, test_patterns (parametrized, integration, property), effort (hours per pattern), ROI (incident prevention).</p>
+</div>
+</div>
+</div>
+
+<div class="engine-deep" id="engine-debt-roi">
+<div class="engine-deep-header">
+<div class="engine-deep-icon debt"></div>
+<div>
+<h3>debt_roi — Technical Debt Prioritizer <span class="crate-badge">sutra-repair-debt-roi</span></h3>
+<p class="engine-deep-why"><strong>Why:</strong> All 4 engines above propose fixes, but which should you prioritize? This engine ranks all findings by return on investment (effort cost vs incident prevention value), automagically answering "What should we fix first?"</p>
+</div>
+</div>
+<div class="engine-deep-body">
+<div class="engine-deep-section">
+<h4>Scoring</h4>
+<p>ROI (months) = effort_cost / (annual_incident_value + annual_maintenance_value + capacity_gain_value). Lower = higher priority. Instant decision matrix.</p>
+</div>
+<div class="engine-deep-section">
+<h4>Output</h4>
+<p><code>DebtRoiSpec</code> with: all debt items, per-item ROI calculations, ranked priority list, combined impact (total annual savings, total effort), expected payoff timeline.</p>
 </div>
 </div>
 </div>

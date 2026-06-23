@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0)
 [![SARIF](https://img.shields.io/badge/SARIF-2.1.0-orange)](https://docs.oasis-open.org/sarif/sarif/v2.1.0/)
 
-Sutra is a deterministic, math-first framework that estimates production failure risk from source code. It fuses **7 analysis engines** — complexity, dependency, runtime survivability (RSE), process/change mining, logistic regression, LLM validation, and human feedback — into a single composable pipeline. **18K+ lines of Rust, 693 tests, 13 crates, zero external runtime deps. Parallel execution, OpenAPI docs, E2E integration tests, CI security auditing.**
+Sutra is a deterministic, math-first framework that estimates production failure risk from source code and proposes concrete fixes. It fuses **7 analysis engines** (complexity, dependency, runtime survivability, process mining, ML, LLM, human feedback) + **5 repair engines** (refactoring, coupling, performance, testing, debt prioritization) into a single composable pipeline. **18K+ lines of Rust, 693 tests, 13 crates, zero external runtime deps. Parallel execution, OpenAPI docs, E2E integration tests, CI security auditing.**
 
 ---
 
@@ -83,6 +83,43 @@ let result = orchestrator.analyze(&request)?;
 | **ci** | `sutra-ci` | 32 | SARIF 2.1.0 output, markdown PR comments | — |
 
 \* ML is deterministic for a given trained model; training itself is not deterministic.
+
+### Repair Engines (Actionable Specifications)
+
+Beyond finding problems, Sutra proposes structured solutions. The **5 repair engines** generate detailed specifications with quantified impact:
+
+| Engine | Crate | Purpose | Outputs |
+|--------|-------|---------|---------|
+| **refactoring** | `sutra-repair-refactoring` | Propose class/method extractions | `RefactoringSpec`: before/after complexity, effort (hrs), bug prevention ROI |
+| **coupling** | `sutra-repair-coupling` | Propose architectural decoupling | `CouplingSpec`: throughput/latency gain, migration phases, RPS increase |
+| **performance** | `sutra-repair-performance` | Fix runtime bottlenecks | `PerformanceSpec`: latency reduction %, optimization strategies ranked by ROI |
+| **testing_gap** | `sutra-repair-testing-gap` | Plan test coverage improvements | `TestingGapSpec`: coverage gain %, test patterns, effort estimates |
+| **debt_roi** | `sutra-repair-debt-roi` | Prioritize all findings by ROI | `DebtRoiSpec`: ranked payoff timeline (months), annual savings per fix |
+
+Each spec is machine-readable JSON with:
+- ✅ **Quantified impact**: before/after numbers, confidence scores, edge cases
+- ✅ **Effort breakdown**: design, implementation, testing, buffer hours
+- ✅ **ROI analysis**: incident prevention value, payoff period
+- ✅ **Validation strategy**: how to verify the fix works
+- ✅ **Zero hallucination**: all data computed, not invented
+
+**Example:** Coupling engine on observalog's triage subsystem:
+```json
+{
+  "id": "COUP-001",
+  "type": "async_message_queue",
+  "impact": {
+    "throughput": {"before_rps": 8, "after_rps": 45, "improvement_percent": 462.5},
+    "latency_p95": {"before_ms": 500, "after_ms": 180},
+    "coupling_score": {"before": 0.82, "after": 0.15}
+  },
+  "effort_hours": 40,
+  "roi_months": 0.69,  // Pays for itself in < 1 month
+  "confidence": 0.88
+}
+```
+
+See [REPAIR_ENGINES.md](REPAIR_ENGINES.md) for detailed specification examples.
 
 ---
 
