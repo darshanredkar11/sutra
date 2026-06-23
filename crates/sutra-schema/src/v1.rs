@@ -641,6 +641,9 @@ mod tests {
             severity: Severity::Critical,
             validated: true,
             suggested_fix: Some("Use `with_open`".into()),
+            spec_data: None,
+            confidence: None,
+            edge_cases: None,
         };
         let json = serde_json::to_string(&f).unwrap();
         let back: Finding = serde_json::from_str(&json).unwrap();
@@ -1141,6 +1144,9 @@ include_metrics = true
                     severity,
                     validated,
                     suggested_fix,
+                    spec_data: None,
+                    confidence: None,
+                    edge_cases: None,
                 },
             )
     }
@@ -1325,6 +1331,9 @@ include_metrics = true
             severity: Severity::Info,
             validated: false,
             suggested_fix: Some("أصلح هذا".into()),
+            spec_data: None,
+            confidence: None,
+            edge_cases: None,
         };
         let json = serde_json::to_string(&f).unwrap();
         let back: Finding = serde_json::from_str(&json).unwrap();

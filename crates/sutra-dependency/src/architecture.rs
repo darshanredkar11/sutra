@@ -31,13 +31,14 @@ impl ArchEngine {
 
     pub fn detect_layer(&self, module_path: &str) -> Option<String> {
         // ponytail: improved layer detection — match path hierarchy, not just substring
-        // Examples: "api/users.rs" matches "api" layer, "internal/cache.rs" matches "internal"
+        // Examples: "api/users.rs" matches "api" layer, "api.controllers" matches "api" layer
         // but "api_deprecated.rs" should NOT match "api" layer
         for (layer_name, _) in &self.layer_map {
-            // Match layer as first path component or explicit directory boundary
+            // Match layer as first component with clear boundary (slash or dot)
             if module_path == layer_name
                 || module_path.starts_with(&format!("{}/", layer_name))
                 || module_path.starts_with(&format!("src/{}/", layer_name))
+                || module_path.starts_with(&format!("{}.", layer_name))
             {
                 return Some(layer_name.clone());
             }
