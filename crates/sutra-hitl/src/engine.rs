@@ -13,8 +13,20 @@ pub struct HitlEngine {
 
 impl HitlEngine {
     pub fn new() -> Self {
+        let mut store = InMemoryFeedbackStore::new();
+        // ponytail: auto-load feedback from ~/.sutra/hitl-feedback.json if it exists
+        if let Ok(home) = std::env::var("HOME") {
+            let path = format!("{}/.sutra/hitl-feedback.json", home);
+            if let Ok(json) = std::fs::read_to_string(&path) {
+                if let Ok(entries) = serde_json::from_str::<Vec<FeedbackEntry>>(&json) {
+                    for entry in entries {
+                        let _ = store.store(entry);
+                    }
+                }
+            }
+        }
         Self {
-            store: Box::new(InMemoryFeedbackStore::new()),
+            store: Box::new(store),
             config: HitlConfig::default(),
         }
     }

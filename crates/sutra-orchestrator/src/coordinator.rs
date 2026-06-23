@@ -60,7 +60,7 @@ impl Orchestrator {
 
         let mut all_findings: Vec<Finding> = Vec::new();
         let mut all_recommendations: Vec<Recommendation> = Vec::new();
-        let mut total_risk = 0.0f64;
+        let mut engine_risks: Vec<f64> = Vec::new();
         let mut total_time = 0.0f64;
         let mut merged_metrics: Option<sutra_schema::v1::MetricsSummary> = None;
         let mut blocked = false;
@@ -68,7 +68,7 @@ impl Orchestrator {
 
         // Process the pre-run Process result if available
         if let Some(result) = process_result {
-            total_risk = total_risk.max(result.overall_risk);
+            engine_risks.push(result.overall_risk);
             total_time += result.processing_time_ms;
             all_findings.extend(result.findings);
             all_recommendations.extend(result.recommendations);
@@ -97,7 +97,7 @@ impl Orchestrator {
             let engine_type = output.engine_type;
             match output.result {
                 Ok(Ok(result)) => {
-                    total_risk = total_risk.max(result.overall_risk);
+                    engine_risks.push(result.overall_risk);
                     total_time += result.processing_time_ms;
                     all_findings.extend(result.findings);
                     all_recommendations.extend(result.recommendations);
@@ -143,12 +143,18 @@ impl Orchestrator {
             }
         }
 
-        total_risk = if total_risk.is_nan() { 0.0 } else { total_risk.min(1.0) };
+        // Compute weighted average risk (equal weights for all engines)
+        let overall_risk = if engine_risks.is_empty() {
+            0.0
+        } else {
+            let avg = engine_risks.iter().sum::<f64>() / engine_risks.len() as f64;
+            if avg.is_nan() { 0.0 } else { avg.min(1.0) }
+        };
 
         Ok(AnalysisResult {
             request_id: request.request_id.clone(),
             commit_hash: request.commit_hash.clone(),
-            overall_risk: total_risk,
+            overall_risk,
             findings: all_findings,
             recommendations: all_recommendations,
             metrics: merged_metrics,

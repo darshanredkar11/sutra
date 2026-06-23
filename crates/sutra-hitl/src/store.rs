@@ -47,7 +47,13 @@ impl FeedbackStore for InMemoryFeedbackStore {
                 entry.id
             )));
         }
-        self.entries.push(entry);
+        self.entries.push(entry.clone());
+        // ponytail: auto-persist to ~/.sutra/hitl-feedback.json if writable
+        if let Ok(home) = std::env::var("HOME") {
+            let path = format!("{}/.sutra/hitl-feedback.json", home);
+            let _ = std::fs::create_dir_all(format!("{}/.sutra", home));
+            let _ = std::fs::write(&path, serde_json::to_string_pretty(&self.entries).unwrap_or_default());
+        }
         Ok(())
     }
 
