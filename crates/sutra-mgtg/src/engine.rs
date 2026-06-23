@@ -132,6 +132,7 @@ impl AnalysisEngine for MgtgEngine {
             metrics: Some(metrics),
             processing_time_ms,
             blocked_merge: has_critical || (has_errors && mgtg_result.summary.overall_health < 0.3),
+            jit_features: None,
         })
     }
 }

@@ -61,6 +61,10 @@ pub enum IrNode {
         value: Option<String>,
         line: usize,
     },
+    Raise {
+        value: Option<String>,
+        line: usize,
+    },
     Variable {
         name: String,
         line: usize,
@@ -86,6 +90,7 @@ impl IrNode {
             | IrNode::Alloc { line: l, .. }
             | IrNode::Closure { line: l, .. }
             | IrNode::Return { line: l, .. }
+            | IrNode::Raise { line: l, .. }
             | IrNode::Variable { line: l, .. }
             | IrNode::NullCheck { line: l, .. }
             | IrNode::Unresolved { line: l, .. } => *l,

@@ -268,6 +268,8 @@ pub struct AnalysisResult {
     pub processing_time_ms: f64,
     #[serde(default)]
     pub blocked_merge: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub jit_features: Option<Vec<FeatureMap>>,
 }
 
 impl AnalysisResult {
@@ -281,6 +283,7 @@ impl AnalysisResult {
             metrics: None,
             processing_time_ms: 0.0,
             blocked_merge: false,
+            jit_features: None,
         }
     }
 
@@ -686,6 +689,7 @@ mod tests {
             metrics: None,
             processing_time_ms: 100.0,
             blocked_merge: false,
+            jit_features: None,
         };
         assert_eq!(r.finding_count_by_severity(Severity::Error), 2);
         assert_eq!(r.finding_count_by_severity(Severity::Warning), 1);
@@ -743,6 +747,7 @@ mod tests {
             }),
             processing_time_ms: 1234.56,
             blocked_merge: false,
+            jit_features: None,
         };
         let json = serde_json::to_string_pretty(&r).unwrap();
         let back: AnalysisResult = serde_json::from_str(&json).unwrap();
@@ -1154,6 +1159,7 @@ include_metrics = true
                         metrics,
                         processing_time_ms,
                         blocked_merge,
+                        jit_features: None,
                     }
                 },
             )
@@ -1323,6 +1329,7 @@ include_metrics = true
             metrics: Some(MetricsSummary::default()),
             processing_time_ms: 100.0,
             blocked_merge: false,
+            jit_features: None,
         };
         assert!(r.findings.is_empty());
         let json = serde_json::to_string(&r).unwrap();

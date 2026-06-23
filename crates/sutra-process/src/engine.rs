@@ -72,6 +72,7 @@ impl AnalysisEngine for ProcessEngine {
                 }),
                 processing_time_ms: start.elapsed().as_secs_f64() * 1000.0,
                 blocked_merge: false,
+                jit_features: None,
             });
         }
 
@@ -110,7 +111,7 @@ impl AnalysisEngine for ProcessEngine {
         for f in &jit_features {
             if f.revisions > 20 {
                 findings.push(Finding::new(
-                    &format!("PROC-REV{:03}", findings.len() + 1 - (jit_features.iter().filter(|ff| ff.entropy > 3.0 && ff.revisions > 20).count()..).next().unwrap_or(0)),
+                    &format!("PROC-REV{:03}", findings.len() + 1),
                     SutraEngine::Process,
                     &f.file_path,
                     1,
@@ -131,7 +132,7 @@ impl AnalysisEngine for ProcessEngine {
 
         for f in &buggy {
             findings.push(Finding::new(
-                &format!("PROC-BUG{:03}", findings.len() + 1 - (jit_features.iter().filter(|ff| ff.revisions > 20 && ff.bug_fix_commits >= 3).count()..).next().unwrap_or(0)),
+                &format!("PROC-BUG{:03}", findings.len() + 1),
                 SutraEngine::Process,
                 &f.file_path,
                 1,
@@ -143,11 +144,12 @@ impl AnalysisEngine for ProcessEngine {
             ));
         }
 
-        // Tight co-change coupling
+        // Tight co-change coupling (requires ≥10 commits, flagged at >10% co-change rate, min 2 co-changes)
+        let min_co_change_rate = if commits.len() >= 10 { commits.len() / 10 } else { usize::MAX };
         let tight_coupling: Vec<_> = co_changes
             .edges
             .iter()
-            .filter(|e| e.count as usize > commits.len() / 10)
+            .filter(|e| e.count >= 2 && e.count as usize > min_co_change_rate)
             .collect();
 
         for edge in &tight_coupling {
@@ -240,6 +242,28 @@ impl AnalysisEngine for ProcessEngine {
 
         let processing_time_ms = start.elapsed().as_secs_f64() * 1000.0;
 
+        let feature_maps: Vec<sutra_schema::v1::FeatureMap> = jit_features
+            .iter()
+            .map(|jf| {
+                let mut fm = sutra_schema::v1::FeatureMap::new();
+                fm.insert("revisions".into(), jf.revisions as f64);
+                fm.insert("distinct_committers".into(), jf.distinct_committers as f64);
+                fm.insert("lines_added".into(), jf.lines_added as f64);
+                fm.insert("lines_deleted".into(), jf.lines_deleted as f64);
+                fm.insert("total_lines_changed".into(), jf.total_lines_changed as f64);
+                fm.insert("entropy".into(), jf.entropy);
+                fm.insert("num_directories".into(), jf.num_directories as f64);
+                fm.insert("avg_files_per_commit".into(), jf.avg_files_per_commit);
+                fm.insert("age_days".into(), jf.age_days);
+                fm.insert("weighted_age_days".into(), jf.weighted_age_days);
+                fm.insert("recent_commits".into(), jf.recent_commits as f64);
+                fm.insert("bug_fix_commits".into(), jf.bug_fix_commits as f64);
+                fm.insert("owner_contribution".into(), jf.owner_contribution);
+                fm.insert("minor_contributors".into(), jf.minor_contributors as f64);
+                fm
+            })
+            .collect();
+
         Ok(AnalysisResult {
             request_id: request.request_id.clone(),
             commit_hash: request.commit_hash.clone(),
@@ -250,6 +274,7 @@ impl AnalysisEngine for ProcessEngine {
             metrics: Some(metrics),
             processing_time_ms,
             blocked_merge: error_count > 0,
+            jit_features: if feature_maps.is_empty() { None } else { Some(feature_maps) },
         })
     }
 }

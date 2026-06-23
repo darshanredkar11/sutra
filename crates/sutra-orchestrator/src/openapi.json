@@ -1,0 +1,348 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sutra API",
+    "description": "Predict production software failures before they happen. Sutra fuses 7 analysis engines into a single prediction pipeline.\n\n## Engines\n- **mgtg** — Cyclomatic/cognitive complexity\n- **dependency** — Import graph, Tarjan SCC cycles, architecture rules\n- **rse** — Runtime survivability (M/M/1 queueing, CPU/memory/GC risk)\n- **process** — Git change mining, Hassan entropy, 14 JIT features\n- **ml** — Logistic regression (SGD+L2, AUC evaluation)\n- **llm** — Ollama-based finding validation (optional)\n- **hitl** — Human feedback precision tracking",
+    "version": "0.1.0",
+    "contact": {
+      "name": "Sutra",
+      "url": "https://github.com/darshanredkar/sutra"
+    },
+    "license": {
+      "name": "Apache 2.0",
+      "url": "https://www.apache.org/licenses/LICENSE-2.0"
+    }
+  },
+  "servers": [
+    { "url": "http://localhost:8080", "description": "Local development" }
+  ],
+  "paths": {
+    "/v1/analyze": {
+      "post": {
+        "summary": "Run full analysis",
+        "description": "Analyze a repository path with all registered engines. Returns unified risk score, findings, and recommendations.",
+        "operationId": "analyze",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnalyzeRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis complete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnalysisResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Invalid request body"
+          },
+          "500": {
+            "description": "Analysis failed"
+          }
+        }
+      }
+    },
+    "/v1/demo": {
+      "post": {
+        "summary": "Analyze public GitHub repo",
+        "description": "Clone any public GitHub repository and run all analysis engines. The repo is cloned temporarily and cleaned up after analysis.",
+        "operationId": "demo",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["repo_url"],
+                "properties": {
+                  "repo_url": {
+                    "type": "string",
+                    "format": "uri",
+                    "example": "https://github.com/darshanredkar/sutra",
+                    "description": "Public GitHub repository URL"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Analysis complete",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid URL or clone failure"
+          },
+          "500": {
+            "description": "Analysis failed"
+          }
+        }
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns the health status of all registered engines.",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Health information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ComponentHealth"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/status": {
+      "get": {
+        "summary": "Server status",
+        "description": "Returns server version, uptime, registered engines, and start time.",
+        "operationId": "status",
+        "responses": {
+          "200": {
+            "description": "Server status",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "version": { "type": "string" },
+                    "uptime_seconds": { "type": "integer" },
+                    "engines": {
+                      "type": "array",
+                      "items": { "type": "string" }
+                    },
+                    "started_at": { "type": "string", "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/openapi.json": {
+      "get": {
+        "summary": "OpenAPI specification",
+        "description": "Returns the OpenAPI 3.1 specification for the Sutra API.",
+        "operationId": "openapi",
+        "responses": {
+          "200": {
+            "description": "OpenAPI specification",
+            "content": {
+              "application/json": {}
+            }
+          }
+        }
+      }
+    },
+    "/v1/report": {
+      "get": {
+        "summary": "HTML report page",
+        "description": "Returns an interactive HTML report page for manual analysis.",
+        "operationId": "report",
+        "parameters": [
+          {
+            "name": "repo",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Pre-fill the repo URL field"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "HTML page",
+            "content": {
+              "text/html": {}
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AnalyzeRequest": {
+        "type": "object",
+        "required": ["repo_path", "commit_hash"],
+        "properties": {
+          "repo_path": {
+            "type": "string",
+            "description": "Filesystem path to the repository"
+          },
+          "commit_hash": {
+            "type": "string",
+            "description": "Git commit hash to analyze (defaults to HEAD)"
+          },
+          "engines": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": ["mgtg", "process", "dependency", "ml", "hitl", "rse"]
+            },
+            "description": "Engines to run. Empty array runs all."
+          },
+          "config": {
+            "$ref": "#/components/schemas/AnalysisConfig"
+          },
+          "request_id": {
+            "type": "string",
+            "description": "Optional client-provided request ID"
+          }
+        }
+      },
+      "AnalysisConfig": {
+        "type": "object",
+        "properties": {
+          "skip_llm_validation": {
+            "type": "boolean",
+            "default": false
+          },
+          "min_severity": {
+            "type": "number",
+            "default": 0.0,
+            "description": "Minimum severity threshold"
+          },
+          "include_metrics": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      },
+      "AnalysisResult": {
+        "type": "object",
+        "properties": {
+          "request_id": { "type": "string" },
+          "commit_hash": { "type": "string" },
+          "overall_risk": {
+            "type": "number",
+            "format": "double",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "findings": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Finding" }
+          },
+          "recommendations": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Recommendation" }
+          },
+          "metrics": {
+            "$ref": "#/components/schemas/MetricsSummary"
+          },
+          "processing_time_ms": {
+            "type": "number",
+            "format": "double"
+          },
+          "blocked_merge": {
+            "type": "boolean"
+          }
+        }
+      },
+      "Finding": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "engine": { "type": "string" },
+          "file_path": { "type": "string" },
+          "line": { "type": "integer" },
+          "message": { "type": "string" },
+          "severity": {
+            "type": "string",
+            "enum": ["info", "warning", "error", "critical"]
+          },
+          "validated": { "type": "boolean" },
+          "suggested_fix": { "type": "string" }
+        }
+      },
+      "Recommendation": {
+        "type": "object",
+        "properties": {
+          "text": { "type": "string" },
+          "affected_files": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "priority": { "type": "number" }
+        }
+      },
+      "MetricsSummary": {
+        "type": "object",
+        "properties": {
+          "cyclomatic_max": { "type": "number" },
+          "cognitive_max": { "type": "number" },
+          "nesting_max": { "type": "number" },
+          "total_functions": { "type": "integer" },
+          "total_files": { "type": "integer" },
+          "dependency_fan_in_max": { "type": "number" },
+          "dependency_fan_out_max": { "type": "number" },
+          "circular_dependencies": { "type": "integer" },
+          "rse_survivability": { "type": "number" },
+          "rse_complexity_max": { "type": "number" },
+          "rse_memory_per_request": { "type": "number" },
+          "rse_safe_rps": { "type": "number" }
+        }
+      },
+      "ComponentHealth": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": ["healthy", "degraded", "unhealthy"]
+          },
+          "message": { "type": "string" },
+          "last_heartbeat_ms": { "type": "integer" }
+        }
+      },
+      "DemoResponse": {
+        "type": "object",
+        "properties": {
+          "repo_url": { "type": "string" },
+          "repo_name": { "type": "string" },
+          "overall_risk": { "type": "number" },
+          "risk_label": {
+            "type": "string",
+            "enum": ["LOW", "MODERATE", "HIGH", "CRITICAL"]
+          },
+          "findings_count": { "type": "integer" },
+          "errors": { "type": "integer" },
+          "warnings": { "type": "integer" },
+          "info_count": { "type": "integer" },
+          "processing_time_ms": { "type": "number" },
+          "findings": {
+            "type": "array",
+            "items": { "type": "object" }
+          },
+          "error": { "type": "string" }
+        }
+      }
+    }
+  }
+}

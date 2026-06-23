@@ -28,11 +28,11 @@ fn check_gaps(nodes: &[IrNode], file: &str, findings: &mut Vec<Finding>, depth: 
             } => {
                 // Check for missing else branch
                 if else_branch.is_empty() {
-                    // Check if it's not a guard clause (if with return)
-                    let returns_in_then = then_branch
+                    // Check if it's not a guard clause (if with return or raise/throw)
+                    let terminates_in_then = then_branch
                         .iter()
-                        .any(|n| matches!(n, IrNode::Return { .. }));
-                    if !returns_in_then {
+                        .any(|n| matches!(n, IrNode::Return { .. } | IrNode::Raise { .. }));
+                    if !terminates_in_then {
                         findings.push(Finding {
                             id: finding_id("G", 0),
                             category: "gaps".to_string(),
@@ -57,7 +57,6 @@ fn check_gaps(nodes: &[IrNode], file: &str, findings: &mut Vec<Finding>, depth: 
                     || lower.contains("none")
                     || lower.contains("is none")
                     || lower.contains("is not none")
-                    || condition.contains("==")
                 {
                     // Check if the null/undefined branch is handled
                     if else_branch.is_empty() || then_branch.is_empty() {

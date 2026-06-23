@@ -1,5 +1,6 @@
 pub mod python;
 pub mod javascript;
+pub mod rust;
 
 use crate::ir::IrNode;
 
@@ -19,6 +20,8 @@ pub fn detect_language(path: &str) -> Option<&'static str> {
         || path.ends_with(".tsx")
     {
         Some("javascript")
+    } else if path.ends_with(".rs") {
+        Some("rust")
     } else {
         None
     }
@@ -29,6 +32,7 @@ pub fn parse_file(path: &str, source: &str) -> Option<(Vec<IrNode>, &'static str
     let nodes = match lang {
         "python" => python::PythonParser::parse(source),
         "javascript" => javascript::JsParser::parse(source),
+        "rust" => rust::RustParser::parse(source),
         _ => return None,
     };
     Some((nodes, lang))

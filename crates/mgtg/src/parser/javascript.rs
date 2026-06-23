@@ -44,6 +44,7 @@ fn parse_statement(node: Node, source: &str) -> Vec<IrNode> {
         "assignment_expression" | "variable_declaration" | "lexical_declaration" => parse_assignment(node, source),
         "expression_statement" => parse_expression_statement(node, source),
         "return_statement" => parse_return(node, source),
+        "throw_statement" => parse_throw(node, source),
         "ternary_expression" => parse_ternary(node, source),
         "arrow_function" => parse_closure(node, source),
         _ => {
@@ -415,6 +416,18 @@ fn parse_return(node: Node, source: &str) -> Vec<IrNode> {
     let mut result = extra_nodes;
     result.push(IrNode::Return { value, line });
     result
+}
+
+fn parse_throw(node: Node, source: &str) -> Vec<IrNode> {
+    let line = node.start_position().row + 1;
+    let mut cursor = node.walk();
+    let mut value = None;
+    for child in node.children(&mut cursor) {
+        if child.kind() != "throw" {
+            value = Some(node_text(child, source));
+        }
+    }
+    vec![IrNode::Raise { value, line }]
 }
 
 fn parse_ternary(node: Node, source: &str) -> Vec<IrNode> {

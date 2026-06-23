@@ -85,6 +85,7 @@ mod tests {
                 metrics: None,
                 processing_time_ms: 5.0,
                 blocked_merge: false,
+                jit_features: None,
             })
         }
     }

@@ -29,11 +29,11 @@
 <a href="book.html">Docs</a>
 <a href="example.html">Examples</a>
 <a href="#market">Market</a>
+<a href="#enterprise">Enterprise</a>
 <a href="#engines">Engines</a>
 <a href="#demo">Demo</a>
 <a href="#live-demo">Live</a>
 <a href="#roadmap">Roadmap</a>
-<a href="#monetization">Plans</a>
 </div>
 </div>
 </nav>
@@ -101,25 +101,127 @@ Sutra bridges the gap between static analysis and production reliability.
 <div class="comp-table-wrap">
 <table class="comp-table">
 <thead>
-<tr><th>Capability</th><th>Sutra</th><th>SonarQube</th><th>CodeClimate</th><th>Semgrep</th><th>DataDog CI</th></tr>
+<tr><th>Capability</th><th>Sutra</th><th>SonarQube</th><th>CodeRabbit</th><th>Semgrep</th><th>Codacy</th><th>LinearB</th></tr>
 </thead>
 <tbody>
-<tr><td>Cyclomatic complexity</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td></tr>
-<tr><td>Dependency cycle detection</td><td class="yes">Yes</td><td class="partial">Limited</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
-<tr><td>Git change entropy</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
-<tr><td>14 JIT risk features</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td></tr>
-<tr><td>Logistic regression</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td></tr>
-<tr><td>LLM validation</td><td class="yes">Yes*</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td><td class="no">No</td></tr>
-<tr><td>HITL feedback loop</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
-<tr><td>Single risk score</td><td class="yes">Yes</td><td class="partial">Partial</td><td class="partial">Partial</td><td class="no">No</td><td class="no">No</td></tr>
-<tr><td>SARIF output</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
-<tr><td>Zero external deps</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="partial">Python</td><td class="no">No</td></tr>
-<tr><td>Open core</td><td class="yes">Yes</td><td class="partial">Community</td><td class="no">No</td><td class="partial">Rules limited</td><td class="no">No</td></tr>
+<tr><td>Production failure prediction</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Runtime survivability (RSE)</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Multi-engine risk fusion</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Git change entropy + JIT</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td></tr>
+<tr><td>Logistic regression ML</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="partial">Limited</td></tr>
+<tr><td>LLM-powered validation</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="partial">Limited</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Human feedback loop</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Cyclomatic complexity</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td><td class="no">No</td></tr>
+<tr><td>Dependency cycle detection</td><td class="yes">Yes</td><td class="partial">Limited</td><td class="no">No</td><td class="no">No</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>PR review automation</td><td class="no">No</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
+<tr><td>Security vulnerability scan</td><td class="no">No</td><td class="yes">Yes</td><td class="partial">Limited</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
+<tr><td>Single unified risk score</td><td class="yes">Yes</td><td class="partial">Partial</td><td class="no">No</td><td class="no">No</td><td class="partial">Partial</td><td class="no">No</td></tr>
+<tr><td>SARIF 2.1.0 output</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td></tr>
+<tr><td>Zero external runtime deps</td><td class="yes">Yes</td><td class="no">No</td><td class="no">No</td><td class="partial">Python</td><td class="no">No</td><td class="no">No</td></tr>
+<tr><td>Self-hosted / air-gapped</td><td class="yes">Yes</td><td class="yes">Yes</td><td class="no">No</td><td class="yes">Yes</td><td class="partial">Paid tier</td><td class="no">No</td></tr>
+<tr><td>Open source (Apache 2.0)</td><td class="yes">Yes</td><td class="partial">LGPL</td><td class="no">No</td><td class="partial">Rules limited</td><td class="partial">Partial</td><td class="no">No</td></tr>
 </tbody>
 </table>
 </div>
-<p class="table-footnote">* LLM engine is optional (disabled by default, enabled via <code>--llm</code> flag). Only Sutra fuses all 7 signals into one composable pipeline.</p>
+<p class="table-footnote">Sutra is the only tool that fuses 7 analysis engines into a single production failure risk score. All competitors are point solutions — they solve one dimension but miss the synthesis that predicts <em>operational</em> failure. No competitor models runtime survivability or combines change mining + ML + LLM + human feedback into a composable pipeline.</p>
 
+</div>
+</section>
+
+<!-- ═══════════════════════════════════════════════════════ ENTERPRISE -->
+
+<section id="enterprise" class="section section-dark">
+<div class="container">
+<h2>Enterprise Readiness</h2>
+<p class="section-desc">
+Sutra is early-stage infrastructure — the core analysis pipeline is production-quality (682 tests, 7 engines, SARIF output), but enterprise plumbing (auth, multi-tenancy, scaling) is still being built. Below is the current state and roadmap.
+</p>
+
+<div class="comp-table-wrap">
+<table class="comp-table">
+<thead>
+<tr><th>Capability</th><th>Status</th><th>Details</th><th>Timeline</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td>Authentication</td>
+  <td class="no">Missing</td>
+  <td>No API keys, JWT, or RBAC. Any client can call any endpoint.</td>
+  <td>Q3 2026</td>
+</tr>
+<tr>
+  <td>Rate limiting</td>
+  <td class="no">Missing</td>
+  <td>No per-client or per-endpoint rate limiting.</td>
+  <td>Q2 2026</td>
+</tr>
+<tr>
+  <td>Multi-tenancy</td>
+  <td class="no">Missing</td>
+  <td>No org/project isolation in data model or API.</td>
+  <td>Q4 2026</td>
+</tr>
+<tr>
+  <td>Prometheus /metrics</td>
+  <td class="partial">Internal</td>
+  <td>Counters/histograms/gauges registered internally — no /metrics endpoint yet.</td>
+  <td>Q2 2026</td>
+</tr>
+<tr>
+  <td>Parallel analysis</td>
+  <td class="yes">Done</td>
+  <td>Engines run concurrently via rayon. Panic-safe, deterministic merge.</td>
+  <td>Done</td>
+</tr>
+<tr>
+  <td>Docker deployment</td>
+  <td class="yes">Basic</td>
+  <td>Multi-stage Dockerfile + Railway config. No docker-compose or Helm yet.</td>
+  <td>Q2 2026</td>
+</tr>
+<tr>
+  <td>OpenAPI spec</td>
+  <td class="yes">Done</td>
+  <td>OpenAPI 3.1 served at <code>/v1/openapi.json</code>. Interactive Swagger UI at <code>/v1/docs</code>.</td>
+  <td>Done</td>
+</tr>
+<tr>
+  <td>GitHub Action</td>
+  <td class="no">Missing</td>
+  <td>CLI + SARIF work from any CI, but no reusable GitHub Action yet.</td>
+  <td>Q2 2026</td>
+</tr>
+<tr>
+  <td>PostgreSQL support</td>
+  <td class="no">Missing</td>
+  <td>SQLite only. Noted as future work in whitepaper §11.2.</td>
+  <td>Q4 2026</td>
+</tr>
+<tr>
+  <td>Dependency scanning</td>
+  <td class="yes">Done</td>
+  <td>Weekly <code>cargo audit</code> CI job. Runs on dependency changes. Reports to issues.</td>
+  <td>Done</td>
+</tr>
+<tr>
+  <td>E2E integration tests</td>
+  <td class="yes">Done</td>
+  <td>11 synthetic repo tests + 3 real-repo tests (opt-in via <code>#[ignore]</code>). Full pipeline validation.</td>
+  <td>Done</td>
+</tr>
+<tr>
+  <td>Apache 2.0 license</td>
+  <td class="yes">Yes</td>
+  <td>Permissive, patent-safe, no CLA. Enterprise-friendly out of the box.</td>
+  <td>Done</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<p class="table-footnote" style="margin-top: 20px;">
+<strong>Quick wins (Q2 2026):</strong> Rate limiting (tower-http, 0.5 day) &middot; docker-compose.yml (0.5 day) &middot; Prometheus /metrics endpoint (1 day) &middot; API key auth middleware (1 day) &middot; GitHub Action packaging (1.5 days) &middot; PQ/PG store support (1 week)
+</p>
 </div>
 </section>
 

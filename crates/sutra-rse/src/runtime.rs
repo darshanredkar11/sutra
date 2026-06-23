@@ -1,10 +1,7 @@
 use crate::types::{ComplexityProfile, RequestWeight, Runtime, RuntimePrediction};
 
 pub fn predict_cpu_risk(complexity: &ComplexityProfile) -> f64 {
-    let base = complexity.time_complexity.risk_factor();
-    let loop_penalty = (complexity.loop_depth as f64).min(10.0) * 0.05;
-    let branch_penalty = (complexity.branch_count as f64).min(50.0) * 0.005;
-    (base + loop_penalty + branch_penalty).min(1.0)
+    complexity.time_complexity.risk_factor()
 }
 
 pub fn predict_memory_risk(weight: &RequestWeight, runtime: Runtime, memory_limit_mb: f64) -> f64 {
@@ -43,14 +40,11 @@ pub fn predict_gc_risk(runtime: Runtime, weight: &RequestWeight, complexity: &Co
 pub fn predict_thread_risk(runtime: Runtime, expected_rps: f64) -> f64 {
     let max_conc = runtime.max_concurrent();
     let ratio = expected_rps / max_conc;
-    (ratio / 10.0).min(1.0)
+    (ratio / 20.0).min(1.0)
 }
 
 pub fn predict_latency_risk(complexity: &ComplexityProfile) -> f64 {
-    let complexity_risk = complexity.time_complexity.risk_factor();
-    let depth_penalty = (complexity.loop_depth as f64).min(10.0) * 0.03;
-    let branch_penalty = (complexity.branch_count as f64).min(30.0) * 0.01;
-    (complexity_risk + depth_penalty + branch_penalty).min(1.0)
+    complexity.time_complexity.risk_factor()
 }
 
 pub fn predict_runtime(
@@ -173,8 +167,7 @@ mod tests {
             ..zero_profile()
         };
         let risk = predict_cpu_risk(&profile);
-        assert!(risk <= 1.0);
-        assert!((risk - 0.5).abs() < f64::EPSILON);
+        assert_eq!(risk, 0.0);
     }
 
     #[test]
@@ -186,8 +179,7 @@ mod tests {
             ..zero_profile()
         };
         let risk = predict_cpu_risk(&profile);
-        assert!(risk <= 1.0);
-        assert!((risk - 0.25).abs() < f64::EPSILON);
+        assert_eq!(risk, 0.0);
     }
 
     #[test]

@@ -1,8 +1,14 @@
 use std::collections::HashMap;
 
+use rayon::prelude::*;
 use sutra_common::engine::AnalysisEngine;
 use sutra_common::error::SutraResult;
 use sutra_schema::v1::{AnalysisResult, AnalyzeRequest, Engine, Finding, Recommendation};
+
+struct EngineOutput {
+    engine_type: Engine,
+    result: std::thread::Result<Result<AnalysisResult, sutra_common::error::SutraError>>,
+}
 
 pub struct Orchestrator {
     engines: HashMap<Engine, Box<dyn AnalysisEngine>>,
@@ -26,23 +32,70 @@ impl Orchestrator {
             request.engines.clone()
         };
 
+        // Two-pass: if ML and Process are both requested, run Process first sequentially
+        let mut process_result = None;
+        let mut engines_parallel = engines_to_run.clone();
+
+        if engines_to_run.contains(&Engine::Process) && engines_to_run.contains(&Engine::Ml) {
+            if let Some(engine) = self.engines.get(&Engine::Process) {
+                if let Ok(result) = engine.analyze(request) {
+                    process_result = Some(result);
+                }
+            }
+            engines_parallel.retain(|e| *e != Engine::Process);
+        }
+
+        let outputs: Vec<EngineOutput> = engines_parallel
+            .par_iter()
+            .filter_map(|engine_type| {
+                let engine = self.engines.get(engine_type)?;
+                Some(EngineOutput {
+                    engine_type: *engine_type,
+                    result: std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                        engine.analyze(request)
+                    })),
+                })
+            })
+            .collect();
+
         let mut all_findings: Vec<Finding> = Vec::new();
         let mut all_recommendations: Vec<Recommendation> = Vec::new();
         let mut total_risk = 0.0f64;
         let mut total_time = 0.0f64;
         let mut merged_metrics: Option<sutra_schema::v1::MetricsSummary> = None;
         let mut blocked = false;
+        let mut jit_features: Option<Vec<sutra_schema::v1::FeatureMap>> = None;
 
-        for engine_type in &engines_to_run {
-            let Some(engine) = self.engines.get(engine_type) else {
-                continue;
-            };
+        // Process the pre-run Process result if available
+        if let Some(result) = process_result {
+            total_risk = total_risk.max(result.overall_risk);
+            total_time += result.processing_time_ms;
+            all_findings.extend(result.findings);
+            all_recommendations.extend(result.recommendations);
+            jit_features = result.jit_features.clone();
+            if result.blocked_merge {
+                blocked = true;
+            }
+            if let Some(metrics) = result.metrics {
+                let m = merged_metrics.get_or_insert_with(Default::default);
+                m.total_files = m.total_files.max(metrics.total_files);
+                m.total_functions = m.total_functions.max(metrics.total_functions);
+                m.cyclomatic_max = m.cyclomatic_max.max(metrics.cyclomatic_max);
+                m.cognitive_max = m.cognitive_max.max(metrics.cognitive_max);
+                m.nesting_max = m.nesting_max.max(metrics.nesting_max);
+                m.dependency_fan_in_max = m.dependency_fan_in_max.max(metrics.dependency_fan_in_max);
+                m.dependency_fan_out_max = m.dependency_fan_out_max.max(metrics.dependency_fan_out_max);
+                m.circular_dependencies = m.circular_dependencies.max(metrics.circular_dependencies);
+                m.rse_survivability = m.rse_survivability.max(metrics.rse_survivability);
+                m.rse_complexity_max = m.rse_complexity_max.max(metrics.rse_complexity_max);
+                m.rse_memory_per_request = m.rse_memory_per_request.max(metrics.rse_memory_per_request);
+                m.rse_safe_rps = m.rse_safe_rps.max(metrics.rse_safe_rps);
+            }
+        }
 
-            let engine_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
-                engine.analyze(request)
-            }));
-
-            match engine_result {
+        for output in outputs {
+            let engine_type = output.engine_type;
+            match output.result {
                 Ok(Ok(result)) => {
                     total_risk = total_risk.max(result.overall_risk);
                     total_time += result.processing_time_ms;
@@ -70,7 +123,7 @@ impl Orchestrator {
                 Ok(Err(e)) => {
                     all_findings.push(Finding::new(
                         &format!("ORCH-{}-ERR", engine_type.as_str()),
-                        *engine_type,
+                        engine_type,
                         "N/A",
                         1,
                         &format!("Engine '{}' failed: {}", engine_type.as_str(), e),
@@ -80,7 +133,7 @@ impl Orchestrator {
                 Err(_) => {
                     all_findings.push(Finding::new(
                         &format!("ORCH-{}-ERR", engine_type.as_str()),
-                        *engine_type,
+                        engine_type,
                         "N/A",
                         1,
                         &format!("Engine '{}' panicked", engine_type.as_str()),
@@ -101,6 +154,7 @@ impl Orchestrator {
             metrics: merged_metrics,
             processing_time_ms: total_time,
             blocked_merge: blocked,
+            jit_features,
         })
     }
 
@@ -171,6 +225,7 @@ mod tests {
                 metrics: None,
                 processing_time_ms: 10.0,
                 blocked_merge: false,
+                jit_features: None,
             })
         }
     }

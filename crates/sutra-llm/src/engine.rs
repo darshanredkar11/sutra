@@ -148,6 +148,7 @@ impl AnalysisEngine for LlmEngine {
                 metrics: None,
                 processing_time_ms: start.elapsed().as_secs_f64() * 1000.0,
                 blocked_merge: false,
+                jit_features: None,
             });
         }
 
@@ -163,6 +164,7 @@ impl AnalysisEngine for LlmEngine {
             metrics: None,
             processing_time_ms: start.elapsed().as_secs_f64() * 1000.0,
             blocked_merge: false,
+            jit_features: None,
         })
     }
 }

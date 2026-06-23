@@ -181,6 +181,7 @@ impl AnalysisEngine for HitlEngine {
             metrics: None,
             processing_time_ms: 0.0,
             blocked_merge: false,
+            jit_features: None,
         };
 
         Ok(result)

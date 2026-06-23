@@ -90,26 +90,28 @@ impl AnalysisEngine for MlEngine {
     fn analyze(&self, _request: &AnalyzeRequest) -> SutraResult<AnalysisResult> {
         let start = Instant::now();
 
-        let _model = self
-            .model
-            .as_ref()
-            .ok_or_else(|| SutraError::engine("ml", "no trained model available. train with `train_on_labeled` first or load from path"))?;
+        let model_is_ready = self.model.is_some();
 
-        // Without access to process analysis features in the AnalyzeRequest,
-        // we return a basic result indicating no ML findings.
-        // In practice, the orchestrator would pass JIT features through.
         Ok(AnalysisResult {
             request_id: _request.request_id.clone(),
             commit_hash: _request.commit_hash.clone(),
             overall_risk: 0.0,
             findings: vec![],
-            recommendations: vec![Recommendation::new(
-                "ML engine available but requires feature input from ProcessEngine. Train with labeled data first.",
-                0.5,
-            )],
+            recommendations: if model_is_ready {
+                vec![Recommendation::new(
+                    "ML engine active but feature input from ProcessEngine required for predictions.",
+                    0.5,
+                )]
+            } else {
+                vec![Recommendation::new(
+                    "ML engine not trained — run `train_on_labeled` with labeled commit data to enable predictions.",
+                    0.3,
+                )]
+            },
             metrics: None,
             processing_time_ms: start.elapsed().as_secs_f64() * 1000.0,
             blocked_merge: false,
+            jit_features: None,
         })
     }
 }
@@ -158,9 +160,10 @@ mod tests {
     fn test_engine_analyze_without_model() {
         let engine = MlEngine::new();
         let req = AnalyzeRequest::new("/repo", "abc");
-        let result = engine.analyze(&req);
-        assert!(result.is_err());
-        assert!(result.unwrap_err().to_string().contains("no trained model"));
+        let result = engine.analyze(&req).unwrap();
+        assert!(result.overall_risk == 0.0);
+        assert!(result.findings.is_empty());
+        assert!(result.recommendations.iter().any(|r| r.text.contains("not trained")));
     }
 
     #[test]

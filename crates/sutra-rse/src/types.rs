@@ -94,7 +94,7 @@ impl ComplexityClass {
             ComplexityClass::ON => 0.3,
             ComplexityClass::ONLogN => 0.4,
             ComplexityClass::ON2 => 0.7,
-            ComplexityClass::ON3 => 0.9,
+            ComplexityClass::ON3 => 0.85,
             ComplexityClass::O2N => 1.0,
         }
     }
@@ -186,7 +186,7 @@ impl Default for RseConfig {
             enabled: true,
             runtime: None,
             max_endpoints: 50,
-            expected_rps: 100.0,
+            expected_rps: 30.0,
             memory_limit_mb: 512.0,
         }
     }

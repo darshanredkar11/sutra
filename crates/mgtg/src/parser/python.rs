@@ -42,6 +42,7 @@ fn parse_statement(node: Node, source: &str) -> Vec<IrNode> {
         "assignment" => parse_assignment(node, source),
         "expression_statement" => parse_expression_statement(node, source),
         "return_statement" => parse_return(node, source),
+        "raise_statement" => parse_raise(node, source),
         "try_statement" => parse_try(node, source),
         "with_statement" => parse_with(node, source),
         _ => {
@@ -384,4 +385,16 @@ fn parse_return(node: Node, source: &str) -> Vec<IrNode> {
         }
     }
     vec![IrNode::Return { value, line }]
+}
+
+fn parse_raise(node: Node, source: &str) -> Vec<IrNode> {
+    let line = node.start_position().row + 1;
+    let mut cursor = node.walk();
+    let mut value = None;
+    for child in node.children(&mut cursor) {
+        if child.kind() != "raise" {
+            value = Some(node_text(child, source));
+        }
+    }
+    vec![IrNode::Raise { value, line }]
 }

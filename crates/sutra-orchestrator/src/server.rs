@@ -66,10 +66,48 @@ pub fn build_router(state: SharedState) -> Router {
         .route("/v1/report", get(handle_report))
         .route("/v1/health", get(handle_health))
         .route("/v1/status", get(handle_status))
+        .route("/v1/openapi.json", get(handle_openapi))
+        .route("/v1/docs", get(handle_swagger_ui))
         .layer(
             tower_http::cors::CorsLayer::permissive(),
         )
         .with_state(state)
+}
+
+async fn handle_openapi() -> impl IntoResponse {
+    (
+        StatusCode::OK,
+        [("content-type", "application/json")],
+        include_str!("openapi.json"),
+    )
+}
+
+async fn handle_swagger_ui() -> impl IntoResponse {
+    let html = r#"<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sutra API — Swagger UI</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+<div id="swagger-ui"></div>
+<script src="https://cdn.jsdelivr.net/npm/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+<script>
+  SwaggerUIBundle({
+    url: '/v1/openapi.json',
+    dom_id: '#swagger-ui',
+    presets: [SwaggerUIBundle.presets.apis],
+    layout: 'BaseLayout',
+    deepLinking: true,
+    showExtensions: true,
+    showCommonExtensions: true,
+  });
+</script>
+</body>
+</html>"#;
+    (StatusCode::OK, [("content-type", "text/html")], html)
 }
 
 #[derive(Deserialize)]
@@ -345,6 +383,7 @@ mod tests {
                 metrics: None,
                 processing_time_ms: 5.0,
                 blocked_merge: false,
+                jit_features: None,
             })
         }
     }

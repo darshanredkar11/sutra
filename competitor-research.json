@@ -1,0 +1,205 @@
+[
+  {
+    "name": "SonarQube / SonarCloud",
+    "description": "Industry-standard static code analysis platform for code quality and security, covering 30+ languages with deep taint analysis and AI CodeFix.",
+    "features": [
+      "6000+ rules covering bugs, vulnerabilities, code smells, security hotspots",
+      "AI CodeFix and AI Code Assurance for AI-generated code review",
+      "Quality gates, custom profiles, and portfolio dashboards",
+      "SAST + SCA (Advanced Security add-on)",
+      "30+ languages (40+ in Enterprise, including COBOL, ABAP, PL/I)",
+      "Self-hosted (Server) or SaaS (Cloud) deployment",
+      "Branch analysis, PR analysis, secrets detection",
+      "OWASP, CWE, PCI DSS, MISRA compliance reporting"
+    ],
+    "pricing": "Free tier (50K LOC, basic features). Team from $32/mo (100K LOC). Enterprise custom (annual, LOC-based). Server: Developer $750/yr, Enterprise custom. OSS plan free.",
+    "license": "Community Edition: LGPL v3. Server/Cloud editions: Proprietary (SonarSource)",
+    "differentiator": "Sutra predicts production failures via multi-engine fusion (complexity, dependencies, runtime, change mining, ML, LLM, human feedback). SonarQube is a static analysis quality gate — it finds code-level issues before merge but does not fuse runtime telemetry, change-mining signals, or logistic regression to predict whether code will survive in production."
+  },
+  {
+    "name": "CodeRabbit",
+    "description": "AI-powered code review tool that provides line-by-line feedback, summaries, and autofix on pull requests across GitHub, GitLab, IDE, and CLI.",
+    "features": [
+      "AI PR reviews with line-by-line comments and autofix (1-click commits)",
+      "PR summarization, architectural diagrams, walkthroughs",
+      "Custom review guidelines via YAML config",
+      "Learning system that improves from developer feedback",
+      "40+ linter/SAST integrations with noise filtering",
+      "Agentic chat, MCP connections, linked repository analysis",
+      "Pre-merge checks, unit test generation, docstring generation",
+      "Product analytics dashboards and customizable reports"
+    ],
+    "pricing": "Free (PR summarization only). Pro $24/dev/mo. Pro+ $48/dev/mo. Enterprise (contact sales, includes self-hosting). Usage-based add-on for overages. Free for public repos.",
+    "license": "Proprietary (CodeRabbit AI)",
+    "differentiator": "CodeRabbit focuses exclusively on PR-level AI code review with chat and autofix. Sutra integrates PR review as one signal among many but goes far beyond it: it fuses complexity metrics, dependency analysis, runtime survivability data, change-mining, logistic regression, LLM validation, and human feedback into a unified production failure prediction — CodeRabbit has no runtime survivability or multi-engine fusion pipeline."
+  },
+  {
+    "name": "Semgrep (r2c)",
+    "description": "Fast, pattern-based SAST engine with a community rules registry and proprietary cross-file/taint analysis for AppSec teams.",
+    "features": [
+      "Pattern-based SAST with custom rule writing (YAML)",
+      "Cross-file and cross-function taint analysis (Pro)",
+      "35+ languages, 900+ Pro rules, community rule registry",
+      "Semgrep Supply Chain (SCA) with reachability analysis",
+      "Semgrep Secrets with entropy/validation detection",
+      "AI-powered triage, prioritization, and fix suggestions (Semgrep Assistant)",
+      "CI/CD integrations, PR comments, IDE plugins",
+      "Policy-based workflows, SSO, RBAC"
+    ],
+    "pricing": "Free (10 contributors, 10 repos). Team from $30/contributor/mo (Code or Supply Chain). Enterprise custom. Community Edition (CE) free & open source.",
+    "license": "CE engine: LGPL 2.1. Pro rules/AppSec Platform: Proprietary (Semgrep Rules License v1.0)",
+    "differentiator": "Semgrep is a security-focused SAST/SCA/secrets scanner — excellent at finding code vulnerabilities fast via pattern matching. Sutra is a production failure prediction framework that goes beyond code scanning: it analyzes complexity trends, dependency topologies, runtime survival data, change velocity, logistic regression models, and LLM-based validation to predict whether code will actually fail in production, not just whether it has security bugs."
+  },
+  {
+    "name": "Snyk Code",
+    "description": "Developer-first SAST platform with AI-powered real-time scanning and 80%-accurate automated fixes, deeply integrated into IDEs and CI/CD.",
+    "features": [
+      "Real-time SAST scanning in IDE, CLI, and PRs",
+      "AI-based engine with 80% fix accuracy (Snyk Agent Fix)",
+      "SCA (Snyk Open Source) with dependency vulnerability scanning",
+      "Container and IaC scanning",
+      "Interfile analysis, priority scoring, risk-based prioritization",
+      "Full SaaS deployment with Snyk Broker for self-hosted Git",
+      "Jira integration, custom policies, SBOM generation",
+      "Snyk Essentials for ASPM (AppSec Posture Management)"
+    ],
+    "pricing": "Free (limited tests, 1 user). Team $25/dev/mo. Enterprise custom (~$40-80/dev/mo). Snyk Code also available standalone.",
+    "license": "Proprietary (Snyk Ltd.)",
+    "differentiator": "Snyk Code is a developer-first SAST tool focused on finding and fixing security vulnerabilities quickly. Sutra is a multi-engine prediction framework that forecasts production failures by combining code complexity, dependency structure, runtime survivability metrics, change-mining signals, logistic regression, LLM validation, and human feedback — Snyk has no runtime telemetry fusion, no change-process mining, and no survivability prediction layer."
+  },
+  {
+    "name": "CodeClimate",
+    "description": "Engineering intelligence platform offering code quality (maintainability scores, technical debt tracking) and velocity (DORA metrics, delivery insights).",
+    "features": [
+      "Automated code review with maintainability scores (A–F)",
+      "Test coverage tracking and gap analysis",
+      "Technical debt assessment and trending",
+      "Velocity: DORA metrics, delivery pipeline health, cycle time",
+      "PR integration with quality gates",
+      "Hotspot detection (frequently changed files needing coverage)",
+      "IDE and CLI local analysis",
+      "Jira/Slack integrations, REST API"
+    ],
+    "pricing": "Free (OSS, limited). Startup free (4 seats). Team from $16.67/seat/mo. Enterprise custom. Quality ~$50-80/committer/mo, Velocity ~$40-70/committer/mo, bundled ~$90-120/committer/mo.",
+    "license": "Proprietary (Code Climate Inc.)",
+    "differentiator": "CodeClimate measures code quality and engineering velocity as separate analytics products. Sutra is a prediction pipeline that fuses 7 engines to forecast production failures — CodeClimate tells you your code quality score and cycle time, but does not predict whether a specific change will cause a production incident by combining runtime data, change mining, classification models, and human feedback."
+  },
+  {
+    "name": "Codacy",
+    "description": "Automated code quality and security platform with AI guardrails, covering SAST, SCA, secrets, IaC, and DAST in a unified per-user SaaS model.",
+    "features": [
+      "SAST, hardcoded secrets detection, SCA, IaC scanning, DAST",
+      "AI Reviewer (hybrid deterministic + LLM PR review)",
+      "AI Guardrails — real-time scanning in AI coding agents (VS Code, Cursor, MCP)",
+      "49 languages, malicious package detection",
+      "Quality gates and merge blocking",
+      "AI false-positive detection and triage",
+      "License scanning and SBOM exports",
+      "Self-hosted option (Business plan)"
+    ],
+    "pricing": "Free for OSS. Developer (free, IDE-only). Team $18/dev/mo (annual). Business custom (contact sales). 14-day free trial.",
+    "license": "Proprietary (Codacy)",
+    "differentiator": "Codacy is a comprehensive automated code review and security scanning platform with AI guardrails for AI-generated code. Sutra focuses on predicting production failures — Codacy detects issues in code before merge, but does not model runtime survivability, process/change-mining trends, or fuse multiple analytical engines to assign a failure probability to production deployments."
+  },
+  {
+    "name": "DeepSource",
+    "description": "AI code review platform combining static analysis with AI-powered review and autofix, covering code quality, SAST, SCA, and IaC.",
+    "features": [
+      "Static analysis with 5000+ checks across 30+ languages",
+      "AI Review and Autofix (hybrid static + AI engine)",
+      "SAST, secrets detection, IaC security scanning",
+      "OSS dependency scanning with reachability analysis (SCA)",
+      "License compliance tracking",
+      "Code formatting automation (Prettier, Black, gofmt)",
+      "OWASP Top 10 reports, quality/security gates",
+      "Self-hosted deployment (Enterprise)"
+    ],
+    "pricing": "Free (OSS, limited runs). Individual free (public/private). Team $24/contributor/mo (annual). Enterprise custom. AI credits: $100/yr per contributor included, add-on for overages.",
+    "license": "Proprietary (DeepSource Inc.)",
+    "differentiator": "DeepSource provides AI-powered static analysis and autofix with strong SAST/SCA coverage. Sutra is a failure prediction framework — DeepSource finds issues in your code and dependencies, but does not fuse runtime telemetry, change-velocity mining, logistic regression models, or human feedback to predict whether deployed code will survive in production."
+  },
+  {
+    "name": "Amazon CodeGuru Reviewer",
+    "description": "ML-powered code review service for Java and Python that detects defects and provides recommendations based on AWS best practices (deprecated Nov 2025 for new associations).",
+    "features": [
+      "ML-based code review recommendations trained on Amazon codebases",
+      "Security vulnerability detection, secrets exposure, resource leaks",
+      "Concurrency issue detection (via Infer integration)",
+      "AWS API/SDK best practice recommendations",
+      "Incremental (PR) and full repository scans",
+      "GitHub, GitHub Enterprise, Bitbucket, CodeCommit integration",
+      "Bandit (Python) and Infer (Java) managed integrations"
+    ],
+    "pricing": "Free tier (90 days, 100K LOC). Standard: monthly LOC-based tiers. Additional full scans $10/100K LOC. No upfront fees.",
+    "license": "Proprietary (AWS — pay-as-you-go)",
+    "differentiator": "CodeGuru Reviewer (now deprecated in favor of Amazon Q Developer) was an ML-powered code review tool focused on Java/Python best practices and AWS API usage. Sutra predicts production failures by fusing 7 engines — CodeGuru reviewed code diffs for defects but did not model runtime survivability, change frequency, logistic regression, or multi-engine fusion for failure prediction. Also, CodeGuru is effectively end-of-life (Nov 2025)."
+  },
+  {
+    "name": "LinearB",
+    "description": "Software delivery management platform that measures engineering productivity (DORA metrics), automates PR workflows, and provides AI-driven delivery insights.",
+    "features": [
+      "DORA metrics, cycle time tracking, delivery forecasting",
+      "AI code reviews with auto-PR descriptions",
+      "AI Impact Measurement dashboard (adoption, velocity impact)",
+      "PR automation: routing, reviewer assignment, policy-as-code (YAML)",
+      "Developer satisfaction surveys (DevEx)",
+      "Project tracking, resource allocation, R&D cost capitalization",
+      "MCP server for natural-language engineering data queries",
+      "Integrates with GitHub, GitLab, Jira, Slack, MS Teams"
+    ],
+    "pricing": "Essentials $29/contributor/mo. Business $59/contributor/mo. Enterprise custom. Credit-based: 100 credits/PR automated. Annual billing only.",
+    "license": "Proprietary (LinearB Inc.)",
+    "differentiator": "LinearB measures what happened (DORA metrics, cycle time) and automates PR workflows. Sutra predicts what will happen (production failures) by fusing complexity, dependency, runtime, change-mining, logistic regression, LLM validation, and human feedback engines — LinearB is a retrospective intelligence and workflow automation platform, not a predictive failure fusion engine."
+  },
+  {
+    "name": "Alloy (Softagram Analyzer)",
+    "description": "Architecture visualization and dependency analysis tool that shows pull request impact on component dependencies, architecture boundaries, and security risks.",
+    "features": [
+      "Automated dependency graph visualization from source code",
+      "PR impact analysis — shows affected components and transitive dependencies",
+      "Hidden dependency detection via ML",
+      "Custom dependency boundary rules and enforcement",
+      "SBOM generation and vulnerability detection",
+      "MCP server for AI agent architecture awareness (sgraph-mcp-server)",
+      "Open-source sgraph library for dependency graph queries",
+      "14+ languages (JS/TS, Java, Kotlin, Python, Go, C, C++, C#, Ruby, etc.)"
+    ],
+    "pricing": "$19/active developer/month. 14-day free trial, unlimited repos. On-premises and custom pricing available.",
+    "license": "Proprietary (Softagram). sgraph library is open source.",
+    "differentiator": "Softagram analyzes codebase architecture and dependency impacts — it shows you what changes affect. Sutra predicts whether those changes will cause production failures. Softagram provides the dependency graph layer (one of Sutra's 7 engines), but does not fuse complexity metrics, runtime survivability, change-mining, logistic regression, LLM validation, or human feedback into a failure prediction score."
+  },
+  {
+    "name": "Qodana (JetBrains)",
+    "description": "Smart code quality platform by JetBrains, powered by IntelliJ inspection engines, supporting 60+ languages with CI/CD and IDE integration.",
+    "features": [
+      "Static code analysis powered by JetBrains IDE inspections (IntelliJ, Rider, PhpStorm, etc.)",
+      "60+ languages including Java, Kotlin, Python, Go, C#, C/C++, PHP, JS/TS, Ruby",
+      "Quick-fix support, quality gates, baseline management",
+      "Security analysis: taint analysis, OWASP Top 10 (Ultimate+)",
+      "Third-party license audit and compliance",
+      "Code coverage tracking",
+      "Advanced reporting: team-/org-level insights, dashboards",
+      "Self-hosted or Qodana Cloud, any CI/CD integration"
+    ],
+    "pricing": "Community (free, limited languages). Ultimate $5/active contributor/mo. Ultimate+ $15/active contributor/mo. OSS free. 60-day trial.",
+    "license": "Community: Proprietary (free). Ultimate/Ultimate+: Proprietary (JetBrains).",
+    "differentiator": "Qodana brings JetBrains IDE-level static analysis to CI/CD — it finds code issues, security vulnerabilities, and license conflicts. Sutra predicts production failures by fusing 7 analysis engines including runtime data, change-mining, and ML classification — Qodana does not analyze runtime survivability, process metrics, or combine multiple predictive models to forecast whether code will cause incidents in production."
+  },
+  {
+    "name": "Reviewpad",
+    "description": "PR automation platform that uses a programmable YAML rules engine and AI to automate labeling, reviewer assignment, merge policies, and code review.",
+    "features": [
+      "Programmable rules engine with custom DSL (reviewpad.yml)",
+      "Automated PR labeling by size, type, and file paths",
+      "Intelligent reviewer assignment with load balancing",
+      "Merge policy enforcement (required approvals, git integrity)",
+      "Stale PR detection, non-conventional-commits flagging, high code churn alerts",
+      "AI-powered PR summarization and review (ChatGPT integration)",
+      "Reviewpad Check — automatic flagging of problematic PRs",
+      "GitHub App with zero-config setup; CLI for custom workflows"
+    ],
+    "pricing": "OSS CLI (free). GitHub App (free). Enterprise via Snyk (contact sales, no public pricing). Originally $8/dev/mo prior to Snyk acquisition.",
+    "license": "CLI: Open source. GitHub App/Enterprise: Proprietary (Reviewpad/Snyk).",
+    "differentiator": "Reviewpad automates PR workflow governance — labeling, reviewer assignment, and merge policies. Sutra predicts production failures by fusing 7 analytical engines — Reviewpad streamlines the PR process itself but does not analyze code complexity trends, runtime behavior, change-mining patterns, or fuse predictive models to assess production risk."
+  }
+]

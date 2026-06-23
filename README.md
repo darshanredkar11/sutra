@@ -6,7 +6,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0)
 [![SARIF](https://img.shields.io/badge/SARIF-2.1.0-orange)](https://docs.oasis-open.org/sarif/sarif/v2.1.0/)
 
-Sutra is a deterministic, math-first framework that estimates production failure risk from source code. It fuses **7 analysis engines** — complexity, dependency, runtime survivability (RSE), process/change mining, logistic regression, LLM validation, and human feedback — into a single composable pipeline. **18K+ lines of Rust, 682 tests, 13 crates, zero external runtime deps.**
+Sutra is a deterministic, math-first framework that estimates production failure risk from source code. It fuses **7 analysis engines** — complexity, dependency, runtime survivability (RSE), process/change mining, logistic regression, LLM validation, and human feedback — into a single composable pipeline. **18K+ lines of Rust, 693 tests, 13 crates, zero external runtime deps. Parallel execution, OpenAPI docs, E2E integration tests, CI security auditing.**
 
 ---
 
@@ -77,7 +77,7 @@ let result = orchestrator.analyze(&request)?;
 | **ml** | `sutra-ml` | 70 | Logistic regression (SGD+L2), AUC evaluation, model persistence | No\* |
 | **llm** | `sutra-llm` | 45 | Finding validation via Ollama (optional, disabled by default) | No |
 | **hitl** | `sutra-hitl` | 62 | Human feedback, per-engine precision tracking, auto-adjust findings | Yes |
-| **orchestrator** | `sutra-orchestrator` | 22 | Engine registration, risk fusion (max), panic safety, HTTP API | Yes |
+| **orchestrator** | `sutra-orchestrator` | 33 | Engine registration, risk fusion (max), panic safety, HTTP API, parallel rayon, 11 E2E tests | Yes |
 | **schema** | `sutra-schema` | 68 | Core types, serde JSON/YAML/TOML, proptest fuzzing | — |
 | **common** | `sutra-common` | 66 | Shared traits, errors, config, health, metrics | — |
 | **ci** | `sutra-ci` | 32 | SARIF 2.1.0 output, markdown PR comments | — |
@@ -117,10 +117,12 @@ sutra server --port 8080
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `POST /v1/analyze` | POST | Run analysis with JSON request body |
+| `POST /v1/demo` | POST | Clone any public GitHub repo and run all 7 engines |
 | `GET /v1/health` | GET | Component health check |
 | `GET /v1/status` | GET | Server and engine status |
 | `GET /v1/report` | GET | HTML report page with interactive analysis form |
-| `POST /v1/demo` | POST | Clone any public GitHub repo and run all 7 engines |
+| `GET /v1/openapi.json` | GET | OpenAPI 3.1 specification |
+| `GET /v1/docs` | GET | Interactive Swagger UI docs |
 
 ---
 
@@ -139,7 +141,7 @@ sutra/
 │   ├── sutra-ml/                 # Logistic regression (70 tests)
 │   ├── sutra-llm/                # LLM validation (45 tests)
 │   ├── sutra-hitl/               # Human feedback (62 tests)
-│   ├── sutra-orchestrator/       # Engine coordinator (22 tests)
+│   ├── sutra-orchestrator/       # Engine coordinator (22 unit + 11 E2E tests)
 │   ├── sutra-ci/                 # SARIF & PR comments (32 tests)
 │   └── sutra-cli/                # CLI entry point
 ├── docs/

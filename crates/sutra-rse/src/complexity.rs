@@ -88,7 +88,13 @@ fn estimate_complexity_class(loop_count: u32, nesting: u32) -> ComplexityClass {
         }
         3..=5 => ComplexityClass::ON2,
         6..=10 => ComplexityClass::ON3,
-        _ => ComplexityClass::O2N,
+        _ => {
+            if nesting >= 5 {
+                ComplexityClass::O2N
+            } else {
+                ComplexityClass::ON3
+            }
+        }
     }
 }
 
@@ -326,8 +332,8 @@ mod tests {
 
     #[test]
     fn test_estimate_complexity_o2n_with_many_loops() {
-        assert_eq!(estimate_complexity_class(11, 0), ComplexityClass::O2N);
-        assert_eq!(estimate_complexity_class(20, 10), ComplexityClass::O2N);
+        assert_eq!(estimate_complexity_class(11, 4), ComplexityClass::ON3);
+        assert_eq!(estimate_complexity_class(20, 5), ComplexityClass::O2N);
     }
 
     #[test]

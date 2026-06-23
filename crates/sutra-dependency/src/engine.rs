@@ -223,6 +223,7 @@ impl AnalysisEngine for DependencyEngine {
             metrics: Some(metrics),
             processing_time_ms,
             blocked_merge: error_count > 0,
+            jit_features: None,
         })
     }
 }

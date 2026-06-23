@@ -137,6 +137,7 @@ mod tests {
             }),
             processing_time_ms: 123.45,
             blocked_merge: false,
+            jit_features: None,
         }
     }
 

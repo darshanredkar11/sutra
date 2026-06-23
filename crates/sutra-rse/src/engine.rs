@@ -29,38 +29,22 @@ impl RseEngine {
 
     fn analyze_endpoints(&self, repo_path: &str) -> Vec<(String, String, Runtime, String)> {
         let mut endpoints = Vec::new();
-        let mut files: Vec<String> = Vec::new();
+        const SUPPORTED: [&str; 10] = ["java", "kt", "kts", "py", "js", "ts", "mjs", "mts", "rs", "go"];
 
-        match std::fs::read_dir(repo_path) {
-            Ok(entries) => {
-                for entry in entries.flatten() {
-                    let path = entry.path();
-                    if path.is_dir() {
-                        if let Ok(sub) = std::fs::read_dir(&path) {
-                            for sub_entry in sub.flatten() {
-                                let sub_path = sub_entry.path();
-                                if sub_path.is_file() {
-                                    if let Some(ext) = sub_path.extension().and_then(|e| e.to_str()) {
-                                        let supported = ["java", "kt", "kts", "py", "js", "ts", "mjs", "mts", "rs", "go"];
-                                        if supported.contains(&ext) {
-                                            files.push(sub_path.to_string_lossy().to_string());
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    } else if path.is_file() {
-                        if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
-                            let supported = ["java", "kt", "kts", "py", "js", "ts", "mjs", "mts", "rs", "go"];
-                            if supported.contains(&ext) {
-                                files.push(path.to_string_lossy().to_string());
-                            }
-                        }
-                    }
-                }
-            }
-            Err(_) => return endpoints,
-        };
+        let files: Vec<String> = walkdir::WalkDir::new(repo_path)
+            .follow_links(false)
+            .into_iter()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_type().is_file())
+            .filter(|e| {
+                e.path()
+                    .extension()
+                    .and_then(|x| x.to_str())
+                    .map(|ext| SUPPORTED.contains(&ext))
+                    .unwrap_or(false)
+            })
+            .map(|e| e.path().to_string_lossy().into_owned())
+            .collect();
 
         if files.is_empty() {
             return endpoints;
@@ -409,6 +393,7 @@ impl AnalysisEngine for RseEngine {
             }),
             processing_time_ms: elapsed,
             blocked_merge: blocked,
+            jit_features: None,
         })
     }
 }
