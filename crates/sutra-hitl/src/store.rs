@@ -24,15 +24,23 @@ pub struct InMemoryFeedbackStore {
 
 impl InMemoryFeedbackStore {
     pub fn new() -> Self {
-        Self {
-            entries: Vec::new(),
-        }
+        Self { entries: Vec::new() }
     }
 
     pub fn with_capacity(cap: usize) -> Self {
-        Self {
-            entries: Vec::with_capacity(cap),
-        }
+        Self { entries: Vec::with_capacity(cap) }
+    }
+
+    /// Replace the store's contents in one shot, skipping the per-entry
+    /// duplicate-id scan `store()` does. Used to replay a previously
+    /// persisted feedback file: those entries are already known-valid
+    /// (they passed the check when originally stored), so re-validating
+    /// each one against all entries loaded so far -- an O(n^2) scan for
+    /// n saved entries -- buys nothing and was the source of multi-minute
+    /// engine-construction stalls once the on-disk log reached a few
+    /// thousand entries.
+    pub fn load_bulk(&mut self, entries: Vec<FeedbackEntry>) {
+        self.entries = entries;
     }
 }
 
@@ -47,13 +55,7 @@ impl FeedbackStore for InMemoryFeedbackStore {
                 entry.id
             )));
         }
-        self.entries.push(entry.clone());
-        // ponytail: auto-persist to ~/.sutra/hitl-feedback.json if writable
-        if let Ok(home) = std::env::var("HOME") {
-            let path = format!("{}/.sutra/hitl-feedback.json", home);
-            let _ = std::fs::create_dir_all(format!("{}/.sutra", home));
-            let _ = std::fs::write(&path, serde_json::to_string_pretty(&self.entries).unwrap_or_default());
-        }
+        self.entries.push(entry);
         Ok(())
     }
 

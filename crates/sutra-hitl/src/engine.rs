@@ -9,25 +9,35 @@ use crate::types::{FeedbackEntry, HitlConfig};
 pub struct HitlEngine {
     store: Box<dyn FeedbackStore>,
     config: HitlConfig,
+    /// Path to auto-persist feedback to, e.g. `~/.sutra/hitl-feedback.json`.
+    /// Only set by `new()` -- `with_store()` (used by tests and anyone
+    /// wanting a pure in-memory engine) never touches disk.
+    persist_path: Option<String>,
 }
 
 impl HitlEngine {
     pub fn new() -> Self {
         let mut store = InMemoryFeedbackStore::new();
-        // ponytail: auto-load feedback from ~/.sutra/hitl-feedback.json if it exists
-        if let Ok(home) = std::env::var("HOME") {
-            let path = format!("{}/.sutra/hitl-feedback.json", home);
-            if let Ok(json) = std::fs::read_to_string(&path) {
+        let persist_path = std::env::var("HOME")
+            .ok()
+            .map(|home| format!("{}/.sutra/hitl-feedback.json", home));
+
+        // ponytail: auto-load feedback from ~/.sutra/hitl-feedback.json if it
+        // exists. Loaded via load_bulk (no per-entry duplicate-scan +
+        // full-file rewrite) -- replaying N saved entries through store()
+        // one at a time was O(n^2) and turned a few thousand entries into a
+        // multi-minute stall on every single engine construction.
+        if let Some(path) = &persist_path {
+            if let Ok(json) = std::fs::read_to_string(path) {
                 if let Ok(entries) = serde_json::from_str::<Vec<FeedbackEntry>>(&json) {
-                    for entry in entries {
-                        let _ = store.store(entry);
-                    }
+                    store.load_bulk(entries);
                 }
             }
         }
         Self {
             store: Box::new(store),
             config: HitlConfig::default(),
+            persist_path,
         }
     }
 
@@ -35,6 +45,7 @@ impl HitlEngine {
         Self {
             store,
             config: HitlConfig::default(),
+            persist_path: None,
         }
     }
 
@@ -43,15 +54,28 @@ impl HitlEngine {
         self
     }
 
+    fn persist(&self) -> SutraResult<()> {
+        let Some(path) = &self.persist_path else {
+            return Ok(());
+        };
+        let entries = self.store.get_all()?;
+        if let Some(parent) = std::path::Path::new(path).parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        let _ = std::fs::write(path, serde_json::to_string_pretty(&entries).unwrap_or_default());
+        Ok(())
+    }
+
     pub fn store_feedback(&mut self, entry: FeedbackEntry) -> SutraResult<()> {
-        self.store.store(entry)
+        self.store.store(entry)?;
+        self.persist()
     }
 
     pub fn store_feedback_batch(&mut self, entries: Vec<FeedbackEntry>) -> SutraResult<()> {
         for entry in entries {
             self.store.store(entry)?;
         }
-        Ok(())
+        self.persist()
     }
 
     pub fn adjust_findings(&self, findings: &[Finding]) -> SutraResult<Vec<Finding>> {
@@ -206,9 +230,18 @@ mod tests {
     use crate::types::{FeedbackEntry, FeedbackVerdict};
     use sutra_schema::v1::{Finding, Severity};
 
+    /// Fresh, disk-free engine for tests. `hermetic_engine()` auto-loads
+    /// and auto-persists to the real `~/.sutra/hitl-feedback.json` on this
+    /// machine, which made every test here order-dependent on and mutate
+    /// shared real state (duplicate-id collisions across runs, unbounded
+    /// file growth). Tests must use this instead.
+    fn hermetic_engine() -> HitlEngine {
+        HitlEngine::with_store(Box::new(InMemoryFeedbackStore::new()))
+    }
+
     #[test]
     fn test_engine_disabled() {
-        let engine = HitlEngine::new().with_config(HitlConfig {
+        let engine = hermetic_engine().with_config(HitlConfig {
             enabled: false,
             ..HitlConfig::default()
         });
@@ -220,7 +253,7 @@ mod tests {
 
     #[test]
     fn test_engine_no_feedback() {
-        let engine = HitlEngine::new();
+        let engine = hermetic_engine();
         let req = AnalyzeRequest::new("/repo", "abc");
         let result = engine.analyze(&req).unwrap();
 
@@ -231,7 +264,7 @@ mod tests {
 
     #[test]
     fn test_engine_with_feedback() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         engine.store_feedback(FeedbackEntry::new(
             "e1", "f1", Engine::Mgtg, "f.rs", 1, FeedbackVerdict::Correct, "tester",
         )).unwrap();
@@ -253,13 +286,13 @@ mod tests {
 
     #[test]
     fn test_engine_name() {
-        let engine = HitlEngine::new();
+        let engine = hermetic_engine();
         assert_eq!(engine.name(), "hitl");
     }
 
     #[test]
     fn test_adjust_findings() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         for i in 0..3 {
             engine.store_feedback(FeedbackEntry::new(
                 &format!("e{}", i), "f1", Engine::Mgtg, "f.rs", 1,
@@ -278,7 +311,7 @@ mod tests {
 
     #[test]
     fn test_store_feedback_batch() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         let entries = vec![
             FeedbackEntry::new("e1", "f1", Engine::Mgtg, "f.rs", 1, FeedbackVerdict::Correct, "tester"),
             FeedbackEntry::new("e2", "f2", Engine::Mgtg, "f.rs", 2, FeedbackVerdict::Incorrect, "tester"),
@@ -292,7 +325,7 @@ mod tests {
 
     #[test]
     fn test_engine_reliability() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         engine.store_feedback(FeedbackEntry::new(
             "e1", "f1", Engine::Mgtg, "f.rs", 1, FeedbackVerdict::Correct, "tester",
         )).unwrap();
@@ -317,7 +350,7 @@ mod tests {
             min_feedback_count: 5,
             ..HitlConfig::default()
         };
-        let engine = HitlEngine::new().with_config(config.clone());
+        let engine = hermetic_engine().with_config(config.clone());
         assert_eq!(engine.config().min_feedback_count, 5);
     }
 
@@ -329,7 +362,7 @@ mod tests {
 
     #[test]
     fn test_engine_analyze_with_low_precision_warning() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         for i in 0..5 {
             engine.store_feedback(FeedbackEntry::new(
                 &format!("e{}", i), &format!("f{}", i), Engine::Mgtg, "f.rs", 1,
@@ -352,7 +385,7 @@ mod tests {
 
     #[test]
     fn test_store_feedback_duplicate_id() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         engine.store_feedback(FeedbackEntry::new(
             "e1", "f1", Engine::Mgtg, "f.rs", 1, FeedbackVerdict::Correct, "tester",
         )).unwrap();
@@ -364,7 +397,7 @@ mod tests {
 
     #[test]
     fn test_store_feedback_batch_mixed_valid_invalid() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         let entries = vec![
             FeedbackEntry::new("e1", "f1", Engine::Mgtg, "f.rs", 1, FeedbackVerdict::Correct, "tester"),
             FeedbackEntry::new("", "f2", Engine::Process, "f.rs", 2, FeedbackVerdict::Incorrect, "tester"),
@@ -378,7 +411,7 @@ mod tests {
 
     #[test]
     fn test_engine_analyze_with_1000_feedback_entries() {
-        let mut engine = HitlEngine::new();
+        let mut engine = hermetic_engine();
         for i in 0..1000 {
             engine.store_feedback(FeedbackEntry::new(
                 &format!("e{}", i), &format!("f{}", i % 50), Engine::Mgtg, "f.rs", 1,
@@ -394,7 +427,7 @@ mod tests {
 
     #[test]
     fn test_engine_disabled_still_stores() {
-        let mut engine = HitlEngine::new().with_config(HitlConfig {
+        let mut engine = hermetic_engine().with_config(HitlConfig {
             enabled: false,
             ..HitlConfig::default()
         });
