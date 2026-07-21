@@ -31,9 +31,23 @@ impl RseEngine {
         let mut endpoints = Vec::new();
         const SUPPORTED: [&str; 10] = ["java", "kt", "kts", "py", "js", "ts", "mjs", "mts", "rs", "go"];
 
+        const VENDOR_DIRS: [&str; 8] = [
+            "node_modules", "vendor", "target", "dist", "build", ".git", "venv", "__pycache__",
+        ];
         let files: Vec<String> = walkdir::WalkDir::new(repo_path)
             .follow_links(false)
             .into_iter()
+            .filter_entry(|e| {
+                // Applied to every entry (dirs AND files) before descending
+                // -- unlike a post-hoc path.contains() filter, this actually
+                // prunes the walk so vendored subtrees (e.g. node_modules,
+                // which can be huge) are never traversed at all, not merely
+                // filtered out of the results afterward.
+                e.file_name()
+                    .to_str()
+                    .map(|name| !VENDOR_DIRS.contains(&name))
+                    .unwrap_or(true)
+            })
             .filter_map(|e| e.ok())
             .filter(|e| e.file_type().is_file())
             .filter(|e| {
@@ -669,5 +683,38 @@ mod tests {
         let engine = RseEngine::default();
         assert_eq!(engine.name(), "rse");
         assert!(engine.config.enabled);
+    }
+
+    #[test]
+    fn test_analyze_endpoints_excludes_node_modules() {
+        let dir = std::env::temp_dir().join(format!("rse-vendor-exclusion-test-{}", uuid_like()));
+        std::fs::create_dir_all(dir.join("node_modules/@types/node")).unwrap();
+        std::fs::write(
+            dir.join("node_modules/@types/node/http.d.ts"),
+            "/** Example: `agent.get('http://localhost:3000')` */\n",
+        ).unwrap();
+        std::fs::write(
+            dir.join("real.ts"),
+            "app.get(\"/api/real\", handler);\n",
+        ).unwrap();
+
+        let engine = RseEngine::new();
+        let endpoints = engine.analyze_endpoints(dir.to_str().unwrap());
+
+        assert!(
+            endpoints.iter().all(|(_, _, _, file)| !file.contains("node_modules")),
+            "no endpoint should be attributed to a file under node_modules, got {:?}", endpoints
+        );
+        assert!(
+            endpoints.iter().any(|(path, _, _, _)| path == "/api/real"),
+            "the real, non-vendor endpoint must still be found, got {:?}", endpoints
+        );
+
+        std::fs::remove_dir_all(&dir).ok();
+    }
+
+    fn uuid_like() -> u64 {
+        use std::time::{SystemTime, UNIX_EPOCH};
+        SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_nanos() as u64
     }
 }

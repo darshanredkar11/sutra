@@ -194,6 +194,86 @@ fn remove_comments_and_strings(source: &str) -> String {
     result
 }
 
+/// Like [`remove_comments_and_strings`] but keeps string-literal CONTENT
+/// intact -- only comments are blanked out. `detect_endpoints` needs the
+/// text inside string literals (the route path itself, e.g. `"/users"`);
+/// blanking strings the way `remove_comments_and_strings` does would
+/// destroy the very data being extracted. String state is still tracked
+/// (so `//` or `/*` inside a string, e.g. a URL in a doc-comment example
+/// like `"http://localhost:3000"`, is correctly NOT treated as the start
+/// of a real comment) -- this is exactly the bug that caused Sutra to
+/// misread `@types/node/*.d.ts` JSDoc example URLs as real HTTP call
+/// sites on the Visita audit.
+fn remove_comments_only(source: &str) -> String {
+    let mut result = String::new();
+    let mut in_block_comment = false;
+    let mut in_string = false;
+    let mut string_quote = '"';
+    let mut escape_next = false;
+    let mut chars = source.chars().peekable();
+
+    while let Some(ch) = chars.next() {
+        if escape_next {
+            escape_next = false;
+            result.push(ch);
+            continue;
+        }
+
+        if in_string {
+            if ch == '\\' {
+                escape_next = true;
+                result.push(ch);
+                continue;
+            }
+            if ch == string_quote {
+                in_string = false;
+            }
+            result.push(ch);
+            continue;
+        }
+
+        if in_block_comment {
+            if ch == '*' && chars.peek() == Some(&'/') {
+                chars.next();
+                in_block_comment = false;
+                result.push_str("  ");
+            } else {
+                result.push(if ch == '\n' { '\n' } else { ' ' });
+            }
+            continue;
+        }
+
+        if ch == '"' || ch == '\'' {
+            in_string = true;
+            string_quote = ch;
+            result.push(ch);
+            continue;
+        }
+
+        if ch == '/' && chars.peek() == Some(&'/') {
+            chars.next();
+            while let Some(c) = chars.next() {
+                if c == '\n' {
+                    result.push('\n');
+                    break;
+                }
+            }
+            continue;
+        }
+
+        if ch == '/' && chars.peek() == Some(&'*') {
+            chars.next();
+            in_block_comment = true;
+            result.push_str("  ");
+            continue;
+        }
+
+        result.push(ch);
+    }
+
+    result
+}
+
 fn count_branches(source: &str) -> u32 {
     let branch_patterns = [
         r"\bif\b",
@@ -348,9 +428,10 @@ pub fn detect_endpoints(source: &str, file_ext: &str) -> Vec<(String, String)> {
         _ => &[],
     };
 
+    let stripped = remove_comments_only(source);
     for (pat, method) in patterns {
         if let Ok(re) = regex::Regex::new(pat) {
-            for cap in re.captures_iter(source) {
+            for cap in re.captures_iter(&stripped) {
                 endpoints.push((cap[1].to_string(), method.to_string()));
             }
         }
@@ -612,6 +693,42 @@ mod tests {
         let src = "fn foo() { let x = 42; }";
         let eps = detect_endpoints(src, "rs");
         assert!(eps.is_empty());
+    }
+
+    #[test]
+    fn test_detect_endpoints_ignores_jsdoc_comment_example_url() {
+        // Reproduces the exact Visita false positive: @types/node/http.d.ts's
+        // JSDoc doc-comment contains an example call
+        // `agent.get('http://localhost:3000')` documenting usage -- not a
+        // real endpoint registration in this file.
+        let src = "/**\n * Example: `agent.get('http://localhost:3000')`\n */\nexport class Agent {}\n";
+        let eps = detect_endpoints(src, "ts");
+        assert!(eps.is_empty(), "JSDoc example inside a block comment must not be detected as a real endpoint, got {:?}", eps);
+    }
+
+    #[test]
+    fn test_detect_endpoints_ignores_line_comment_example() {
+        let src = "// example: router.get(\"/fake\", handler)\nconst x = 1;\n";
+        let eps = detect_endpoints(src, "js");
+        assert!(eps.is_empty(), "line-comment example must not be detected, got {:?}", eps);
+    }
+
+    #[test]
+    fn test_detect_endpoints_still_matches_real_call_outside_comments() {
+        // Sanity: comment-stripping must not blind the detector to genuine,
+        // non-comment endpoint registrations.
+        let src = "// setup\napp.get(\"/api/users\", (req, res) => {});\n";
+        let eps = detect_endpoints(src, "js");
+        assert_eq!(eps, vec![("/api/users".to_string(), "HTTP".to_string())]);
+    }
+
+    #[test]
+    fn test_detect_endpoints_url_inside_string_literal_not_mistaken_for_comment() {
+        // A string containing "//" (e.g. a URL) must not be misread as the
+        // start of a line comment, which would corrupt everything after it.
+        let src = "app.get(\"http://example.com/callback\", h); app.post(\"/api/real\", h2);\n";
+        let eps = detect_endpoints(src, "js");
+        assert_eq!(eps.len(), 2, "both calls must still be detected: {:?}", eps);
     }
 
     #[test]

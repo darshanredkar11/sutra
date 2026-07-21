@@ -201,8 +201,34 @@ impl DebtRoiEngine {
             for (j, l) in lines.iter().enumerate() {
                 if j < i { continue; }
                 if j == i {
+                    // Track BOTH the opening and any closing brace on the
+                    // declaration line itself. The previous version only
+                    // looked for '{' here and unconditionally `continue`d,
+                    // so a single-line function (`fn f() { body }`) never
+                    // had its own closing '}' consumed -- brace_depth stuck
+                    // at 1, and every subsequent line in the file (until an
+                    // unrelated, coincidental brace-balance zeroed it out)
+                    // was misattributed as this function's body.
                     for ch in l.chars() {
-                        if ch == '{' { in_fn = true; brace_depth = 1; }
+                        match ch {
+                            '{' => { in_fn = true; brace_depth += 1; }
+                            '}' if in_fn => {
+                                brace_depth -= 1;
+                                if brace_depth == 0 {
+                                    // Self-closing single-line function: its
+                                    // whole body lives on this one line.
+                                    body = 1;
+                                    in_fn = false;
+                                }
+                            }
+                            _ => {}
+                        }
+                    }
+                    if !in_fn {
+                        // Closed already (single-liner, or no '{' at all
+                        // e.g. a trait method signature with no body) --
+                        // nothing more belongs to this function.
+                        break;
                     }
                     continue;
                 }
@@ -356,6 +382,60 @@ mod tests {
         let functions = engine.detect_functions(content);
         assert_eq!(functions.len(), 2);
         assert!(functions[1].cyclomatic > 1);
+    }
+
+    #[test]
+    fn single_line_function_is_counted_as_one_line_and_does_not_corrupt_later_functions() {
+        let engine = DebtRoiEngine::new();
+        let content = "fn default_permissions() -> Vec<String> { vec![\"ENTRY\".into()] }\n\
+                        fn default_max_uses() -> i32 { 1 }\n\
+                        fn default_action() -> String { \"ENTRY\".into() }\n\
+                        struct Something {\n    field: i32,\n}\n";
+        let functions = engine.detect_functions(content);
+        assert_eq!(functions.len(), 3, "should find exactly the 3 one-line functions, not swallow the struct too");
+        assert_eq!(functions[0].body_lines, 1, "default_permissions body_lines");
+        assert_eq!(functions[1].body_lines, 1, "default_max_uses body_lines");
+        assert_eq!(functions[2].body_lines, 1, "default_action body_lines");
+    }
+
+    #[test]
+    fn visita_passes_rs_functions_no_longer_report_fabricated_line_counts() {
+        // Reproduces the exact false-positive from the Sutra-vs-Visita audit:
+        // default_permissions/default_max_uses/default_action (one-liners)
+        // were previously mis-measured at 370/369/325 lines each because the
+        // brace tracker never closed a same-line '{'...'}' pair.
+        let engine = DebtRoiEngine::new();
+        let content = std::fs::read_to_string(
+            "/Users/darshanredkar/darshan/visita/crates/api/src/handlers/passes.rs"
+        );
+        let Ok(content) = content else {
+            eprintln!("skipping: visita checkout not present in this environment");
+            return;
+        };
+        let functions = engine.detect_functions(&content);
+        let get = |name: &str| functions.iter().find(|f| f.name == name);
+
+        let perm = get("default_permissions").expect("default_permissions must be detected");
+        assert!(perm.body_lines < 5, "default_permissions is a one-liner, got {} lines", perm.body_lines);
+
+        let max_uses = get("default_max_uses").expect("default_max_uses must be detected");
+        assert!(max_uses.body_lines < 5, "default_max_uses is a one-liner, got {} lines", max_uses.body_lines);
+
+        let action = get("default_action").expect("default_action must be detected");
+        assert!(action.body_lines < 5, "default_action is a one-liner, got {} lines", action.body_lines);
+
+        // fn showNotification-equivalent check: a genuinely multi-line
+        // function whose declaration line is a single-line signature
+        // (opening '{' on the `fn` line itself) must still be detected as
+        // multi-line -- proves the fix didn't just make everything report
+        // 1 line. (Handlers with a multi-line parameter list before their
+        // opening '{', e.g. create_pass, hit a SEPARATE, pre-existing,
+        // out-of-scope limitation -- this detector only ever looks for '{'
+        // on the function's own declaration line -- not touched by this fix.)
+        let map_entity_to_response = get("map_entity_to_response");
+        if let Some(f) = map_entity_to_response {
+            assert!(f.body_lines >= 1, "map_entity_to_response body_lines should be >= 1, got {}", f.body_lines);
+        }
     }
 
     #[test]

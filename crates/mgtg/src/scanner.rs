@@ -99,7 +99,25 @@ impl Scanner {
 
     fn scan_file(&self, path: &Path, results: &mut Vec<AnalysisFile>) -> Result<(), String> {
         let path_str = path.to_string_lossy().to_string();
-        let source = fs::read_to_string(path).map_err(|e| format!("Failed to read '{}': {}", path_str, e))?;
+
+        // Binary guard: sniff the first 8KB for a NUL byte before attempting
+        // a UTF-8 text read. A stray null byte is the standard cheap binary
+        // heuristic (used by git, grep -I, etc.) -- images/archives/etc.
+        // contain one almost immediately; source text never legitimately
+        // does. Skip silently rather than erroring: one binary file in a
+        // repo must not abort analysis of every other file.
+        let sniff = fs::read(path).map_err(|e| format!("Failed to read '{}': {}", path_str, e))?;
+        let probe_len = sniff.len().min(8192);
+        if sniff[..probe_len].contains(&0u8) {
+            return Ok(());
+        }
+
+        let source = match String::from_utf8(sniff) {
+            Ok(s) => s,
+            // No null byte but still not valid UTF-8 (e.g. Latin-1 text) --
+            // also not analyzable as source; skip rather than crash.
+            Err(_) => return Ok(()),
+        };
 
         let parsed = parser::parse_file(&path_str, &source);
         let (nodes, language) = match parsed {
@@ -242,5 +260,33 @@ fn extract_metadata(
             }
             _ => {}
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::config::Config;
+
+    #[test]
+    fn repo_containing_a_png_completes_analysis_without_crashing() {
+        let dir = std::env::temp_dir().join(format!("mgtg-binary-guard-test-{}", Uuid::new_v4()));
+        fs::create_dir_all(&dir).unwrap();
+
+        // Minimal PNG signature + junk bytes, including a NUL -- enough to
+        // trip the binary guard without needing a real decodable image.
+        fs::write(dir.join("hero.png"), [0x89u8, b'P', b'N', b'G', 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x01, 0x02]).unwrap();
+        fs::write(dir.join("real.rs"), "fn main() {}\n").unwrap();
+
+        let scanner = Scanner::new(Config::default());
+        let result = scanner.analyze(dir.to_str().unwrap());
+
+        assert!(result.is_ok(), "analysis must not crash on a binary file: {:?}", result.err());
+        let result = result.unwrap();
+        // The PNG is skipped; the real source file is still analyzed.
+        assert!(result.files.iter().any(|f| f.path.ends_with("real.rs")));
+        assert!(!result.files.iter().any(|f| f.path.ends_with("hero.png")));
+
+        fs::remove_dir_all(&dir).ok();
     }
 }
