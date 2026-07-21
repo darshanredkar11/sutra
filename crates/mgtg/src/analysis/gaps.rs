@@ -26,8 +26,12 @@ fn check_gaps(nodes: &[IrNode], file: &str, findings: &mut Vec<Finding>, depth: 
                 condition,
                 line,
             } => {
-                // Check for missing else branch
-                if else_branch.is_empty() {
+                // Check for missing else branch. `match` is exhaustive by
+                // construction in Rust (the compiler enforces it) -- the
+                // Rust parser tags match conditions with a "match " prefix
+                // specifically so this check can skip them; "no else
+                // branch" is a category error for a match, not a real gap.
+                if else_branch.is_empty() && !condition.trim_start().starts_with("match ") {
                     // Check if it's not a guard clause (if with return or raise/throw)
                     let terminates_in_then = then_branch
                         .iter()
