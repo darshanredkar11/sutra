@@ -1,8 +1,11 @@
-target/
-.DS_Store
-.git
-.gitignore
-*.swp
-*.swo
-*~
-*.log
+# docker/Dockerfile only COPYs Cargo.toml, Cargo.lock, crates/, migrations/ —
+# everything else here just bloats the build context sent to the daemon.
+*
+!Cargo.toml
+!Cargo.lock
+!crates/
+!migrations/
+
+# Never send build output even from the allowed dirs
+**/target/
+**/*.rs.bk

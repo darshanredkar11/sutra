@@ -1,6 +1,9 @@
-# Sutra
+<div align="center">
+  <img src="assets/logo.svg" width="120" height="120" alt="Sutra logo"/>
+  <h1>Sutra</h1>
+  <strong>Predict production software failures before they happen.</strong>
+</div>
 
-**Predict production software failures before they happen.**
 
 [![Rust](https://img.shields.io/badge/rust-1.86%2B-blue)](https://www.rust-lang.org)
 [![License](https://img.shields.io/badge/license-Apache%202.0-green)](https://www.apache.org/licenses/LICENSE-2.0)

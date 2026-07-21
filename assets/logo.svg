@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320" width="320" height="320" role="img" aria-label="Sutra logo">
+  <title>Sutra</title>
+
+  <!-- Background -->
+  <rect width="320" height="320" fill="#16161e" rx="24"/>
+
+  <!-- Defs: arrowhead + node glow -->
+  <defs>
+    <marker id="arr" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto">
+      <path d="M0,0.5 L0,6.5 L6.5,3.5 Z" fill="#bb9af7"/>
+    </marker>
+    <filter id="glow-blue" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3.5" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="glow-lav" x="-80%" y="-80%" width="360%" height="360%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- ── Diamond DAG ─────────────────────────────────────────────────── -->
+  <!-- Nodes: Top(160,62) Left(88,148) Right(232,148) Bottom(160,234)    -->
+
+  <!-- Edges — drawn under nodes -->
+  <!-- Top → Left -->
+  <line x1="160" y1="62" x2="92" y2="140"
+        stroke="#bb9af7" stroke-width="1.6" opacity="0.75"
+        marker-end="url(#arr)" filter="url(#glow-lav)"/>
+  <!-- Top → Right -->
+  <line x1="160" y1="62" x2="228" y2="140"
+        stroke="#bb9af7" stroke-width="1.6" opacity="0.75"
+        marker-end="url(#arr)" filter="url(#glow-lav)"/>
+  <!-- Left → Bottom -->
+  <line x1="88" y1="156" x2="152" y2="226"
+        stroke="#bb9af7" stroke-width="1.6" opacity="0.75"
+        marker-end="url(#arr)" filter="url(#glow-lav)"/>
+  <!-- Right → Bottom -->
+  <line x1="232" y1="156" x2="168" y2="226"
+        stroke="#bb9af7" stroke-width="1.6" opacity="0.75"
+        marker-end="url(#arr)" filter="url(#glow-lav)"/>
+  <!-- Left → Right (transitive sibling dependency) -->
+  <line x1="100" y1="148" x2="220" y2="148"
+        stroke="#7aa2f7" stroke-width="1" opacity="0.35"
+        stroke-dasharray="4 4" marker-end="url(#arr)"/>
+
+  <!-- Nodes — drawn on top -->
+  <circle cx="160" cy="62"  r="12" fill="#7aa2f7" filter="url(#glow-blue)"/>
+  <circle cx="88"  cy="148" r="12" fill="#7aa2f7" filter="url(#glow-blue)"/>
+  <circle cx="232" cy="148" r="12" fill="#7aa2f7" filter="url(#glow-blue)"/>
+  <circle cx="160" cy="234" r="12" fill="#7aa2f7" filter="url(#glow-blue)"/>
+
+  <!-- Inner dots (node "weight" indicator) -->
+  <circle cx="160" cy="62"  r="4" fill="#1f2335"/>
+  <circle cx="88"  cy="148" r="4" fill="#1f2335"/>
+  <circle cx="232" cy="148" r="4" fill="#1f2335"/>
+  <circle cx="160" cy="234" r="4" fill="#1f2335"/>
+
+  <!-- Label -->
+  <text x="160" y="290"
+        font-family="ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace"
+        font-size="19" font-weight="500" fill="#c0caf5"
+        text-anchor="middle" letter-spacing="5">sutra</text>
+</svg>

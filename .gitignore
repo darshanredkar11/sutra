@@ -1,8 +1,49 @@
-/target
+# ── Rust ────────────────────────────────────────────────────────────────────
+/target/
+**/target/
+
+# ── Kotlin Multiplatform / Gradle / Android (mobile/) ──────────────────────────
+**/build/
+**/.gradle/
+**/.kotlin/
+*.class
+*.jar
+!gradle/wrapper/gradle-wrapper.jar
+local.properties
+.cxx/
+captures/
+*.apk
+*.aab
+*.ap_
+*.dex
+*.hprof
+
+# ── Web (React/Vite) ────────────────────────────────────────────────────────
+web/node_modules/
+node_modules/
+web/dist/
+dist/
+*.tsbuildinfo
+.vite/
+
+# ── Environment — NEVER commit ─────────────────────────────────────────────
+.env
+.env.local
+.env.production
+
+# ── IDE ─────────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+
+# ── macOS ───────────────────────────────────────────────────────────────────
 .DS_Store
-*.swp
-*.swo
-*~
-.vscode
-.idea
+
+# ── SQLx query cache (can be committed to enable offline mode in CI) ───────
+# .sqlx/
+
+# ── Logs ────────────────────────────────────────────────────────────────────
 *.log
+
+# ── Test artifacts ──────────────────────────────────────────────────────────
+/test_output/
