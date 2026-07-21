@@ -590,23 +590,7 @@ impl AnalysisEngine for PerformanceEngine {
         let mut all_findings = Vec::new();
 
         const SUPPORTED: [&str; 10] = ["rs", "py", "js", "ts", "java", "kt", "go", "mjs", "mts", "c"];
-        let files: Vec<_> = walkdir::WalkDir::new(&request.repo_path)
-            .follow_links(false)
-            .into_iter()
-            .filter_map(|e| e.ok())
-            .filter(|e| e.file_type().is_file())
-            .filter(|e| {
-                e.path()
-                    .extension()
-                    .and_then(|x| x.to_str())
-                    .map(|ext| SUPPORTED.contains(&ext))
-                    .unwrap_or(false)
-            })
-            .filter(|e| !e.path().to_string_lossy().contains("target/")
-                && !e.path().to_string_lossy().contains("node_modules/")
-                && !e.path().to_string_lossy().contains(".git/"))
-            .map(|e| e.path().to_string_lossy().into_owned())
-            .collect();
+        let files: Vec<String> = sutra_common::fs::discover_source_files(&request.repo_path, &SUPPORTED);
 
         for file_path in &files {
             let content = match std::fs::read_to_string(file_path) {

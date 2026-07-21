@@ -82,10 +82,18 @@ impl Scanner {
             let entry = entry.map_err(|e| format!("Failed to read entry: {}", e))?;
             let path = entry.path();
             if path.is_dir() {
-                // Skip hidden directories and node_modules
+                // Skip hidden dirs (also covers .git) and common
+                // vendor/build-output dirs -- their contents aren't source
+                // the repo's authors wrote, and scanning them (e.g. a
+                // vendored `target/debug/build/*/out/*.rs`, or a Gradle
+                // `build/generated/...`) produces findings against code
+                // nobody can act on. Mirrors sutra-rse's engine.rs list.
                 if let Some(name) = path.file_name() {
                     let name = name.to_string_lossy();
-                    if name.starts_with('.') || name == "node_modules" || name == "__pycache__" {
+                    const VENDOR_DIRS: [&str; 8] = [
+                        "node_modules", "vendor", "target", "dist", "build", ".git", "venv", "__pycache__",
+                    ];
+                    if name.starts_with('.') || VENDOR_DIRS.contains(&name.as_ref()) {
                         continue;
                     }
                 }
