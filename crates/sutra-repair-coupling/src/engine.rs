@@ -31,6 +31,46 @@ impl CouplingEngine {
 
         for (func, fan_in, fan_out) in &fan_in_out {
             if *fan_in > 5 || *fan_out > 5 {
+                let total_coupling = fan_in + fan_out;
+                let refactoring_effort = ((total_coupling as f64 / 10.0) * 16.0).ceil() as u32;
+                let throughput_improvement = (total_coupling as f64 * 20.0) as u32; // 20% per reduced hop
+
+                let spec = serde_json::json!({
+                    "type": "redistribute_hub",
+                    "current_state": {
+                        "fan_in": fan_in,
+                        "fan_out": fan_out,
+                        "total_coupling": total_coupling
+                    },
+                    "proposed_state": {
+                        "fan_in": (fan_in / 2).max(2),
+                        "fan_out": (fan_out / 2).max(2),
+                        "num_modules": 2
+                    },
+                    "impact": {
+                        "throughput_improvement_percent": throughput_improvement,
+                        "latency_improvement": "Medium",
+                        "testability_improvement": "High",
+                        "reasoning_complexity": "High"
+                    },
+                    "migration_plan": {
+                        "phase_1": "Identify responsibility clusters",
+                        "phase_2": "Extract interfaces for each cluster",
+                        "phase_3": "Migrate call sites incrementally",
+                        "phase_4": "Deprecate and remove old hub"
+                    },
+                    "effort": {
+                        "estimated_hours": refactoring_effort,
+                        "complexity_of_refactor": "high",
+                        "risk_of_bugs": 0.15
+                    },
+                    "roi": {
+                        "throughput_gain": format!("{}% throughput improvement", throughput_improvement.min(100)),
+                        "roi_months": format!("{:.2}", (refactoring_effort as f64 * 100.0) / (throughput_improvement.max(1) as f64 * 10.0)),
+                        "priority": "critical"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "COUP-HUB",
@@ -43,12 +83,61 @@ impl CouplingEngine {
                         ),
                         Severity::Warning,
                     )
-                    .with_fix("Split functionality: extract subsets of calls into separate modules"),
+                    .with_fix("Split functionality: extract subsets of calls into separate modules")
+                    .with_spec_data(spec)
+                    .with_confidence(0.93)
+                    .with_edge_cases(vec![
+                        "Ensure all callers are updated when extracting submodules".into(),
+                        "Verify no circular dependencies introduced between new modules".into(),
+                        "Monitor latency during gradual migration to new architecture".into(),
+                    ])
                 );
             }
         }
 
         if call_chains.len() >= self.config.chain_depth_threshold as usize {
+            let chain_depth = call_chains.len();
+            let refactoring_effort = ((chain_depth as f64 / 5.0) * 24.0).ceil() as u32;
+            let latency_reduction = (chain_depth as f64 * 15.0) as u32; // ~15ms per hop reduced
+
+            let spec = serde_json::json!({
+                "type": "async_queue_decoupling",
+                "current_state": {
+                    "call_chain_depth": chain_depth,
+                    "synchronous_hops": chain_depth,
+                    "blocking_calls": chain_depth
+                },
+                "proposed_state": {
+                    "architecture": "async queue with event-driven handlers",
+                    "call_chain_depth": 2,
+                    "latency_model": "queue-based with percentile SLAs"
+                },
+                "impact": {
+                    "latency_reduction_ms": latency_reduction,
+                    "throughput_improvement": "Very High",
+                    "resilience_improvement": "Critical",
+                    "scalability_improvement": "Horizontal scaling enabled"
+                },
+                "technical_approach": {
+                    "step_1": "Identify event boundaries between hops",
+                    "step_2": "Extract handler functions for each hop",
+                    "step_3": "Implement queue (RabbitMQ, Kafka, or Redis Streams)",
+                    "step_4": "Add retry logic and dead-letter queues",
+                    "step_5": "Migrate call sites to publish events"
+                },
+                "effort": {
+                    "estimated_hours": refactoring_effort,
+                    "complexity_of_refactor": "high",
+                    "infrastructure_setup": "Moderate",
+                    "risk_of_bugs": 0.20
+                },
+                "roi": {
+                    "latency_reduction_ms": latency_reduction,
+                    "roi_months": format!("{:.2}", (refactoring_effort as f64 * 100.0) / (latency_reduction.max(1) as f64 * 2.0)),
+                    "priority": "critical"
+                }
+            });
+
             findings.push(
                 Finding::new(
                     "COUP-CHAIN",
@@ -61,11 +150,58 @@ impl CouplingEngine {
                     ),
                     Severity::Warning,
                 )
-                .with_fix("Decouple via message queue: replace direct calls with async events"),
+                .with_fix("Decouple via message queue: replace direct calls with async events")
+                .with_spec_data(spec)
+                .with_confidence(0.91)
+                .with_edge_cases(vec![
+                    "Ensure event ordering is preserved for dependent operations".into(),
+                    "Implement idempotency to handle retries safely".into(),
+                    "Plan for eventual consistency semantics vs. immediate consistency".into(),
+                    "Monitor queue depth and implement backpressure mechanisms".into(),
+                ])
             );
         }
 
         if self.detect_circular_dependency(&functions, &call_chains) {
+            let effort_hours = 12u32;
+            let bug_risk_reduction = 500u32; // High risk of defects from circular deps
+
+            let spec = serde_json::json!({
+                "type": "break_circular_dependency",
+                "current_state": {
+                    "circular_dependencies": 1,
+                    "affected_components": "Multiple",
+                    "testing_difficulty": "Very High",
+                    "refactoring_risk": "Very High"
+                },
+                "proposed_state": {
+                    "circular_dependencies": 0,
+                    "architecture": "Layered or event-driven with clear direction"
+                },
+                "impact": {
+                    "testability_improvement": "Critical",
+                    "reasoning_complexity": "Critical",
+                    "maintenance_difficulty_reduction": "Very High",
+                    "regression_risk": "Reduced"
+                },
+                "resolution_patterns": [
+                    "Dependency Inversion Principle: introduce interface between modules",
+                    "Extract mediator/coordinator module to manage interactions",
+                    "Use event-driven approach: decouple via events instead of direct calls",
+                    "Separate into distinct layers with one-way dependencies"
+                ],
+                "effort": {
+                    "estimated_hours": effort_hours,
+                    "complexity_of_refactor": "very_high",
+                    "risk_of_bugs": 0.25
+                },
+                "roi": {
+                    "defect_prevention": format!("${}", bug_risk_reduction * 5), // $5K per prevented defect
+                    "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (bug_risk_reduction as f64 + 1.0)),
+                    "priority": "critical"
+                }
+            });
+
             findings.push(
                 Finding::new(
                     "COUP-CIRCULAR",
@@ -75,7 +211,15 @@ impl CouplingEngine {
                     "Circular dependency detected between functions. Hard to reason about and test.",
                     Severity::Error,
                 )
-                .with_fix("Apply dependency inversion: introduce interface or mediator to break the cycle"),
+                .with_fix("Apply dependency inversion: introduce interface or mediator to break the cycle")
+                .with_spec_data(spec)
+                .with_confidence(0.98)
+                .with_edge_cases(vec![
+                    "This is a critical issue - must be resolved to maintain code quality".into(),
+                    "Verify resolution doesn't introduce performance overhead from indirection".into(),
+                    "Ensure all call sites are updated when breaking the cycle".into(),
+                    "Add integration tests to verify cycle is truly broken".into(),
+                ])
             );
         }
 

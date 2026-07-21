@@ -37,6 +37,34 @@ impl TestingGapEngine {
                 .collect();
 
             if func_branches.is_empty() && func.body_lines > 3 && !is_test_file {
+                let spec = serde_json::json!({
+                    "type": "add_unit_tests",
+                    "current_state": {
+                        "function_type": "Linear/no-branch",
+                        "test_coverage": "None",
+                        "function_lines": func.body_lines
+                    },
+                    "proposed_state": {
+                        "test_cases": 1,
+                        "test_coverage": "100%"
+                    },
+                    "impact": {
+                        "coverage_improvement": "Baseline coverage established",
+                        "regression_detection": "Future changes detected",
+                        "documentation_value": "Function behavior documented through tests"
+                    },
+                    "effort": {
+                        "estimated_hours": 1u32,
+                        "complexity_of_testing": "low",
+                        "risk_of_bugs": 0.02
+                    },
+                    "roi": {
+                        "regression_prevention": "$1000",
+                        "roi_months": "0.1",
+                        "priority": "low"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "TEST-NO-BRANCH",
@@ -49,6 +77,12 @@ impl TestingGapEngine {
                         ),
                         Severity::Info,
                     )
+                    .with_fix("Add simple unit test to verify function behavior and catch regressions")
+                    .with_spec_data(spec)
+                    .with_confidence(0.75)
+                    .with_edge_cases(vec![
+                        "Simple functions are often refactored later — tests prevent regressions".into(),
+                    ])
                 );
             }
 
@@ -67,7 +101,48 @@ impl TestingGapEngine {
             if untested_branches.len() > 2 {
                 let gap: f64 = self.config.coverage_goal - estimated_coverage;
                 if gap > 0.0 {
-                    let _improvement = (gap * 100.0) as u32;
+                    let improvement = (gap * 100.0) as u32;
+                    let test_count = untested_branches.len().min(5) as u32;
+                    let effort_hours = (test_count as f64 * 1.5).ceil() as u32;
+                    let defect_prevention = test_count * 1000; // $1K per prevented defect from untested path
+
+                    let spec = serde_json::json!({
+                        "type": "increase_branch_coverage",
+                        "current_state": {
+                            "coverage_percent": (estimated_coverage * 100.0) as u32,
+                            "untested_branches": untested_branches.len(),
+                            "coverage_gap_percent": improvement
+                        },
+                        "proposed_state": {
+                            "coverage_percent": self.config.coverage_goal as u32 * 100,
+                            "untested_branches": 0,
+                            "test_cases_added": test_count
+                        },
+                        "impact": {
+                            "coverage_improvement_percent": improvement,
+                            "defect_detection_rate": "Very High",
+                            "regression_prevention": "High",
+                            "confidence_in_changes": "Significantly improved"
+                        },
+                        "testing_strategy": {
+                            "parametrized_tests": true,
+                            "error_paths": "Required",
+                            "edge_cases": "Required",
+                            "happy_path": "Required"
+                        },
+                        "effort": {
+                            "estimated_hours": effort_hours,
+                            "complexity_of_testing": "medium",
+                            "infrastructure": "Parametrized test framework (pytest, JUnit, etc.)",
+                            "risk_of_bugs": 0.05
+                        },
+                        "roi": {
+                            "defect_prevention_value": format!("${}", defect_prevention),
+                            "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (defect_prevention as f64 + 1.0)),
+                            "priority": "high"
+                        }
+                    });
+
                     findings.push(
                         Finding::new(
                             "TEST-GAP",
@@ -85,7 +160,14 @@ impl TestingGapEngine {
                         .with_fix(&format!(
                             "Write {} parametrized test cases covering error paths, edge cases, and main flow",
                             untested_branches.len().min(5)
-                        )),
+                        ))
+                        .with_spec_data(spec)
+                        .with_confidence(0.87)
+                        .with_edge_cases(vec![
+                            "Ensure all parametrized test cases exercise distinct code paths".into(),
+                            "Mock external dependencies to isolate function behavior".into(),
+                            "Add assertions that verify both positive and negative scenarios".into(),
+                        ])
                     );
                 }
             }
@@ -98,6 +180,46 @@ impl TestingGapEngine {
                     || content.contains(&format!("test_{}", err.name));
 
                 if !has_negative_test {
+                    let effort_hours = 2u32;
+                    let defect_prevention = 2000u32; // Error path defects are critical ($2K per)
+
+                    let spec = serde_json::json!({
+                        "type": "test_error_paths",
+                        "current_state": {
+                            "error_handling": "Implemented",
+                            "error_tests": "None detected",
+                            "coverage": "0% of error paths"
+                        },
+                        "proposed_state": {
+                            "error_handling": "Implemented + Tested",
+                            "error_tests": "Added",
+                            "coverage": "100% of error paths"
+                        },
+                        "impact": {
+                            "defect_detection_rate": "Critical errors caught early",
+                            "production_reliability": "Very High",
+                            "incident_prevention": "Error scenarios prevented in production"
+                        },
+                        "test_scenarios": [
+                            "Network timeout/unavailable",
+                            "Invalid input/malformed data",
+                            "Resource exhaustion (memory, connections)",
+                            "Concurrency/race conditions",
+                            "Cascading failures from dependencies"
+                        ],
+                        "effort": {
+                            "estimated_hours": effort_hours,
+                            "complexity_of_testing": "medium",
+                            "error_scenario_complexity": "Can be complex",
+                            "risk_of_bugs": 0.10
+                        },
+                        "roi": {
+                            "critical_incident_prevention": format!("${}", defect_prevention),
+                            "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (defect_prevention as f64 + 1.0)),
+                            "priority": "critical"
+                        }
+                    });
+
                     findings.push(
                         Finding::new(
                             "TEST-ERROR-PATH",
@@ -110,6 +232,14 @@ impl TestingGapEngine {
                             ),
                             Severity::Info,
                         )
+                        .with_fix("Add dedicated error-path tests using chaos engineering or exception injection")
+                        .with_spec_data(spec)
+                        .with_confidence(0.91)
+                        .with_edge_cases(vec![
+                            "Error paths are often difficult to reproduce in production".into(),
+                            "Use test utilities or mocking to simulate error conditions".into(),
+                            "Verify error messages are helpful for debugging and don't leak secrets".into(),
+                        ])
                     );
                 }
             }

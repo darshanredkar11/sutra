@@ -32,6 +32,46 @@ impl PerformanceEngine {
 
         for func in &functions {
             if func.body_lines > 50 {
+                let effort_hours = ((func.body_lines / 50) as f64 * 6.0).ceil() as u32;
+                let optimization_potential = ((func.body_lines as f64 / 200.0) * 100.0).min(40.0) as u32;
+
+                let spec = serde_json::json!({
+                    "type": "split_large_function",
+                    "current_state": {
+                        "function_size_lines": func.body_lines,
+                        "estimated_cyclomatic_complexity": "High (needs profiling)",
+                        "cache_efficiency": "Low"
+                    },
+                    "proposed_state": {
+                        "target_lines_per_function": 30,
+                        "num_functions": (func.body_lines / 30).max(2),
+                        "cache_efficiency": "Better"
+                    },
+                    "impact": {
+                        "latency_reduction_percent": optimization_potential,
+                        "cache_hit_rate_improvement": "20-30%",
+                        "testability_improvement": "High",
+                        "readability_improvement": "Very High"
+                    },
+                    "optimization_opportunities": [
+                        "Reduce CPU cache misses by splitting into smaller functions",
+                        "Enable better branch prediction",
+                        "Improve SIMD vectorization opportunities",
+                        "Enable better inlining decisions by compiler"
+                    ],
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "medium",
+                        "risk_of_bugs": 0.10,
+                        "profiling_required": true
+                    },
+                    "roi": {
+                        "latency_reduction_percent": optimization_potential,
+                        "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (optimization_potential.max(1) as f64 * 10.0)),
+                        "priority": "medium"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "PERF-LARGE-FUNC",
@@ -44,7 +84,14 @@ impl PerformanceEngine {
                         ),
                         Severity::Warning,
                     )
-                    .with_fix("Split into smaller functions. Profile to identify hot spots."),
+                    .with_fix("Split into smaller functions. Profile to identify hot spots.")
+                    .with_spec_data(spec)
+                    .with_confidence(0.82)
+                    .with_edge_cases(vec![
+                        "Profile before and after to confirm latency improvements".into(),
+                        "Ensure inlining decisions don't negate benefits".into(),
+                        "Watch for register pressure from additional function calls".into(),
+                    ])
                 );
             }
         }
@@ -54,6 +101,45 @@ impl PerformanceEngine {
                 io.line >= func.line && io.line < func.line + func.body_lines
             }).count();
             if io_count > 2 {
+                let effort_hours = ((io_count as f64 / 3.0) * 8.0).ceil() as u32;
+                let latency_reduction = (io_count as f64 * 50.0) as u32; // ~50ms per batched I/O
+
+                let spec = serde_json::json!({
+                    "type": "batch_and_cache_io",
+                    "current_state": {
+                        "io_operations": io_count,
+                        "roundtrips": io_count,
+                        "latency_contribution": "High (likely 60-80% of function time)"
+                    },
+                    "proposed_state": {
+                        "io_batches": (io_count / 3).max(1),
+                        "cache_layers": 2,
+                        "roundtrips": (io_count / 3).max(1)
+                    },
+                    "impact": {
+                        "latency_reduction_ms": latency_reduction,
+                        "throughput_improvement": "Very High",
+                        "resource_utilization": "Better connection pooling"
+                    },
+                    "optimization_strategies": [
+                        "Batch multiple I/O calls into single operation",
+                        "Add local cache (L1) for repeated queries",
+                        "Implement distributed cache (Redis) for cross-service cache",
+                        "Use connection pooling to reduce overhead"
+                    ],
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "medium",
+                        "infrastructure": "May need cache system",
+                        "risk_of_bugs": 0.12
+                    },
+                    "roi": {
+                        "latency_reduction_ms": latency_reduction,
+                        "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (latency_reduction.max(1) as f64)),
+                        "priority": "critical"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "PERF-IO-HEAVY",
@@ -66,7 +152,14 @@ impl PerformanceEngine {
                         ),
                         Severity::Warning,
                     )
-                    .with_fix("Batch I/O operations, add caching layer, or use connection pooling."),
+                    .with_fix("Batch I/O operations, add caching layer, or use connection pooling.")
+                    .with_spec_data(spec)
+                    .with_confidence(0.89)
+                    .with_edge_cases(vec![
+                        "Monitor cache hit rates to validate strategy effectiveness".into(),
+                        "Implement cache invalidation strategy for stale data risks".into(),
+                        "Consider eventual consistency implications for distributed cache".into(),
+                    ])
                 );
             }
         }
@@ -75,6 +168,45 @@ impl PerformanceEngine {
             let depth = pair.depth;
             if depth >= 2 {
                 let severity = if depth >= 3 { Severity::Error } else { Severity::Warning };
+                let time_complexity_exponent = depth;
+                let optimization_factor = (2_u64.pow(time_complexity_exponent as u32) as f64).log2() as u32;
+
+                let spec = serde_json::json!({
+                    "type": "reduce_nesting_depth",
+                    "current_state": {
+                        "nesting_depth": depth,
+                        "time_complexity": format!("O(n^{})", depth),
+                        "estimated_iterations": format!("10^{} with n=10", depth)
+                    },
+                    "proposed_state": {
+                        "nesting_depth": 1,
+                        "time_complexity": "O(n log n) or O(n)",
+                        "algorithm": "Hash-based lookup or divide-and-conquer"
+                    },
+                    "impact": {
+                        "speedup_factor": optimization_factor,
+                        "latency_reduction_percent": 85,
+                        "scalability": "Linear vs polynomial"
+                    },
+                    "optimization_approaches": [
+                        "Use hash map for inner loop lookup (O(n) vs O(n²))",
+                        "Extract inner loop into separate function",
+                        "Restructure algorithm (sort + single pass vs nested iteration)",
+                        "Use Set data structure for membership testing"
+                    ],
+                    "effort": {
+                        "estimated_hours": if depth >= 3 { 16u32 } else { 8u32 },
+                        "complexity_of_refactor": if depth >= 3 { "high" } else { "medium" },
+                        "algorithmic_complexity": "May require algorithm redesign",
+                        "risk_of_bugs": if depth >= 3 { 0.20 } else { 0.12 }
+                    },
+                    "roi": {
+                        "speedup_factor": optimization_factor,
+                        "roi_months": format!("{:.2}", 1.0),
+                        "priority": if depth >= 3 { "critical" } else { "high" }
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "PERF-NESTED-LOOP",
@@ -89,12 +221,62 @@ impl PerformanceEngine {
                     )
                     .with_fix(&format!(
                         "Reduce nesting: extract inner loop, use hash maps, or restructure algorithm."
-                    )),
+                    ))
+                    .with_spec_data(spec)
+                    .with_confidence(0.95)
+                    .with_edge_cases(vec![
+                        "Verify correctness after algorithm restructuring".into(),
+                        "Profile new algorithm on realistic dataset sizes".into(),
+                        "Test edge cases (empty collections, single element, etc.)".into(),
+                    ])
                 );
             }
         }
 
         if !io_patterns.is_empty() && !sync_calls.is_empty() {
+            let sync_io_count = sync_calls.len();
+            let latency_impact = (sync_io_count as f64 * 100.0) as u32; // ~100ms per blocking call
+            let effort_hours = ((sync_io_count as f64 / 3.0) * 20.0).ceil() as u32;
+
+            let spec = serde_json::json!({
+                "type": "async_io_migration",
+                "current_state": {
+                    "blocking_io_calls": sync_io_count,
+                    "threading_model": "Sync with thread pool (expensive)",
+                    "latency_impact_ms": latency_impact
+                },
+                "proposed_state": {
+                    "blocking_io_calls": 0,
+                    "threading_model": "Async/await with event loop",
+                    "connection_pooling": true
+                },
+                "impact": {
+                    "latency_reduction_ms": latency_impact,
+                    "throughput_improvement": "5-10x (eliminates thread blocking)",
+                    "resource_utilization": "99% reduction in thread count",
+                    "scalability": "Horizontal scaling enabled"
+                },
+                "migration_strategy": {
+                    "phase_1": "Mark blocking functions with #[tokio::main] or similar",
+                    "phase_2": "Convert I/O operations to async equivalents",
+                    "phase_3": "Implement connection pooling (tokio-postgres, sqlx, etc.)",
+                    "phase_4": "Add structured concurrency with select!, join!, etc.",
+                    "phase_5": "Profile and optimize hot paths"
+                },
+                "effort": {
+                    "estimated_hours": effort_hours,
+                    "complexity_of_refactor": "high",
+                    "infrastructure": "Async runtime (Tokio, async-std, etc.)",
+                    "risk_of_bugs": 0.18
+                },
+                "roi": {
+                    "latency_reduction_ms": latency_impact,
+                    "throughput_improvement": "5-10x",
+                    "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (latency_impact.max(1) as f64)),
+                    "priority": "critical"
+                }
+            });
+
             findings.push(
                 Finding::new(
                     "PERF-SYNC-IO",
@@ -104,12 +286,60 @@ impl PerformanceEngine {
                     "Synchronous I/O calls detected. Consider async/await for non-blocking I/O.",
                     Severity::Warning,
                 )
-                .with_fix("Replace synchronous I/O with async equivalents. Use connection pooling."),
+                .with_fix("Replace synchronous I/O with async equivalents. Use connection pooling.")
+                .with_spec_data(spec)
+                .with_confidence(0.94)
+                .with_edge_cases(vec![
+                    "Ensure all I/O operations are converted to async versions".into(),
+                    "Watch for blocking operations hiding in async context (careful with spawn_blocking)".into(),
+                    "Implement proper backpressure and flow control in async pipelines".into(),
+                    "Test cancellation behavior and ensure cleanup on task cancellation".into(),
+                ])
             );
         }
 
         for alloc in &allocation_patterns {
             if alloc.count > 10 {
+                let gc_pressure = (alloc.count as f64 * 2.5) as u32; // ms of GC pause time
+                let effort_hours = ((alloc.count as f64 / 15.0) * 10.0).ceil() as u32;
+
+                let spec = serde_json::json!({
+                    "type": "reduce_allocation_pressure",
+                    "current_state": {
+                        "allocations_per_call": alloc.count,
+                        "gc_pause_time_ms": gc_pressure,
+                        "heap_churn": "Very High"
+                    },
+                    "proposed_state": {
+                        "allocations_per_call": (alloc.count / 3).max(1),
+                        "gc_pause_time_ms": gc_pressure / 3,
+                        "strategy": "Object pooling or stack allocation"
+                    },
+                    "impact": {
+                        "gc_pause_reduction_ms": gc_pressure - (gc_pressure / 3),
+                        "throughput_improvement": "20-40%",
+                        "latency_variance_reduction": "Significant (fewer GC stalls)"
+                    },
+                    "optimization_strategies": [
+                        "Implement object pooling for frequently allocated objects",
+                        "Use stack allocation for small objects (Stack frame optimization)",
+                        "Reuse buffers across function calls (buffer ring, thread-local storage)",
+                        "Consider arena allocators for batch operations",
+                        "Profile with heap analyzer to identify allocation patterns"
+                    ],
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "medium",
+                        "profiling_required": true,
+                        "risk_of_bugs": 0.14
+                    },
+                    "roi": {
+                        "gc_pause_reduction_ms": gc_pressure - (gc_pressure / 3),
+                        "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (gc_pressure as f64 + 1.0)),
+                        "priority": "high"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "PERF-ALLOC",
@@ -122,6 +352,14 @@ impl PerformanceEngine {
                         ),
                         Severity::Warning,
                     )
+                    .with_fix("Implement object pooling, use stack allocation, or reuse buffers to reduce heap churn.")
+                    .with_spec_data(spec)
+                    .with_confidence(0.87)
+                    .with_edge_cases(vec![
+                        "Profile memory usage before and after optimization".into(),
+                        "Monitor GC pause time impact under production load".into(),
+                        "Ensure thread safety if using thread-local pools".into(),
+                    ])
                 );
             }
         }

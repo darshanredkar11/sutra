@@ -33,6 +33,43 @@ impl DebtRoiEngine {
 
         for func in &functions {
             if func.cyclomatic > 15 {
+                let estimated_bugs_per_year = (func.cyclomatic / 10).max(1) as u32;
+                let effort_hours = ((func.cyclomatic.max(15) - 10).max(2)) as u32;
+                let roi_months = ((func.cyclomatic as f64 - 10.0) / 15.0 * 3.0).max(0.5);
+                let annual_defect_cost = estimated_bugs_per_year * 5000; // $5K per defect
+
+                let spec = serde_json::json!({
+                    "type": "reduce_complexity_debt",
+                    "current_state": {
+                        "cyclomatic_complexity": func.cyclomatic,
+                        "estimated_bugs_per_year": estimated_bugs_per_year,
+                        "testing_difficulty": "Very High",
+                        "maintenance_cost_per_year": format!("${}", annual_defect_cost)
+                    },
+                    "proposed_state": {
+                        "cyclomatic_complexity": 12,
+                        "estimated_bugs_per_year": 1,
+                        "testing_difficulty": "Medium",
+                        "maintenance_cost_per_year": "$5000"
+                    },
+                    "impact": {
+                        "defect_reduction": format!("{}%", ((estimated_bugs_per_year - 1) as f64 / estimated_bugs_per_year as f64 * 100.0) as u32),
+                        "maintenance_cost_reduction": format!("${}", (annual_defect_cost - 5000).max(0)),
+                        "developer_productivity": "Faster code reviews and changes"
+                    },
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "high",
+                        "risk_of_bugs": 0.15
+                    },
+                    "roi": {
+                        "annual_benefit": format!("${}", annual_defect_cost),
+                        "roi_months": format!("{:.1}", roi_months),
+                        "payback_period": format!("{:.1} months", roi_months),
+                        "priority": if func.cyclomatic > 25 { "critical" } else { "high" }
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "DEBT-COMPLEXITY",
@@ -42,16 +79,60 @@ impl DebtRoiEngine {
                         &format!(
                             "High cyclomatic complexity {} in '{}'. Est. {} bugs/year. Effort: {}h. ROI: {} months.",
                             func.cyclomatic, func.name,
-                            (func.cyclomatic / 10).max(1),
-                            (func.cyclomatic.max(15) - 10).max(2),
-                            ((func.cyclomatic as f64 - 10.0) / 15.0 * 3.0).max(0.5)
+                            estimated_bugs_per_year,
+                            effort_hours,
+                            roi_months as u32
                         ),
                         if func.cyclomatic > 25 { Severity::Error } else { Severity::Warning },
                     )
+                    .with_fix("Refactor using extract method pattern to reduce branching and improve testability")
+                    .with_spec_data(spec)
+                    .with_confidence(0.91)
+                    .with_edge_cases(vec![
+                        "Complex functions often have hidden bugs from untested path combinations".into(),
+                        "Refactoring may reveal additional debt or performance opportunities".into(),
+                    ])
                 );
             }
 
             if func.body_lines > 80 {
+                let maintenance_cost_per_year = (func.body_lines * 10).min(5000) as u32;
+                let effort_hours = ((func.body_lines / 20).max(4)) as u32;
+                let roi_months = (func.body_lines as f64 / 40.0).max(1.0);
+
+                let spec = serde_json::json!({
+                    "type": "split_large_function",
+                    "current_state": {
+                        "function_size_lines": func.body_lines,
+                        "maintenance_cost_per_year": format!("${}", maintenance_cost_per_year),
+                        "understanding_difficulty": "Very High",
+                        "testing_difficulty": "Very High"
+                    },
+                    "proposed_state": {
+                        "avg_function_size": 40,
+                        "num_functions": (func.body_lines / 40).max(2),
+                        "maintenance_cost_per_year": format!("${}", maintenance_cost_per_year / 3),
+                        "understanding_difficulty": "Medium"
+                    },
+                    "impact": {
+                        "maintenance_cost_reduction_percent": 66,
+                        "maintenance_cost_reduction_dollars": format!("${}", maintenance_cost_per_year * 2 / 3),
+                        "review_time_reduction": "50%",
+                        "onboarding_difficulty_reduction": "Significant"
+                    },
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "medium",
+                        "risk_of_bugs": 0.12
+                    },
+                    "roi": {
+                        "annual_benefit": format!("${}", maintenance_cost_per_year * 2 / 3),
+                        "roi_months": format!("{:.1}", roi_months),
+                        "payback_period": format!("{:.1} months", roi_months),
+                        "priority": if func.body_lines > 150 { "critical" } else { "high" }
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "DEBT-LARGE-FUNC",
@@ -61,12 +142,19 @@ impl DebtRoiEngine {
                         &format!(
                             "Large function '{}' ({} lines). Est. maintenance cost: ${}/year. Effort: {}h. ROI: {} months.",
                             func.name, func.body_lines,
-                            (func.body_lines * 10).min(5000),
-                            (func.body_lines / 20).max(4),
-                            (func.body_lines as f64 / 40.0).max(1.0)
+                            maintenance_cost_per_year,
+                            effort_hours,
+                            roi_months as u32
                         ),
                         if func.body_lines > 150 { Severity::Error } else { Severity::Warning },
                     )
+                    .with_fix("Split into smaller functions with single responsibility; each function should fit on one screen")
+                    .with_spec_data(spec)
+                    .with_confidence(0.93)
+                    .with_edge_cases(vec![
+                        "Large functions accumulate technical debt from both complexity and maintenance effort".into(),
+                        "Splitting may require careful state management if function uses local variables extensively".into(),
+                    ])
                 );
             }
         }

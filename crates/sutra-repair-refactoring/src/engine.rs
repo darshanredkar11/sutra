@@ -43,16 +43,52 @@ impl RefactoringEngine {
         let duplications = self.detect_duplication(content);
 
         if max_cyclomatic > self.config.cyclomatic_threshold {
+            let finding_line = function_info
+                .iter()
+                .find(|f| f.cyclomatic == max_cyclomatic)
+                .map(|f| f.line)
+                .unwrap_or(1);
+
+            // Generate spec with quantified impact
+            let complexity_reduction = (max_cyclomatic as f64 * 0.65).min(self.config.cyclomatic_threshold as f64);
+            let reduction_percent = (complexity_reduction / max_cyclomatic as f64) * 100.0;
+            let effort_hours = ((max_cyclomatic as f64 / 10.0) * 6.0).ceil() as u32;
+            let bug_prevention_value = effort_hours * 500; // $500 per hour of defect prevention
+            let roi_months = (effort_hours as f64 * 100.0) / (bug_prevention_value as f64 + 1.0);
+
+            let spec = serde_json::json!({
+                "type": "extract_method",
+                "current_state": {
+                    "cyclomatic_complexity": max_cyclomatic,
+                    "function_count": function_info.len()
+                },
+                "proposed_state": {
+                    "cyclomatic_complexity": (max_cyclomatic as f64 * (1.0 - 0.65)) as u32,
+                    "extracted_methods": 2
+                },
+                "impact": {
+                    "complexity_reduction_percent": reduction_percent,
+                    "maintainability_improvement": "High",
+                    "testability_improvement": "Medium"
+                },
+                "effort": {
+                    "estimated_hours": effort_hours,
+                    "complexity_of_refactor": "medium",
+                    "risk_of_bugs": 0.12
+                },
+                "roi": {
+                    "bug_prevention_value": format!("${}", bug_prevention_value),
+                    "roi_months": format!("{:.2}", roi_months),
+                    "priority": "high"
+                }
+            });
+
             findings.push(
                 Finding::new(
                     "REF-EXTRACT-METHOD",
                     Engine::Refactoring,
                     file_path,
-                    function_info
-                        .iter()
-                        .find(|f| f.cyclomatic == max_cyclomatic)
-                        .map(|f| f.line)
-                        .unwrap_or(1),
+                    finding_line,
                     &format!(
                         "Function cyclomatic complexity {} exceeds threshold {}. Extract method recommended.",
                         max_cyclomatic, self.config.cyclomatic_threshold
@@ -62,12 +98,50 @@ impl RefactoringEngine {
                 .with_fix(&format!(
                     "Extract smaller methods: split function with cyclomatic complexity {} into units under {}",
                     max_cyclomatic, self.config.cyclomatic_threshold
-                )),
+                ))
+                .with_spec_data(spec)
+                .with_confidence(0.92)
+                .with_edge_cases(vec![
+                    "If function has shared mutable state across extracted methods, use synchronized access".into(),
+                    "Ensure extracted methods are testable independently".into(),
+                    "Verify no regression in performance from additional function calls".into(),
+                ])
             );
         }
 
         for cinfo in &class_info {
             if cinfo.loc > self.config.class_loc_threshold {
+                let num_extracts = (cinfo.loc / self.config.class_loc_threshold).max(2);
+                let effort_hours = (num_extracts as f64 * 8.0) as u32;
+                let bug_prevention_value = effort_hours * 600; // Large classes = higher maintenance burden
+
+                let spec = serde_json::json!({
+                    "type": "extract_class",
+                    "current_state": {
+                        "lines_of_code": cinfo.loc,
+                        "responsibilities": "Multiple (needs analysis)"
+                    },
+                    "proposed_state": {
+                        "num_classes": num_extracts,
+                        "avg_loc_per_class": cinfo.loc / num_extracts
+                    },
+                    "impact": {
+                        "loc_reduction_percent": 75.0,
+                        "maintainability_improvement": "Very High",
+                        "testability_improvement": "Very High"
+                    },
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "high",
+                        "risk_of_bugs": 0.18
+                    },
+                    "roi": {
+                        "bug_prevention_value": format!("${}", bug_prevention_value),
+                        "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (bug_prevention_value as f64 + 1.0)),
+                        "priority": "critical"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "REF-EXTRACT-CLASS",
@@ -82,16 +156,53 @@ impl RefactoringEngine {
                     )
                     .with_fix(&format!(
                         "Extract class '{}' into {} smaller classes (~{} LOC each)",
-                        cinfo.name,
-                        (cinfo.loc / self.config.class_loc_threshold).max(2),
+                        cinfo.name, num_extracts,
                         self.config.class_loc_threshold
-                    )),
+                    ))
+                    .with_spec_data(spec)
+                    .with_confidence(0.95)
+                    .with_edge_cases(vec![
+                        "Ensure extracted classes have clear single responsibility".into(),
+                        "Update all references to use new class constructors".into(),
+                        "Verify test suite still passes after extraction".into(),
+                    ])
                 );
             }
         }
 
         for pair in &coupling_pairs {
             if pair.strength > self.config.coupling_threshold {
+                let effort_hours = 4u32;
+                let maintenance_savings = (pair.strength * 1000.0) as u32;
+
+                let spec = serde_json::json!({
+                    "type": "decouple",
+                    "current_state": {
+                        "coupling_strength": pair.strength,
+                        "methods_involved": [&pair.method_a, &pair.method_b],
+                        "shared_state": "Detected but needs analysis"
+                    },
+                    "proposed_state": {
+                        "coupling_strength": pair.strength * 0.2,
+                        "pattern": "dependency injection or extract service"
+                    },
+                    "impact": {
+                        "coupling_reduction_percent": 80.0,
+                        "testability_improvement": "High",
+                        "changeability_improvement": "High"
+                    },
+                    "effort": {
+                        "estimated_hours": effort_hours,
+                        "complexity_of_refactor": "medium",
+                        "risk_of_bugs": 0.10
+                    },
+                    "roi": {
+                        "maintenance_savings": format!("${}", maintenance_savings),
+                        "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (maintenance_savings as f64 + 1.0)),
+                        "priority": "medium"
+                    }
+                });
+
                 findings.push(
                     Finding::new(
                         "REF-COUPLING",
@@ -107,12 +218,49 @@ impl RefactoringEngine {
                     .with_fix(&format!(
                         "Reduce coupling between '{}' and '{}': introduce interface or mediator pattern",
                         pair.method_a, pair.method_b
-                    )),
+                    ))
+                    .with_spec_data(spec)
+                    .with_confidence(0.85)
+                    .with_edge_cases(vec![
+                        "Identify truly shared state vs. false-positive coupling".into(),
+                        "Consider interface-based approach to minimize changes".into(),
+                        "Ensure dependency order doesn't introduce circular deps".into(),
+                    ])
                 );
             }
         }
 
         if duplications > self.config.duplication_threshold {
+            let effort_hours = 3u32;
+            let maintenance_savings = ((duplications as f64 / self.config.duplication_threshold) * 500.0) as u32;
+
+            let spec = serde_json::json!({
+                "type": "extract_duplication",
+                "current_state": {
+                    "duplication_ratio": duplications,
+                    "threshold": self.config.duplication_threshold
+                },
+                "proposed_state": {
+                    "duplication_ratio": self.config.duplication_threshold * 0.5,
+                    "refactored_blocks": 3
+                },
+                "impact": {
+                    "code_reduction_percent": 25.0,
+                    "maintainability_improvement": "Medium",
+                    "testability_improvement": "Medium"
+                },
+                "effort": {
+                    "estimated_hours": effort_hours,
+                    "complexity_of_refactor": "low",
+                    "risk_of_bugs": 0.08
+                },
+                "roi": {
+                    "maintenance_savings": format!("${}", maintenance_savings),
+                    "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (maintenance_savings as f64 + 1.0)),
+                    "priority": "medium"
+                }
+            });
+
             findings.push(
                 Finding::new(
                     "REF-DUPLICATION",
@@ -125,11 +273,47 @@ impl RefactoringEngine {
                     ),
                     Severity::Warning,
                 )
-                .with_fix("Extract duplicated blocks into shared functions"),
+                .with_fix("Extract duplicated blocks into shared functions")
+                .with_spec_data(spec)
+                .with_confidence(0.90)
+                .with_edge_cases(vec![
+                    "Verify extracted function semantics match all call sites".into(),
+                    "Consider performance impact of extracted function calls".into(),
+                ])
             );
         }
 
         if max_nesting > self.config.nesting_threshold {
+            let effort_hours = 2u32;
+            let readability_value = ((max_nesting as f64 - self.config.nesting_threshold as f64) * 200.0) as u32;
+
+            let spec = serde_json::json!({
+                "type": "reduce_nesting",
+                "current_state": {
+                    "nesting_depth": max_nesting,
+                    "threshold": self.config.nesting_threshold
+                },
+                "proposed_state": {
+                    "nesting_depth": self.config.nesting_threshold,
+                    "refactoring_technique": "early returns or guard clauses"
+                },
+                "impact": {
+                    "readability_improvement": "High",
+                    "cognitive_load_reduction": "Significant",
+                    "testability_improvement": "Medium"
+                },
+                "effort": {
+                    "estimated_hours": effort_hours,
+                    "complexity_of_refactor": "low",
+                    "risk_of_bugs": 0.05
+                },
+                "roi": {
+                    "readability_value": format!("${}", readability_value),
+                    "roi_months": format!("{:.2}", (effort_hours as f64 * 100.0) / (readability_value as f64 + 1.0)),
+                    "priority": "medium"
+                }
+            });
+
             findings.push(
                 Finding::new(
                     "REF-NESTING",
@@ -146,7 +330,13 @@ impl RefactoringEngine {
                     ),
                     Severity::Warning,
                 )
-                .with_fix("Reduce nesting via early returns, guard clauses, or extracting helper functions"),
+                .with_fix("Reduce nesting via early returns, guard clauses, or extracting helper functions")
+                .with_spec_data(spec)
+                .with_confidence(0.88)
+                .with_edge_cases(vec![
+                    "Ensure logic flow remains correct after refactoring".into(),
+                    "Update tests to verify behavior with reduced nesting".into(),
+                ])
             );
         }
 
